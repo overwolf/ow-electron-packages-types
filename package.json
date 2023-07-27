@@ -1,0 +1,19 @@
+{
+    "name": "@overwolf/ow-electron-packages-types",
+    "version": "0.0.1",
+    "description": "Type definition file for autocompletion and documentation purposes for ow-electron packages",
+    "license": "MIT",
+    "types": "overlay.d.ts",
+    "keywords": [
+        "types",
+        "npm",
+        "package",
+        "overwolf",
+        "ow-electron",
+        "overlay",
+        "game-list"
+    ],
+    "devDependencies": {
+        "@overwolf/ow-electron": "^22.3.3"
+    }
+}
