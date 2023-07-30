@@ -101,7 +101,7 @@ export interface GameLaunchEvent {
 export interface OverlayBrowserWindow {
   window: BrowserWindow;
 
-  overlayOptions: OverlayOptions;
+  readonly overlayOptions: OverlayOptions;
 
   readonly name: string;
 
