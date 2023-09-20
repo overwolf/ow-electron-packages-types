@@ -1,4 +1,9 @@
-import { BrowserWindow, BrowserWindowConstructorOptions, Size, WebContents } from 'electron';
+import {
+  BrowserWindow,
+  BrowserWindowConstructorOptions,
+  Size,
+  WebContents,
+} from 'electron';
 import { EventEmitter } from 'events';
 
 export declare type GameProcessInfo = {
@@ -11,7 +16,7 @@ export declare type GameProcessInfo = {
   is32Bit?: boolean;
 
   isElevated?: boolean;
-}
+};
 
 export declare type GameInfo = {
   id: number;
@@ -20,11 +25,11 @@ export declare type GameInfo = {
 
   name: string;
 
-  supported: boolean
+  supported: boolean;
 
   processInfo?: GameProcessInfo;
 
-  flags?: any
+  flags?: any;
 
   type: 'Game' | 'Launcher';
 };
@@ -52,14 +57,15 @@ export const enum PassthroughType {
 }
 
 /**
- * Overlay z-order
+ * Overlay rendering Z-Order
  */
 export const enum ZOrderType {
   Default,
-  TopMost
+  TopMost,
+  BottomMost,
 }
 
-/** Overlay Specail options */
+/** Overlay ow-electron options */
 export interface OverlayOptions {
   passthrough?: PassthroughType;
 
@@ -92,7 +98,7 @@ export interface IOverlayHotkey {
 }
 
 export interface GameLaunchEvent {
-  inject: (() => void);
+  inject: () => void;
 }
 
 /**
@@ -109,19 +115,32 @@ export interface OverlayBrowserWindow {
 }
 
 export interface InjectionError {
-  error: string
+  error: string;
 }
 
 export interface GameWindowInfo {
-  size: Size,
-  nativeHandle: number,
-  focused: boolean,
-  graphics: 'd3d9' | 'd3d12' | 'd3d11' | string | undefined
+  size: Size;
+  nativeHandle: number;
+  focused: boolean;
+  graphics: 'd3d9' | 'd3d12' | 'd3d11' | string | undefined;
+}
+
+export interface GameInputInterception {
+  /**
+   * Can the Overlay window process input
+   * Related to `mixed mode when available` and/or `exclusive only` games
+   */
+  readonly canInterceptInput?: boolean;
+  /**
+   * Overlay has full input control, blocking input from the game
+   */
+  readonly exclusiveMode?: boolean;
 }
 
 export interface ActiveGameInfo {
-  gameInfo : GameInfo,
-  gameWindowInfo: GameWindowInfo;
+  readonly gameInfo: GameInfo;
+  readonly gameWindowInfo: GameWindowInfo;
+  readonly gameInputInfo: GameInputInterception;
 }
 
 export declare type GameWindowUpdateReason = undefined | 'resized' | 'focus';
@@ -131,6 +150,25 @@ export declare type HotkeyCallback = (
   hotKey: IOverlayHotkey,
   state: HotkeyState
 ) => void;
+
+export interface ExclusiveInputOptions {
+  /**
+   * Exclusive mode FadeIn / FadeOut duration in miliseconds.
+   *
+   * Use `0` to disable.
+   * @default 100
+   */
+  fadeAnimateInterval?: number;
+
+  /**
+   * Exclusive mode overlay background color.
+   * Use `rgba(0,0,0,0)` to disable background color
+   *
+   * Note: Using an invalid color format (e.g: not `rgba(...)`) will throw an Error.
+   * @default 'rgba(12, 12, 12, , 0.5)'
+   */
+  backgroundColor?: string;
+}
 
 export interface IOverlayHotkeys {
   /**
@@ -201,6 +239,26 @@ export interface IOverwolfOverlayApi extends EventEmitter {
   hotkeys: IOverlayHotkeys;
 
   /**
+   * Enters Overlay "Exclusive Mode" - meaning, the game no longer receives user
+   * input (all input will go to the overlay windows).
+   * 
+   * The `game-input-exclusive-mode-changed` event fires if exclusive mode was entered.
+
+   *
+   * NOTE: This is only supported when getActiveGameInfo returns
+   * `"canInterceptInput" == false`. Calling this function when unsupported will
+   * be ignored and will not throw an exception.
+   */
+  enterExclusiveMode(options?: ExclusiveInputOptions): void;
+
+  /**
+   * Exits Overlay Exclusive Mode, returning input control to the game.
+   *
+   * The `game-input-exclusive-mode-changed` event fires when exiting exclusive mode.
+   */
+  exitExclusiveMode(): void;
+
+  /**
    *TODO(bFox) :replace ...args
    */
   on(eventName: 'error', listener: (...args: any[]) => void): this;
@@ -254,5 +312,22 @@ export interface IOverwolfOverlayApi extends EventEmitter {
       gameInfo: GameInfo,
       reason?: GameWindowUpdateReason
     ) => void
+  ): this;
+
+  /**
+   * Fires when the game input interception state changes
+   */
+  on(
+    eventName: 'game-input-interception-changed',
+    listener: (info: GameInputInterception) => void
+  ): this;
+
+  /**
+   * Fires when Overlay input Exclusive Mode changes.
+   * Only relevant to `mixed mode when available` and/or `exclusive only` games
+   */
+  on(
+    eventName: 'game-input-exclusive-mode-changed',
+    listener: (info: GameInputInterception) => void
   ): this;
 }
