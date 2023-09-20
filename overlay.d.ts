@@ -243,7 +243,6 @@ export interface IOverwolfOverlayApi extends EventEmitter {
    * input (all input will go to the overlay windows).
    * 
    * The `game-input-exclusive-mode-changed` event fires if exclusive mode was entered.
-
    *
    * NOTE: This is only supported when getActiveGameInfo returns
    * `"canInterceptInput" == false`. Calling this function when unsupported will
