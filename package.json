@@ -1,6 +1,6 @@
 {
     "name": "@overwolf/ow-electron-packages-types",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "description": "Type definition file for autocompletion and documentation purposes for ow-electron packages",
     "license": "MIT",
     "types": "overlay.d.ts",
