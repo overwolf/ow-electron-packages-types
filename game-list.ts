@@ -1,7 +1,10 @@
 export const enum kGameIds {
   AmericanTruckSimulator = 10874,
+  ARKSurvivalEvolved = 10778,
+  ARKSurvivalAscended = 23476,
   DiabloIV = 22700,
   EuroTruckSimulator2 = 8584,
+  Fortnite = 21216,
   LeagueofLegends = 5426,
   LeagueofLegendsPBE = 22848,
   Minecraft = 8032,
