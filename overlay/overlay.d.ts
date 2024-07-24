@@ -5,42 +5,8 @@ import {
   WebContents,
 } from 'electron';
 import { EventEmitter } from 'events';
+import { GameInfo, GamesFilter } from '../common';
 
-export declare type GameProcessInfo = {
-  pid?: number;
-
-  fullPath: string;
-
-  commandLine?: string;
-
-  is32Bit?: boolean;
-
-  isElevated?: boolean;
-};
-
-export declare type GameInfo = {
-  id: number;
-
-  classId: number;
-
-  name: string;
-
-  supported: boolean;
-
-  processInfo?: GameProcessInfo;
-
-  flags?: any;
-
-  type: 'Game' | 'Launcher';
-};
-
-export interface GamesFilter {
-  all?: boolean;
-
-  includeUnsupported?: boolean;
-
-  gamesIds: number[];
-}
 
 /**
  * Input pass through
