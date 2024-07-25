@@ -13,7 +13,7 @@ The ow-electron recorder uses OBS behind the scenes and exposes OBS functions to
 
 ### Capture Audio / Video
 
-- Capture video from a specific display device or the running game directly.
+- Capture video from a specific display device or capture from a running game.
 - Capture any audio input or output device, such as speakers, a microphone, or the game sound alone.
 - Split capture into separate video files on-demand or using a timer.
 - Multiple audio and video encoders supported.
@@ -51,9 +51,9 @@ Make sure that the following node_modules are installed:
 npm install @overwolf/ow-electron @overwolf/ow-electron-builder @overwolf/ow-electron-packages-types
 ```
 
-> Currently recording api is beta so use so install the beta version using:
+> Currently, the recording api is in beta. To install the beta version use:
 > `npm install @overwolf/ow-electron-packages-types@beta`
-> Alternatively amend package.json and use `npm install` to update dependencies:
+> Alternatively amend the beta package to your package.json and use `npm install` to update dependencies:
 
 ```json
 ...
@@ -81,18 +81,16 @@ To activate the recording package, place the "recorder" string under \`overwolf 
 
 #### Import
 
-Import the app from 'electron' & overwolf from \`@overwolf/ow-electron\`. Register to the ready state, and once the ready event is fired, verify that the package name is \recorder\.
-
 ```javascript
 import { app as electronApp } from 'electron';
 import { overwolf } from '@overwolf/ow-electron';
 ```
 
+Import the app from 'electron' & overwolf from \`@overwolf/ow-electron\`.
+
 #### Register
 
-Register to ow-electron package ready event handler.
-
-```
+```javascript
 const owElectronApp = electronApp as overwolf.OverwolfApp;
 owElectronPackages.on('ready', (e, packageName) => {
     if (packageName === 'recorder') {
@@ -101,7 +99,7 @@ owElectronPackages.on('ready', (e, packageName) => {
 });
 ```
 
-Use event listeners to get notified by, events, for more examples see: [Recording events](api-specification.md#events):
+Register to the ready state, and once the ready event is fired, verify that the package name is \recorder\.
 
 ```javascript
 recorderApi.on('recording-started', (RecordEventArgs) => {
@@ -109,12 +107,9 @@ recorderApi.on('recording-started', (RecordEventArgs) => {
 });
 ```
 
-#### Query information
+Use event listeners to get notified by events. For more examples see: [Recording events](api-specification.md#events):
 
-- Use the query information to obtain information about the running machine:
-  - Display devices
-  - Audio Devices
-  - Supported codecs etc
+#### Query information
 
 ```javascript
 // obtain OBS Information
@@ -142,14 +137,12 @@ console.log(obsInfo.video.encoders);
 console.log(obsInfo.audio.encoders);
 ```
 
-#### Start Recording - Simple
+- Use the query information method to obtain information about the running machine:
+  - Display devices
+  - Audio Devices
+  - Supported codecs etc
 
-1. Create the capture settings options object.
-2. add capture source
-3. Use the capture settings options object to create the settings builder.
-4. Build the capture settings using the `build()` method
-5. Set the recording options
-6. Start recording
+#### Start Recording - Simple
 
 ```javascript
 async function startRecording(gameInfo: GameInfo = null) {
@@ -161,22 +154,22 @@ async function startRecording(gameInfo: GameInfo = null) {
     });
 
     /* changing default video settings
-       settings.videoSettings.fps = 60;
-       settings.videoSettings.baseWidth  = 1920;
-       settings.videoSettings.baseHeight = 1080;
+       settingsBuilder.videoSettings.fps = 60;
+       settingsBuilder.videoSettings.baseWidth  = 1920;
+       settingsBuilder.videoSettings.baseHeight = 1080;
      */
 
     // 2. do we want to capture game or display?
     if (gameInfo) {
       // game capture
-      settings.addGameSource({
+      settingsBuilder.addGameSource({
         gameProcess: gameInfo.processInfo.pid, // or just 'Game.exe' name
         captureOverlays: true, // capture overlay windows
       });
     } else {
       // desktop capture
       // |monitorId| from '''queryInformation()'''
-      settings.addScreenSource({ monitorId });
+      settingsBuilder.addScreenSource({ monitorId });
     }
 
     // 3. Build the capture settings using the `build()` **method**
@@ -195,7 +188,7 @@ async function startRecording(gameInfo: GameInfo = null) {
     };
 
     // 5. Start recording
-    await recorderApi?.startRecording(
+    await recorderApi.startRecording(
       recordingOptions,
       captureSettings,
       (stopResult) => {
@@ -211,21 +204,25 @@ async function startRecording(gameInfo: GameInfo = null) {
 }
 ```
 
-#### Stop Recording
+1. Create the capture settings options object.
+2. add capture source
+3. Use the capture settings options object to create the settings builder.
+4. Build the capture settings using the `build()` method
+5. Set the recording options
+6. Start recording
 
-1. Before attempting to stop the capture directly, we can use the `isActive()` method to check if the capture is active.
-2. Once we know the recording is active, We can call the `stopRecording()` method, include the optional callback to obtain details about the stopped capture.
+#### Stop Recording
 
 ```javascript
 async function stopRecording() {
   try {
-    const active = await recorderApi?.isActive();
+    const active = await recorderApi.isActive();
     if (!active) {
       return;
     }
 
     // stop recording
-    await this.recorderApi?.stopRecording((recordStopEventArgs) => {
+    await recorderApi.stopRecording((recordStopEventArgs) => {
       console.log(recordStopEventArgs.duration);
     });
   } catch (err) {
@@ -233,6 +230,9 @@ async function stopRecording() {
   }
 }
 ```
+
+1. Before attempting to stop the capture directly, we can use the `isActive()` method to check if the capture is active.
+2. Once we know the recording is active, We can call the `stopRecording()` method, include the optional callback to obtain details about the stopped capture.
 
 #### Change Capture Sources
 
@@ -283,7 +283,7 @@ settingsBuilder.addAudioDefaultCapture('output');
 // settingsBuilder.addAudioDefaultCapture('input')
 
 // Alternatively set other device ( Obtain devices from queryInformation() method)
-// settings.addAudioCapture({id: the_device_id, name: "my device"})
+// settingsBuilder.addAudioCapture({id: the_device_id, name: "my device"})
 
 // Build the capture settings using the `build()` **method**
 const captureSettings = settingsBuilder.build();
@@ -293,12 +293,6 @@ const captureSettings = settingsBuilder.build();
 
 ##### Start Replay
 
-1. Create the capture settings options object.
-2. Use the capture settings options object to create the settings builder.
-3. Build the capture settings using the build() method
-4. Set the replays options
-5. Start Replays
-
 ```javascript
 async function startReplays() {}
     try {
@@ -307,9 +301,8 @@ async function startReplays() {}
         includeDefaultAudioSources: true,
       }
       // Build the capture settings using the build() method
-      const settings = await this.createCaptureOptions(
-        captureSettingsOptions,
-      );
+      const settings =
+        await recorderApi.createSettingsBuilder(captureSettingsOptions);
 
       // set key frame every 1 second for more accurate stop timestamp;
       // note: this require more resource from the recording engine
@@ -337,12 +330,13 @@ async function startReplays() {}
     }
 ```
 
-##### Start Capturing Replays
+1. Create the capture settings options object.
+2. Use the capture settings options object to create the settings builder.
+3. Build the capture settings using the build() method
+4. Set the replays options
+5. Start Replays
 
-1. Create the replay Capture Options object.
-2. Use the replay capture options to start the capture replay.
-3. The captureReplay method returns the activeReplay, we can use it to control the capturing replay.
-4. Once the captureReplay callback is returned we set the activeReplay as undefined to indicate that the replay capture is done.
+##### Start Capturing Replays
 
 ```javascript
 async function startCaptureReplay() {
@@ -373,9 +367,12 @@ async function startCaptureReplay() {
 }
 ```
 
-##### Extend Capture Replay
+1. Create the replay Capture Options object.
+2. Use the replay capture options to start the capture replay.
+3. The captureReplay method returns the activeReplay, we can use it to control the capturing replay.
+4. Once the captureReplay callback is returned we set the activeReplay as undefined to indicate that the replay capture is done.
 
-- While the capture replay is running we can extend it's timeout by using the activeReplay object
+##### Extend Capture Replay
 
 ```javascript
 // Check activeReplay is not undefined, which means the capture replay is currently recording.
@@ -389,6 +386,8 @@ console.log(activeReplay.timeout);
 // Stop capture replay after 10000ms
 activeReplay.stopAfter(10000);
 ```
+
+- While the capture replay is running we can extend it's timeout by using the activeReplay object
 
 ##### Stopping Capture Replay
 
