@@ -19,5 +19,5 @@ In order to add more/remove certain ow-electron "packages" from the project, sim
 
 ## Available packages detailed information
 * [recorder](./recorder/recorder.md)
-* [gep]()
-* [overlay]()
+* [gep](./gep/game-events-provider.md)
+* [overlay](/overlay/overlay.md)
