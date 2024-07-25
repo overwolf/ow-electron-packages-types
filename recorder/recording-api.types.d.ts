@@ -810,7 +810,7 @@ export interface CaptureSettingsOptions {
   audioEncoder?: kKnownAudioEncodersTypes;
 
   /**
-   * Add Default Audio Devices
+   * Add Default Audio Devices (Default is True)
    */
   includeDefaultAudioSources?: boolean;
 
