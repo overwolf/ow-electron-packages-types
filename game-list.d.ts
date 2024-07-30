@@ -1,35 +1,52 @@
-// game list version: 3
+// game list version: 6
+
+export const enum kLaunchersIds {
+  LOLLauncher = 10902,
+}
+
 export const enum kGameIds {
   AmericanTruckSimulator = 10874,
   ApexLegends = 21566,
   ARKSurvivalAscended = 23476,
   ARKSurvivalEvolved = 10778,
+  BaldursGateIII = 22088,
+  CallOfDutyModernWarfareIII = 23424,
   CS2 = 22730,
   DiabloIV = 22700,
   Dota2 = 7314,
   ELDENRING = 21866,
-  EuroTruckSimulator2 = 8584,
+  Enshrouded = 23946,
+  EscapeFromTarkov = 21634,
+  EuroTruckSim2 = 8584,
+  FinalFantasyXIVOnline = 6350,
   Fortnite = 21216,
+  GenshinImpact = 21656,
   GTAV = 1076,
+  HearthstoneHeroesofWarcraft = 9898,
+  HELLDIVERS2 = 24000,
   LeagueofLegends = 5426,
   LeagueofLegendsPBE = 22848,
+  LegendsofRuneterra = 21620,
+  LethalCompany = 23522,
   LostArk = 21864,
   Minecraft = 8032,
   MinecraftBedrock = 22176,
+  NewWorld = 21816,
   Osu = 3683,
   Overwatch = 10844,
+  Palworld = 23944,
   PathofExile = 7212,
   PUBG = 10906,
   Rainbow6Siege = 10826,
+  Roblox = 4688,
   RocketLeague = 10798,
   Rust = 10156,
   TeamfightTactics = 21570,
+  TheSims4 = 10540,
   Valheim = 21668,
   VALORANT = 21640,
-  WorldofWarcraft = 765,
+  Warframe = 8954,
+  WoW = 765,
   WoWClassic = 21630,
 }
 
-export const enum kLaunchersIds {
-  LOLLauncher = 10902,
-}
