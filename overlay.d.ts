@@ -44,32 +44,22 @@ export interface GamesFilter {
 
 /**
  * Input pass through
+ * 'noPassThrough':  Window will handle input and block from game (Default)
+ * 'passThrough':  window will not handle any input
+ * 'passThroughAndNotify': Window will handle input and also pass it to the game.
  */
-export const enum PassthroughType {
-  /**
-   *  Window will handle input and block from game (Default)
-   */
-  NoPassThrough = 0,
-  /**
-   *  window will not handle any input
-   */
-  PassThrough,
-}
+export type PassthroughType = "noPassThrough" | "passThrough" | "passThroughAndNotify";
 
 /**
  * Overlay rendering Z-Order
  */
-export const enum ZOrderType {
-  Default,
-  TopMost,
-  BottomMost,
-}
+export type ZOrderType = "default" | "topMost" | "bottomMost";
 
 /** Overlay ow-electron options */
 export interface OverlayOptions {
-  passthrough?: PassthroughType;
+  passthrough?: PassthroughType | number;
 
-  zOrder?: ZOrderType;
+  zOrder?: ZOrderType | number; // backwards compatible
 }
 
 export interface OverlayWindowOptions
@@ -82,6 +72,9 @@ export interface OverlayWindowOptions
 
   /** not supported yet */
   enableHWAcceleration?: boolean;
+
+  /** */
+  enableIsolation?:boolean;
 }
 
 export interface IOverlayHotkey {
