@@ -40,6 +40,36 @@ type GameInfo = {
 };
 
 // -----------------------------------------------------------------------------
+type GameInfoType = 'Game' | 'Launcher' | undefined;
+type InstalledGameInfo = {
+  /**
+   * Game overwolf class id
+   */
+  id: number;
+
+  /**
+   * Game Install location
+   */
+  path?: string;
+
+  /**
+   * Game Name
+   */
+  name?: string;
+
+  /**
+   * Game info type
+   */
+  type?: GameInfoType,
+
+  /**
+   * Overlay supported game
+   */
+  supported?: boolean; 
+}
+
+
+// -----------------------------------------------------------------------------
 interface GamesFilter {
   all?: boolean;
 
@@ -52,6 +82,7 @@ interface GamesFilter {
 interface OWPackages extends overwolf.packages.OverwolfPackageManager {
   recorder: IOverwolfRecordingApi;
   overlay: IOverwolfOverlayApi;
+  utility: IOverwolfUtilityApi;
 }
 
 /**
@@ -85,6 +116,10 @@ interface OverlayWindowOptions
 
   /** not supported yet */
   enableHWAcceleration?: boolean;
+  
+  
+  /** */
+  enableIsolation?:boolean;
 }
 
 interface IOverlayHotkey {
@@ -244,7 +279,7 @@ interface IOverwolfOverlayApi extends EventEmitter {
   /**
    * Enters Overlay "Exclusive Mode" - meaning, the game no longer receives user
    * input (all input will go to the overlay windows).
-   * 
+   *
    * The `game-input-exclusive-mode-changed` event fires if exclusive mode was entered.
    *
    * NOTE: This is only supported when getActiveGameInfo returns
@@ -332,6 +367,28 @@ interface IOverwolfOverlayApi extends EventEmitter {
     eventName: 'game-input-exclusive-mode-changed',
     listener: (info: GameInputInterception) => void
   ): this;
+}
+
+interface IOverwolfUtilityApi {
+  /**
+   * Game launch/exit registration
+   */
+  trackGames(filter: GamesFilter): Promise<void>;
+
+  /**
+   * Scan for installed games
+  */
+  scan(filter?: GamesFilter): Promise<InstalledGameInfo[]>;
+
+  /**
+   *
+   */
+  on(eventName: 'game-launched', listener: (gameInfo: GameInfo) => void): this;
+
+  /**
+   *
+   */
+  on(eventName: 'game-exit', listener: (gameInfo: GameInfo) => void): this;
 }
 
 type Rect = { top: number; left: number; width: number; height: number };
