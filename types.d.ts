@@ -71,8 +71,6 @@ type InstalledGameInfo = {
 
 // -----------------------------------------------------------------------------
 interface GamesFilter {
-  all?: boolean;
-
   /**
    * Track also unsupported (overlay) games (Default is false)
    */
@@ -81,9 +79,14 @@ interface GamesFilter {
   /**
    * Set games id's to track
    *
-   * when null or empty, will track all games
+   * when null or empty, will filter all games
    */
-  gamesId?: number[];
+  gamesIds?: number[];
+
+  /**
+   * when set to all, will also filter all games ()
+   */
+  all?: boolean;
 }
 
 // -----------------------------------------------------------------------------
