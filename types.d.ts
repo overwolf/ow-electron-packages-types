@@ -1651,7 +1651,7 @@ interface IOverwolfRecordingApi {
    *
    * Note: an exception (RecorderError) will be thrown, if the stop command fails
    *
-   *    * ```
+   * ```
    *  try {
    *    await stopReplays(...);
    *  } catch(err) {
