@@ -1,6 +1,6 @@
 {
     "name": "@overwolf/ow-electron-packages-types",
-    "version": "0.1.0-beta.6",
+    "version": "0.1.0-beta.7",
     "description": "Type definition file for autocompletion and documentation purposes for ow-electron packages",
     "license": "MIT",
     "types": "types.d.ts",
