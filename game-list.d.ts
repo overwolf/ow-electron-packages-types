@@ -1,4 +1,4 @@
-// game list version: 10
+// game list version: 11
 
 export const enum kLaunchersIds {
   LOLLauncher = 10902,
@@ -51,6 +51,7 @@ export const enum kGameIds {
   Overwatch = 10844,
   Palworld = 23944,
   PathofExile = 7212,
+  PathofExile2 = 24886,
   PUBG = 10906,
   Rainbow6Siege = 10826,
   Roblox = 4688,
