@@ -1,4 +1,4 @@
-// game list version: 11
+// game list version: 15
 
 export const enum kLaunchersIds {
   LOLLauncher = 10902,
