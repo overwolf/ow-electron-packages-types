@@ -29,7 +29,7 @@ export const enum kGameIds {
   FinalFantasyXIVOnline = 6350,
   Fortnite = 21216,
   GenshinImpact = 21656,
-  GTAV = 1076,
+  GTAV = 10760,
   HadesII = 24218,
   HaloInfinite = 21854,
   HearthstoneHeroesofWarcraft = 9898,
