@@ -1,4 +1,4 @@
-// game list version: 15
+// game list version: 16
 
 export const enum kLaunchersIds {
   LOLLauncher = 10902,
@@ -43,6 +43,7 @@ export const enum kGameIds {
   LostArk = 21864,
   MagictheGatheringArena = 21308,
   ManorLords = 24176,
+  MarvelRivals = 24890,
   Minecraft = 8032,
   MinecraftBedrock = 22176,
   NewWorld = 21816,
