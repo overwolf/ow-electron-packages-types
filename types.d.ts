@@ -407,6 +407,7 @@ type Rect = { top: number; left: number; width: number; height: number };
 type AudioDeviceType = 'input' | 'output';
 
 type kSupportedEncodersTypes =
+// jim_* are deprecated since obs 0.31.0. instead we use obs_nvenc_* encoders
   | 'ffmpeg_svt_av1'
   | 'ffmpeg_aom_av1'
   | 'jim_nvenc'
@@ -418,7 +419,10 @@ type kSupportedEncodersTypes =
   | 'av1_texture_amf'
   | 'obs_qsv11_v2'
   | 'obs_qsv11_hevc'
-  | 'obs_qsv11_av1';
+  | 'obs_qsv11_av1'
+  | 'obs_nvenc_h264_tex'
+  | 'obs_nvenc_hevc_tex'
+  | 'obs_nvenc_av1_tex';
 
 type kKnownAudioEncodersTypes =
   | 'ffmpeg_aac'
@@ -540,7 +544,8 @@ type kFileFormat =
   | 'mkv'
   | 'mov'
   | 'mpegts'
-  | 'hls';
+  | 'hls'
+  | 'hybrid_mp4';
 
 type kVideoColorFormat =
   | 'NV12'
