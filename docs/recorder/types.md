@@ -126,9 +126,6 @@ Once the settings are ready to be applied, use the `build()` method to create th
   ```
   ffmpeg_svt_av1
   ffmpeg_aom_av1
-  jim_nvenc
-  jim_hevc_nvenc
-  jim_av1_nvenc
   obs_x264
   h264_texture_amf
   h265_texture_amf

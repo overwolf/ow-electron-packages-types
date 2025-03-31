@@ -410,9 +410,6 @@ type kSupportedEncodersTypes =
 // jim_* are deprecated since obs 0.31.0. instead we use obs_nvenc_* encoders
   | 'ffmpeg_svt_av1'
   | 'ffmpeg_aom_av1'
-  | 'jim_nvenc'
-  | 'jim_hevc_nvenc'
-  | 'jim_av1_nvenc'
   | 'obs_x264'
   | 'h264_texture_amf'
   | 'h265_texture_amf'
