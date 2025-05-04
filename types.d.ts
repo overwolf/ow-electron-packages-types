@@ -1567,6 +1567,16 @@ interface IOverwolfRecordingApi {
   isActive(): Promise<boolean>;
 
   /**
+   * Is recording active
+   */
+  isRecordingActive(): Promise<boolean>;
+
+  /**
+   * Is replay  active
+   */
+  isReplayActive(): Promise<boolean>;
+
+  /**
    * Query System information.
    *
    * (Supported encoder, available audio\video devices, available setting with descriptions)
