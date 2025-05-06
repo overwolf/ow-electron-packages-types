@@ -112,9 +112,23 @@ type ZOrderType = "default" | "topMost" | "bottomMost";
 
 /** Overlay ow-electron options */
 interface OverlayOptions {
+  /**
+   * Controls how input events are handled by the overlay window
+   * @default 'noPassThrough'
+   */
   passthrough?: PassthroughType;
 
+  /**
+   * Controls the Z-order (stacking order) of the overlay window relative to other window
+   * @default 'default'
+   */
   zOrder?: ZOrderType;
+
+  /**
+   * If true, the overlay will not intercept keyboard input.
+   * @default false
+   */
+  ignoreKeyboardInput?: boolean;
 }
 
 interface OverlayWindowOptions
