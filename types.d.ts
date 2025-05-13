@@ -4,6 +4,8 @@ BrowserWindow,
 BrowserWindowConstructorOptions,
 Size,
 WebContents,
+Display,
+Rectangle
 } from 'electron';
 
 import { EventEmitter } from 'events';
@@ -182,10 +184,27 @@ interface InjectionError {
 }
 
 interface GameWindowInfo {
-  size: Size;
-  nativeHandle: number;
-  focused: boolean;
-  graphics: 'd3d9' | 'd3d12' | 'd3d11' | string | undefined;
+  /** The dimensions of the game window. */
+  readonly size: Size;
+
+  /** The native window handle (HWND) of the game window. */
+  readonly nativeHandle: number;
+
+  /** Indicates whether the game window is currently focused. */
+  readonly focused: boolean;
+
+  /** The graphics API used by the game (e.g., Direct3D 9, 11, 12, Vulkan). */
+  readonly graphics: 'd3d9' | 'd3d12' | 'd3d11' | 'vulkan' | string | undefined;
+
+  /** Display information for the screen on which the game window resides.
+   *  Available since version 1.5.11.
+   */
+  readonly screen?: Display;
+
+  /** The bounding rectangle of the game window in screen coordinates.
+   * Available since version 1.5.11.
+   */
+  readonly bounds?: Rectangle;
 }
 
 interface GameInputInterception {
