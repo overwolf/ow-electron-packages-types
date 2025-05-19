@@ -64,19 +64,25 @@ export interface OverlayOptions {
   zOrder?: ZOrderType | number; // backwards compatible
 }
 
-export interface OverlayWindowOptions
-  extends BrowserWindowConstructorOptions,
-    OverlayOptions {
+/** Overlay ow-electron options */
+export interface OverlayOptions {
   /**
-   * unique name (id)
+   * Controls how input events are handled by the overlay window
+   * @default 'noPassThrough'
+  */
+  passthrough?: PassthroughType | number;
+
+ /**
+   * Controls the Z-order (stacking order) of the overlay window relative to other window
+   * @default 'default'
+  */
+  zOrder?: ZOrderType | number; // backwards compatible;
+
+  /**
+   * If true, the overlay will not intercept keyboard input.
+   * @default false
    */
-  name: string;
-
-  /** not supported yet */
-  enableHWAcceleration?: boolean;
-
-  /** */
-  enableIsolation?:boolean;
+  ignoreKeyboardInput?: boolean;
 }
 
 export interface IOverlayHotkey {
