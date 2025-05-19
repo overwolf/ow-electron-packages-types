@@ -59,13 +59,6 @@ export type ZOrderType = "default" | "topMost" | "bottomMost";
 
 /** Overlay ow-electron options */
 export interface OverlayOptions {
-  passthrough?: PassthroughType | number;
-
-  zOrder?: ZOrderType | number; // backwards compatible
-}
-
-/** Overlay ow-electron options */
-export interface OverlayOptions {
   /**
    * Controls how input events are handled by the overlay window
    * @default 'noPassThrough'
@@ -83,6 +76,21 @@ export interface OverlayOptions {
    * @default false
    */
   ignoreKeyboardInput?: boolean;
+}
+
+export interface OverlayWindowOptions
+  extends BrowserWindowConstructorOptions,
+    OverlayOptions {
+  /**
+   * unique name (id)
+   */
+  name: string;
+
+  /** not supported yet */
+  enableHWAcceleration?: boolean;
+
+  /** */
+  enableIsolation?:boolean;
 }
 
 export interface IOverlayHotkey {
