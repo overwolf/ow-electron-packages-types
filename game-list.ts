@@ -1,4 +1,4 @@
-// game list version: 10
+// game list version: 21
 
 export const enum kLaunchersIds {
   LOLLauncher = 10902,
@@ -60,6 +60,7 @@ export const enum kGameIds {
   SpectreDivide = 24484,
   SplitgateArenaWarfare = 21404,
   StarCraftII = 5855,
+  StardewValley = 19054,
   Starfield = 23222,
   Stormgate = 23818,
   TeamfightTactics = 21570,
