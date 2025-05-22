@@ -1009,7 +1009,8 @@ interface EncoderSettingsNVENC extends VideoEncoderSettingsBase {
    *
    * 'p7' - Slowest (Best Quality)
    */
-  preset2?: 'p1' | 'p2' | 'p3' | 'p4' | 'p5' | 'p6' | 'p7';
+  // OBS 31.0.0 preset2 changed to preset
+  preset?: 'p1' | 'p2' | 'p3' | 'p4' | 'p5' | 'p6' | 'p7';
 
   /**
    * 'qres' - Two Passes (Quarter Resolution) - Default
