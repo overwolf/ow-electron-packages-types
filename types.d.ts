@@ -147,6 +147,13 @@ interface OverlayWindowOptions
   
   /** */
   enableIsolation?:boolean;
+
+  /**
+   * If true, the overlaywindow will be DPI aware (Main monitor DPI).
+   * @default false
+   * @since 1.7.0
+  */
+  dpiAware?: boolean;
 }
 
 interface IOverlayHotkey {
@@ -319,6 +326,12 @@ interface IOverwolfOverlayApi extends EventEmitter {
    * Overlay hotkeys api
    */
   hotkeys: IOverlayHotkeys;
+
+  /**
+   * Overlay package version
+   * @since 1.7.0
+  */
+  readonly version: string;
 
   /**
    * Enters Overlay "Exclusive Mode" - meaning, the game no longer receives user
