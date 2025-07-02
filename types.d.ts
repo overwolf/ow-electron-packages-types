@@ -170,8 +170,38 @@ interface IOverlayHotkey {
   passthrough?: boolean;
 }
 
+/**
+ * options for the `GameLaunchEvent`. 
+ * ability to override some game settings in runtime.
+ *
+ * @see GameLaunchEvent
+ * @since 1.8.0
+ */
+export interface GameLaunchEventOptions {
+  /**
+   * Force OOPO mode (when oopo is false in game list).
+   * @default false
+   */
+  forceOOPO?: boolean;
+
+  /**
+   * Force OOPO mouse Mixed mode control.
+   * @default false
+   */
+  forceOOPOMixedMode?: boolean;
+}
+
 interface GameLaunchEvent {
-  inject: () => void;
+  /**
+   * Inject the overlay into the game.
+   * @param options - options for the `GameLaunchEvent` since 1.8.0.
+   */
+  inject: (options?: GameLaunchEventOptions) => void;
+
+  /**
+   * Dismiss the overlay.
+   */
+  dismiss: () => void;
 }
 
 /**
