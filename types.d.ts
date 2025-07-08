@@ -814,6 +814,13 @@ interface AudioDeviceSettingsInfo extends AudioDeviceSettings {
   readonly name: string;
 }
 
+export interface AudioDeviceSettingsUpdateInfo  extends AudioDeviceSettings {
+   /**
+   * Audio device unique name or Process name for application
+   */
+   readonly name: string;
+}
+
 interface ApplicationAudioDeviceSettingsInfo
   extends AudioDeviceSettingsInfo {
   readonly type: 'output';
@@ -1771,6 +1778,17 @@ interface IOverwolfRecordingApi {
    * register to track running game, witch triggers 'game-launched' and 'game-exit' events.
    */
   registerGames(filter: GamesFilter);
+
+  /**
+   * Update audio device settings while recording
+   * (for example, volume, mute, etc.) by device name.
+   *
+   * @param device
+   * @since 0.32.0
+   */
+  updateAudioDevice(
+    device: AudioDeviceSettingsUpdateInfo
+  ): Promise<void>;
 
   /**
    * Fired when registered game is detected
