@@ -1,12 +1,30 @@
-
-
+/**
+ * The *Content Recommendation Notification* (CRN) APIs give you tools to help manage the content notification settings in your app. 
+ * 
+ * CRN recommends new apps for players that could offer them value.
+ * 
+ * @packageDocumentation
+ */
 // -----------------------------------------------------------------------------
 
 /**
- * Overwolf CRN API
- * @owpackage CRN
-*/
+ * Used to create cancellable or abortable event.
+ *
+ * @example
+ * ```ts
+ * const event: ICRNEvent = createCancelableEvent();
+ *
+ * // Later in the flow
+ * if (shouldCancel) {
+ *   event.abort();
+ * }
+ * ```
+ */
 export interface ICRNEvent {
+  /**
+   *  Cancels the ongoing event, stopping its propagation or execution. 
+   * 
+   */
   abort: () => void;
 }
 
@@ -14,7 +32,20 @@ export interface ICRNEvent {
 
 /**
  * All supported notification actions.
- * @owpackage CRN
+ *
+ * Represents the different ways a user or the system can
+ * interact with or dismiss a notification. It is useful for analytics,
+ * handling UI state changes, or triggering specific behavior based on
+ * user intent or automated conditions.
+ *
+ * @example
+ * ```ts
+ * function handleAction(action: CRNActionType) {
+ *   if (action === 'OpenExternalUrl') {
+ *     // Open a browser tab
+ *   }
+ * }
+ * ```
  */
 export type CRNActionType =
   /**
@@ -57,18 +88,21 @@ export type CRNActionType =
 
 
 /**
- * @owpackage CRN
+ * Interface for interacting with the Overwolf *Content Recommendation Notification* (CRN) system.
+ *
+ * Provides methods to query notification state, control visibility,
+ * and respond to notification events.
  */
 export interface IOverwolfCRNApi {
   /**
-   * returns Notification visible status.
-   * true if the notification is currently visible, false if not.
+   * Returns Notification visible status.
+   * `true` if the notification is currently visible, `false` if not.
    */
   isNotificationVisible(): Promise<boolean>;
 
   /**
-   * returns Notification settings status:
-   * true if notifications are allowed, false if not.
+   * Returns Notification settings status.
+   * `true` if notifications are allowed, `false` if not.
    */
   getNotificationStatus(): Promise<boolean>;
 
@@ -78,8 +112,8 @@ export interface IOverwolfCRNApi {
   closeNotificationWindow(): void;
 
   /**
-   * Enables or disables notifications.
-   * @param enable - true to enable notifications, false to disable.
+   * Enable or disable notifications.
+   * @param enable - `true` to enable notifications, `false` to disable.
    */
   allowNotifications(enable: boolean): void;
 
