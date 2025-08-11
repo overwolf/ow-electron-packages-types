@@ -106,11 +106,13 @@ type GameInfoType = 'Game' | 'Launcher' | undefined;
 
 
 /**
- * Information about a game installed on the user's system:
+ * Information about a game installed on the user's system.
+ * 
+ * Includes:
  * - Game unique ID.
  * - Location.
  * - Display name.
- * - Type (game or launcher).
+ * - Type (`game` or `launcher`).
  * - Overlay support status.
  * 
  */
@@ -172,8 +174,8 @@ interface GamesFilter {
 /**
  * Input passthrough settings:
  *
- * - `noPassThrough`&mdash;-window will handle input and block from game (Default).
- * - `PassThrough`&mdash;window will not handle any input.<
+ * - `noPassThrough`&mdash;window will handle input and block from game (Default).
+ * - `PassThrough`&mdash;window will not handle any input.
  * - `passThroughAndNotify`&mdash;window will handle input and also pass it to the game.
  * 
  */
@@ -354,7 +356,7 @@ interface IOverlayHotkey {
  * };
  * ```
  * 
- * @see {@link GameLaunchEvent}
+ * @see {@link GameLaunchEvent}.
  * @since 1.8.0
  */
 export interface GameLaunchEventOptions {
@@ -408,7 +410,6 @@ interface GameLaunchEvent {
 /**
  * Active overlay window instance created by the overlay API.
  * 
- * 
  *  Wraps an Electron `BrowserWindow` with metadata and configuration
  * specific to the overlay:
  * - ID.
@@ -420,7 +421,7 @@ interface OverlayBrowserWindow {
   window: BrowserWindow;
   
   /**
-   *  Overlay-specific configuration options used when this window was created.
+   * Overlay-specific configuration options used when this window was created.
    * @see {@ink OverlayOptions}.
    */
   readonly overlayOptions: OverlayOptions;
@@ -454,6 +455,7 @@ interface InjectionError {
 
 /**
  * Information about a running game's window.
+ * 
  * Used to determine:
  * - Window focus.
  * - Screen location.
@@ -504,6 +506,7 @@ interface GameWindowInfo {
 
 /**
  * State of input handling between the game and the overlay system.
+ * 
  * Used for determining whether the overlay can intercept input events,
  * or whether it has fully taken control over user input in exclusive mode.
  *
@@ -551,17 +554,17 @@ interface GameInputInterception {
 interface ActiveGameInfo {
   /**
    * Information about the currently running game.
-   * @see {@link GameInfo}
+   * @see {@link GameInfo}.
    */
   readonly gameInfo: GameInfo;
   /**
    * Window-specific details for the running game.
-   * @see {@link GameWindowInfo}
+   * @see {@link GameWindowInfo}.
    */
   readonly gameWindowInfo: GameWindowInfo;
   /**
    * Input interception state between the overlay and the game.
-   * @see {@link GameInputInterception}
+   * @see {@link GameInputInterception}.
    */
   readonly gameInputInfo: GameInputInterception;
 }
@@ -569,7 +572,7 @@ interface ActiveGameInfo {
 /**
  * Reason for a game window update event.
  * 
- * used in callbacks where the overlay needs to respond to
+ * Used in callbacks where the overlay needs to respond to
  * changes in the game window's state, such as resizing or focus change.
  *
  * ```ts
@@ -733,7 +736,7 @@ interface IOverwolfOverlayApi extends EventEmitter {
    *  Create new Overlay window.
    * @param options - Window configuration including name, z-order, passthrough, etc. 
    * @returns A promise that resolves to the created `OverlayBrowserWindow`.
-   * @see {@link OverlayWindowOptions}
+   * @see {@link OverlayWindowOptions}.
    * @see {@link OverlayBrowserWindow}.
    */
   createWindow(options: OverlayWindowOptions): Promise<OverlayBrowserWindow>;
@@ -741,27 +744,27 @@ interface IOverwolfOverlayApi extends EventEmitter {
   /**
    * Game launch registration.
    * @param filter - Configuration specifying which games to register and whether to include unsupported titles.
-   * @see {@link GamesFilter}
+   * @see {@link GamesFilter}.
    */
   registerGames(filter: GamesFilter);
 
   /**
    * Retrieves information about the currently active game, if available.
-   * @see {@link ActiveGameInfo}
+   * @see {@link ActiveGameInfo}.
    */
   getActiveGameInfo(): ActiveGameInfo | undefined;
 
   /**
    * Get all open overlay windows.
    * @returns An array of `OverlayBrowserWindow` instances.
-   * @see {@link OverlayBrowserWindow}
+   * @see {@link OverlayBrowserWindow}.
    */
   getAllWindows(): OverlayBrowserWindow[];
 
   /**
    * Returns the overlay window associated with a given `WebContents` instance.
    * @param webContents - The Electron WebContents to query. 
-   * @see {@link OverlayBrowserWindow}
+   * @see {@link OverlayBrowserWindow}.
    * @returns The corresponding overlay window or `null` if not found. 
    */
   fromWebContents(webContents: WebContents): OverlayBrowserWindow | null;
@@ -772,13 +775,13 @@ interface IOverwolfOverlayApi extends EventEmitter {
    *
    * @param browserWindow - The Electron `BrowserWindow` to query.
    * @returns The corresponding overlay window or `null` if not owned by the overlay system.
-   * @see {@link OverlayBrowserWindow}
+   * @see {@link OverlayBrowserWindow}.
    */
   fromBrowserWindow(browserWindow: BrowserWindow): OverlayBrowserWindow | null;
 
  /**
    * The hotkeys API used to register, update, and remove overlay hotkeys.
-   * @see {@link IOverlayHotkeys}
+   * @see {@link IOverlayHotkeys}.
    */
   hotkeys: IOverlayHotkeys;
 
@@ -806,7 +809,6 @@ interface IOverwolfOverlayApi extends EventEmitter {
    *
    * This is only effective if `getActiveGameInfo().gameInputInfo.canInterceptInput` is `true`.
    *
-   * @param options - Optional fade animation and background configuration.
    */
   exitExclusiveMode(): void;
 
@@ -819,21 +821,39 @@ interface IOverwolfOverlayApi extends EventEmitter {
    * Fires when a registered game is detected.
    * Call `event.inject()` to enable the overlay for the game.
    *
-   * @param eventName - `game-launched`
+   * @param eventName - The event identifier for when a game is launched.
    * @param listener - Callback with game launch event and game metadata.
-   * @see {@link GameInfo}
+   * @see {@link GameInfo}.
    */
-  on(
-    eventName: 'game-exit',
-    listener: (gameInfo: GameInfo, wasInjected: boolean) => void
-  ): this;
+  on(eventName: 'game-launched', listener: (gameInfo: GameInfo) => void): this;
+
+/**
+ * Fired when a registered game process terminates.
+ *
+ * Triggered on game exit.
+ * Useful for performing cleanup, UI updates, or stopping background tasks.
+ *
+ * @param eventName - The event identifier for when the game exits.
+ * @param listener - A callback function that receives the game info of the exited game.
+ *
+ * @example
+ * ```ts
+ * overlay.on('game-exit', (gameInfo) => {
+ *   console.log(`Game exited: ${gameInfo.title}`);
+ *   cleanupOverlayResources();
+ * });
+ * ```
+ * 
+ * @see {@link GameInfo}.
+ */
+  on(eventName: 'game-exit', listener: (gameInfo: GameInfo) => void): this;
 
   /**
    * Fires when the overlay is ready and successfully injected into the game.
    *
    * @param eventName - `game-injected`
    * @param listener - Callback with game info.
-   * @see {@link GameInfo}
+   * @see {@link GameInfo}.
    */
   on(eventName: 'game-injected', listener: (gameInfo: GameInfo) => void): this;
 
@@ -842,7 +862,7 @@ interface IOverwolfOverlayApi extends EventEmitter {
    *
    * @param eventName - `game-injection-error`
    * @param listener - Callback with game info, error message, and optional additional args.
-   * @see {@link GameInfo}
+   * @see {@link GameInfo}.
    */
   on(
     eventName: 'game-injection-error',
@@ -854,8 +874,8 @@ interface IOverwolfOverlayApi extends EventEmitter {
    *
    * @param eventName - `game-focus-changed`
    * @param listener - Callback with window info, game info, and focus state.
-   * @see {@link GameWindowInfo}
-   * @see {@link GameInfo}
+   * @see {@link GameWindowInfo}.
+   * @see {@link GameInfo}.
    */
   on(
     eventName: 'game-focus-changed',
@@ -871,9 +891,9 @@ interface IOverwolfOverlayApi extends EventEmitter {
    *
    * @param eventName - `game-window-changed`
    * @param listener - Callback with window info, game info, and optional reason.
-   * @see {@link GameWindowInfo}
-   * @see {@link GameInfo}
-   * @see {@link GameWindowUpdateReason}
+   * @see {@link GameWindowInfo}.
+   * @see {@link GameInfo}.
+   * @see {@link GameWindowUpdateReason}.
    */
   on(
     eventName: 'game-window-changed',
@@ -889,7 +909,7 @@ interface IOverwolfOverlayApi extends EventEmitter {
    *
    * @param eventName - `game-input-interception-changed`
    * @param listener - Callback with updated input state.
-   * @see {@link GameInputInterception}
+   * @see {@link GameInputInterception}.
    * 
    */
   on(
@@ -902,7 +922,7 @@ interface IOverwolfOverlayApi extends EventEmitter {
    *
    * @param eventName - `game-input-exclusive-mode-changed`
    * @param listener - Callback with input mode details.
-   * @see {@link GameInputInterception}
+   * @see {@link GameInputInterception}.
    */
   on(
     eventName: 'game-input-exclusive-mode-changed',
