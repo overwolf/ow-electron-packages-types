@@ -2,7 +2,7 @@
  * APIs for controlling overlays in apps. Overlay is the ability to show a window on top of the current game window. 
  * 
  * ## Standard mode
-Standard mode is available in games where the mouse is enabled when playing the game. For example, in MOBA games such as League of Legends, Dota 2, and others, the mouse cursor is available, and therefore you are able to interact with the app windows without the need to pull keyboard and mouse focus input from the game.
+ * Standard mode is available in games where the mouse is enabled when playing the game. For example, in MOBA games such as League of Legends, Dota 2, and others, the mouse cursor is available, and therefore you are able to interact with the app windows without the need to pull keyboard and mouse focus input from the game.
 * 
 * ## Exclusive mode
 * Exclusive mode is available in games where the mouse is disabled when playing the game. For example, in FPS games such as CS2, Fortnite and others, there’s no mouse cursor, so the only way to interact with the Overwolf app window is by activating exclusive mode. This will show a semi-transparent window overlaid on the game window and doesn't allow keyboard or mouse input to pass into the game.
@@ -31,7 +31,7 @@ type GameProcessInfo = {
   fullPath: string;
 
   /**
-   * The full command line used to start the game process, if available.
+   * The command line used to start the game process, if available.
    */
   commandLine?: string;
 
@@ -60,7 +60,7 @@ type GameInfo = {
   classId: number;
   
   /**
-   * Name of the game detected or running
+   * Name of the game detected or running.
    */
   name: string;
 
@@ -123,7 +123,7 @@ type InstalledGameInfo = {
   id: number;
 
   /**
-   * Game installation path 
+   * Game installation path.
    */
   path?: string;
 
@@ -241,7 +241,7 @@ interface OverlayOptions {
  * Configuration options for an overlay window.
  * 
  * Combines standard Electron `BrowserWindowConstructorOptions` with additional
- * overlay-specific behaviors defined in `OverlayOptions`.
+ * overlay specific behaviors defined in `OverlayOptions`.
  *
  * Used to define overlay window:
  * - Rendering.
@@ -395,20 +395,20 @@ export interface GameLaunchEventOptions {
 interface GameLaunchEvent {
   /**
    * Inject the overlay into the game.
-   * @param options - Injection oc configuration options. 
+   * @param options - Injection of configuration options. 
    * @since 1.8.0.
    */
   inject: (options?: GameLaunchEventOptions) => void;
 
   /**
-   * Dismiss the overlay. Used to skip injection if the games doesn't meet the required conditions.
+   * Dismiss the overlay. Used to skip injection if the detected game doesn't meet the required conditions.
    */
   dismiss: () => void;
 }
 
 
 /**
- * Active overlay window instance created by the overlay API.
+ * Active overlay window instance.
  * 
  *  Wraps an Electron `BrowserWindow` with metadata and configuration
  * specific to the overlay:
@@ -421,7 +421,7 @@ interface OverlayBrowserWindow {
   window: BrowserWindow;
   
   /**
-   * Overlay-specific configuration options used when this window was created.
+   * Overlay specific configuration options used when this window was created.
    * @see {@ink OverlayOptions}.
    */
   readonly overlayOptions: OverlayOptions;
@@ -483,7 +483,7 @@ interface GameWindowInfo {
   readonly nativeHandle: number;
 
   /** 
-   * Indicates whether the game window is currently focused.
+   * Indicates if the game window is currently in focus.
    */
   readonly focused: boolean;
 
@@ -509,9 +509,6 @@ interface GameWindowInfo {
  * 
  * Used for determining whether the overlay can intercept input events,
  * or whether it has fully taken control over user input in exclusive mode.
- *
- * Typically emitted through input-related overlay events such as
- * `game-input-interception-changed` or `game-input-exclusive-mode-changed`.
  *
  * @example
  * ```ts
@@ -540,8 +537,6 @@ interface GameInputInterception {
  *
  * Combines general game metadata, window information, and input interception state,
  * allowing the overlay to assess readiness and manage behavior accordingly.
- *
- * Typically returned by `getActiveGameInfo()` from the overlay API.
  *
  * @example
  * ```ts
@@ -632,7 +627,7 @@ type HotkeyCallback = (
  */
 interface ExclusiveInputOptions {
   /**
-   * Exclusive mode FadeIn / FadeOut duration in miliseconds.
+   * Exclusive mode FadeIn / FadeOut duration in milliseconds.
    *
    * Use `0` to disable.
    *
@@ -642,6 +637,7 @@ interface ExclusiveInputOptions {
 
   /**
    * Exclusive mode overlay background color.
+   * 
    * Use `rgba(0,0,0,0)` to disable background color
    *
    * **NOTE**
@@ -793,12 +789,12 @@ interface IOverwolfOverlayApi extends EventEmitter {
   readonly version: string;
 
   /**
-   * Enters Overlay "Exclusive Mode" - meaning, the game no longer receives user
+   * Enters Overlay "Exclusive Mode" and the game no longer receives user
    * input (all input will go to the overlay windows).
    *
    * The `game-input-exclusive-mode-changed` event fires if exclusive mode was entered.
    *
-   * NOTE: This is only supported when getActiveGameInfo returns
+   * NOTE: This is only supported when `getActiveGameInfo` returns
    * `"canInterceptInput" == false`. Calling this function when unsupported will
    * be ignored and will not throw an exception.
    */
