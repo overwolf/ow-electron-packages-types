@@ -15,7 +15,7 @@
 /**
  * Information about a running game process.
  *
- * This type is used to describe metadata related to a running game process,
+ * This type is used to describe data related to a running game process,
  * such as its PID, execution path, and other process attributes.
  *
  */
