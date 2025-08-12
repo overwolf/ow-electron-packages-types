@@ -1,5 +1,5 @@
 /**
- * APIs for controlling overlays in apps. Overlay is the ability to show a window on top of the current game window. 
+ * APIs for controlling and creating overlays in games. Overlay is the ability to show windows on top of the current game window.
  * 
  * ## Standard mode
  * Standard mode is available in games where the mouse is enabled when playing the game. For example, in MOBA games such as League of Legends, Dota 2, and others, the mouse cursor is available, and therefore you are able to interact with the app windows without the need to pull keyboard and mouse focus input from the game.
