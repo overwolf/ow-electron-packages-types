@@ -210,25 +210,25 @@ type ZOrderType = "default" | "topMost" | "bottomMost";
 
 
 /**
- * Configuration options for creating or modifying an overlay window.
+ * Overlay configuration options for creating or modifying an overlay window.
  *
  * Control over:
- * - User input.
- * - Window stacking.
- * - Keyboard event handling.
+ * - Input passthrough behavior.
+ * - Overlay window stacking behavior.
+ * - Keyboard input interception.
  *
  * @example
  * ```ts
  * const options: OverlayOptions = {
- *   passthrough: 'mouseOnly',
- *   zOrder: 'alwaysOnTop',
- *   ignoreKeyboardInput: true
+ *   passthrough: 'noPassThrough',
+ *   zOrder: 'default',
+ *   ignoreKeyboardInput: false
  * };
  * ```
  */
 interface OverlayOptions {
   /**
-   * Controls how input events are handled by the overlay window.
+   * Controls how input is handled by the overlay window.
    * @default 'noPassThrough' 
    * @see {@link PassthroughType}.
    *
@@ -236,13 +236,15 @@ interface OverlayOptions {
   passthrough?: PassthroughType;
 
   /**
-   * Controls the Z-order (stacking order) of the overlay window relative to other window.
+   * Controls the z-order (stacking order) of the overlay window.
    * @default 'default' 
    * @see {@link ZOrderType}.
    */
   zOrder?: ZOrderType;
 
   /**
+   * Controls whether the overlay intercepts keyboard input.
+   * 
    * `true`&mdash;the overlay won't intercept keyboard input.
    * @default false
    */
@@ -253,15 +255,11 @@ interface OverlayOptions {
 
 /**
  * Configuration options for an overlay window.
- * 
- * Combines standard Electron `BrowserWindowConstructorOptions` with additional
- * overlay specific behaviors defined in `OverlayOptions`.
  *
- * Used to define overlay window:
- * - Rendering.
- * - Stacking.
- * - Input behavior.
- * - Hardware acceleration.
+ * Used at creation time to define the overlay window's behavior and appearance.
+ * Extends:
+ * - Standard Electron `BrowserWindowConstructorOptions`.
+ * - Overlay specific behaviors using `OverlayOptions`.
  */
 interface OverlayWindowOptions
   extends BrowserWindowConstructorOptions,
@@ -287,7 +285,8 @@ interface OverlayWindowOptions
 
   /**
    * `true`&mdash;the overlay window will be DPI aware (Main monitor DPI).
-   * 
+   *
+   * This allows the overlay to scale correctly on high DPI displays.
    * @default false
    * 
    * @since 1.7.0
