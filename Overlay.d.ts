@@ -70,7 +70,7 @@ type GameInfo = {
   name: string;
 
   /**
-   * Indicates if the game is supports Overlay.
+   * Indicates if the game supports Overlay.
    */
   supported: boolean;
 
@@ -99,7 +99,7 @@ type GameInfo = {
  * Type of the detected game.
  *
  * Used to differentiate whether the currently tracked process
- * is a standalone game, a game launcher, or undefined.
+ * is a game, a game launcher, or undefined.
  *
  * @example
  * ```ts
@@ -120,21 +120,21 @@ type GameInfoType = 'Game' | 'Launcher' | undefined;
  * Information about a game installed on the user's system.
  * 
  * Includes:
- * - Game unique ID.
- * - Location.
- * - Display name.
+ * - The Game's ID.
+ * - Installation path.
+ * - Name of the game.
  * - Type (`game` or `launcher`).
  * - Overlay support status.
  * 
  */
 type InstalledGameInfo = {
   /**
-   * Overwolf game class id.
+   * The game's ID as declared by the gameslist.
    */
   id: number;
 
   /**
-   * Game installation path.
+   * The full file system path to the game's installation directory.
    */
   path?: string;
 
@@ -149,7 +149,7 @@ type InstalledGameInfo = {
   type?: GameInfoType,
 
   /**
-   * Overlay supported game.
+   * Indicates if the game supports Overlay.
    */
   supported?: boolean; 
 }
@@ -159,23 +159,25 @@ type InstalledGameInfo = {
 
 // -----------------------------------------------------------------------------
 /**
- * Filter used to specify overlay support in games.
- * 
+ * Filter object for game overlays.
+ *
+ * Used to specify which games to include or exclude from overlay tracking.
  */
 interface GamesFilter {
   /**
-   * Track supported or unsupported overlay games. (Default: false)
+   * Include tracking of unsupported overlay games. (Default: false)
    */
   includeUnsupported?: boolean;
 
   /**
-   * Set games id's to track.
-   * `null` or empty filters all games.
+   * Array of game IDs to track.
+   * 
+   * If `null` or empty, filters all games.
    */
   gamesIds?: number[];
 
   /**
-   * `true` will filter all games.
+   * Include all games in the overlay tracking.
    */
   all?: boolean;
 }
@@ -183,24 +185,25 @@ interface GamesFilter {
 
 
 /**
- * Input passthrough settings:
+ * Type of input passthrough behavior for overlay windows.
  *
- * - `noPassThrough`&mdash;window will handle input and block from game (Default).
- * - `PassThrough`&mdash;window will not handle any input.
- * - `passThroughAndNotify`&mdash;window will handle input and also pass it to the game.
- * 
+ * - `noPassThrough`&mdash;All input will be handled by the window and blocked from the game (Default).
+ * - `PassThrough`&mdash;All input will be passed through to the game.
+ * - `passThroughAndNotify`&mdash;All input will be passed through to the game, and the window will be notified of the input events.
  */
 type PassthroughType = "noPassThrough" | "passThrough" | "passThroughAndNotify";
 
 
 
 /**
- * Overlay layering of overlapping windows along the z-axis (depth).
- * 
- * - `default`&mdash;the default setting in Windows.
- * - `topMost`&mdash;bring overlay to the top most position.
- * - `bottomMost`&mdash;put window in the bottom most position.
- * 
+ * Type of overlay window stacking behavior.
+ *
+ * Used to control the z-order (stacking order) of the overlay window relative to other windows.
+ *
+ * - `default`&mdash;Bring to front the currently focused overlay window.
+ * - `topMost`&mdash;Set the overlay window to the top most position, above all other windows.
+ * - `bottomMost`&mdash;Set the overlay window to the bottom most position, below all other windows.
+ *
  */
 type ZOrderType = "default" | "topMost" | "bottomMost";
 
