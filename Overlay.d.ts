@@ -2,10 +2,10 @@
  * APIs for controlling and creating overlays in games. Overlay is the ability to show windows on top of the current game window.
  * 
  * ## Standard mode
- * Standard mode is available in games where the mouse is enabled when playing the game. For example, in MOBA games such as League of Legends, Dota 2, and others, the mouse cursor is available, and therefore you are able to interact with the app windows without the need to pull keyboard and mouse focus input from the game.
+ * Standard mode is used in games where the mouse is visible while playing the game. For example, in MOBA games such as League of Legends, Dota 2, and others, the mouse cursor is visible during gameplay, and therefore you are able to interact with the app windows without the need to pull keyboard and mouse focus input from the game.
 * 
 * ## Exclusive mode
-* Exclusive mode is available in games where the mouse is disabled when playing the game. For example, in FPS games such as CS2, Fortnite and others, there’s no mouse cursor, so the only way to interact with the Overwolf app window is by activating exclusive mode. This will show a semi-transparent window overlaid on the game window and doesn't allow keyboard or mouse input to pass into the game.
+* Exclusive mode is used in games where the mouse is not visible while playing the game. For example, in FPS games such as Apex Legends, Fortnite and others, the mouse cursor is not visible during gameplay, so the only way to interact with the Overwolf app window is by entering exclusive mode. This will show a semi-transparent window overlaid on the game window and doesn't allow keyboard or mouse input to pass into the game.
  * 
  * @packageDocumentation
  */
@@ -53,17 +53,25 @@ type GameProcessInfo = {
  */
 type GameInfo = {
   /**
-   * Game Id.
+   * The running game's ID as declared by the gameslist.
+   * For example: League of Legends game id is: 5426
    */
   id: number;
 
+  /**
+   * The running game's class ID as declared by the gameslist.
+   * For example: League of Legends game class id is: 54261
+   */
   classId: number;
   
   /**
-   * Name of the game detected or running.
+   * Name of the detected or running game.
    */
   name: string;
 
+  /**
+   * Indicates if the game is supports Overlay.
+   */
   supported: boolean;
 
   /**
@@ -71,6 +79,9 @@ type GameInfo = {
    */
   processInfo?: GameProcessInfo;
 
+  /**
+   * Gameslist flags associated with the game.
+   */
   flags?: any;
 
   /**
