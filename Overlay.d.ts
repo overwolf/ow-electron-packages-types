@@ -295,18 +295,19 @@ interface OverlayWindowOptions
 }
 
 /**
- * Hotkey configuration used by the overlay.
+ * Represents an overlay hotkey configuration.
  *
  * Defines:
- * - Main key.
+ * - Unique name.
+ * - Main keycode.
  * - Optional modifier keys.
  * - Passthrough behavior.
  *
  * @example
  * ```ts
  * const screenshotHotkey: IOverlayHotkey = {
- *   name: 'screenshot',
- *   keyCode: 44, // Print Screen
+ *   name: 'take-screenshot',
+ *   keyCode: 80, // p
  *   modifiers: { ctrl: true, alt: true },
  *   passthrough: false
  * };
@@ -317,10 +318,12 @@ interface IOverlayHotkey {
    * Unique name of the hotkey.
    */
   name: string;
+
   /**
    * Primary key code for the hotkey. Use standard keyboard codes.
    */
   keyCode: number;
+
   /**
    * Modifier keys that must be pressed along with the main key.
    */
@@ -346,9 +349,14 @@ interface IOverlayHotkey {
      */
     meta?: boolean;
   };
+
   /**
-   * `true`&mdash;the hotkey will be passed through to the underlying game.
-   * `false`&mdash;the hotkey will be captured exclusively by the overlay.
+   * Controls whether the hotkey will be passed through to the underlying game.
+   * 
+   * - If `true`, the hotkey will be captured by the overlay and pass to the game.
+   * - If `false`, the hotkey will be captured exclusively by the overlay.
+   * 
+   * @default false
    */
   passthrough?: boolean;
 }
@@ -357,9 +365,7 @@ interface IOverlayHotkey {
 
 
 /**
- * Configuration flags for launching or injecting the overlay into a game process.
- *
- * Overrides default behavior related to *Overwolf's Out-of-Process Overlay* (OOPO) for compatibility or debugging.
+ * Configuration options for controlling the type of overlay we inject.
  *
  * @example
  * ```ts
@@ -381,7 +387,8 @@ export interface GameLaunchEventOptions {
 
   /**
    * Force OOPO mixed-mode mouse control.
-   * Use for debugging or enabling hybrid input behavior in games that don't support it.
+   * 
+   * Used for debugging or enabling hybrid input behavior in games that don't support it.
    * @default false
    */
   forceOOPOMixedMode?: boolean;
@@ -390,7 +397,7 @@ export interface GameLaunchEventOptions {
 
 
 /**
- * Event fired when a supported game is launched.
+ * Event fired when a game is launched.
  *
  * Provides handlers to inject or dismiss the overlay at game detection.
  *
@@ -408,7 +415,8 @@ export interface GameLaunchEventOptions {
 interface GameLaunchEvent {
   /**
    * Inject the overlay into the game.
-   * @param options - Injection of configuration options. 
+   * @param options - Injection of configuration options.
+   * @see {@link GameLaunchEventOptions}.
    * @since 1.8.0.
    */
   inject: (options?: GameLaunchEventOptions) => void;
@@ -421,12 +429,11 @@ interface GameLaunchEvent {
 
 
 /**
- * Active overlay window instance.
- * 
- *  Wraps an Electron `BrowserWindow` with metadata and configuration
- * specific to the overlay:
- * - ID.
+ * Represents an overlay window instance.
+ *
+ * Wraps an Electron `BrowserWindow` with metadata and configuration specific to the overlay:
  * - Name.
+ * - ID.
  * - Display behavior.
  * 
  */
@@ -435,7 +442,7 @@ interface OverlayBrowserWindow {
   
   /**
    * Overlay specific configuration options used when this window was created.
-   * @see {@ink OverlayOptions}.
+   * @see {@link OverlayOptions}.
    */
   readonly overlayOptions: OverlayOptions;
   
