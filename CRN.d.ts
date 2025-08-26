@@ -10,21 +10,19 @@
 /**
  * Used to create cancellable or abortable event.
  *
+ * @example
+ * crnApi.on('before-notification', (event: ICRNEvent, args) => {
+ *  // Check if the notification should be shown
+ *  if (!shouldShowNotification(args)) {
+ *    event.abort();
+ *   }
+ * });
+ *
  */
 export interface ICRNEvent {
   /**
-   *  Cancels the ongoing event, stopping its propagation or execution. 
-   *
-   *
-   * @example
-   * ```ts
-   * crnApi.on('before-notification', (event: ICRNEvent, args) => {
-   *   // Check if the notification should be shown
-   *   if (!shouldShowNotification(args)) {
-   *     event.abort();
-   *   }
-   * });
-   * ```
+   *  Cancels the ongoing event, stopping its propagation or execution.
+   * 
    */
   abort: () => void;
 }
@@ -40,13 +38,12 @@ export interface ICRNEvent {
  * user intent or automated conditions.
  *
  * @example
- * ```ts
  * crnApi.on('notification-action', (action: CRNActionType) => {
  *   if (action === 'Dismissed') {
  *     // Count the dismissal for internal analytics
  *   }
  * });
- * ```
+ * 
  */
 export type CRNActionType =
   /**
