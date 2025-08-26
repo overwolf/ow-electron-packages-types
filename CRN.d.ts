@@ -1,7 +1,7 @@
 /**
  * The *Content Recommendation Notification* (CRN) APIs give you tools to help manage the content notification settings in your app. 
  * 
- * CRN recommends new apps for players that could offer them value.
+ * CRN is a tool that recommends new apps for players that could offer them more value, and enhance their gaming experience.
  * 
  * @packageDocumentation
  */
@@ -10,20 +10,21 @@
 /**
  * Used to create cancellable or abortable event.
  *
- * @example
- * ```ts
- * const event: ICRNEvent = createCancelableEvent();
- *
- * // Later in the flow
- * if (shouldCancel) {
- *   event.abort();
- * }
- * ```
  */
 export interface ICRNEvent {
   /**
    *  Cancels the ongoing event, stopping its propagation or execution. 
-   * 
+   *
+   *
+   * @example
+   * ```ts
+   * crnApi.on('before-notification', (event: ICRNEvent, args) => {
+   *   // Check if the notification should be shown
+   *   if (!shouldShowNotification(args)) {
+   *     event.abort();
+   *   }
+   * });
+   * ```
    */
   abort: () => void;
 }
@@ -40,11 +41,11 @@ export interface ICRNEvent {
  *
  * @example
  * ```ts
- * function handleAction(action: CRNActionType) {
- *   if (action === 'OpenExternalUrl') {
- *     // Open a browser tab
+ * crnApi.on('notification-action', (action: CRNActionType) => {
+ *   if (action === 'Dismissed') {
+ *     // Count the dismissal for internal analytics
  *   }
- * }
+ * });
  * ```
  */
 export type CRNActionType =
