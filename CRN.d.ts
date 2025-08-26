@@ -119,7 +119,7 @@ export interface IOverwolfCRNApi {
   allowNotifications(enable: boolean): void;
 
   /**
-   * Fired before a notification is shown. Typically used to abort a notification (e.g., inappropriate timing).
+   * Fires before a notification is shown. Typically used to abort a notification (e.g., inappropriate timing).
    * @param eventName
    * @param listener
    */
@@ -129,7 +129,7 @@ export interface IOverwolfCRNApi {
   ): this;
 
   /**
-   * Fired when a notification action is triggered.
+   * Fires when a notification action is triggered.
    * @param eventName
    * @param listener
    */
