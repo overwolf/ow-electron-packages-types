@@ -370,6 +370,23 @@ type DisplayCaptureType =
   | "WGC";
 
 /**
+ * Type of window capture method.
+ */
+type WindowCaptureType =
+  /**
+   * Automatically select the best window capture method.
+   */
+  "Auto"
+  /**
+   * Use BitBlt (Bit Block Transfer), a legacy GDI-based capture method. May be less performant.
+   */
+  | "BitBlt"
+  /**
+   * Use Windows Graphics Capture (WGC), available on Windows 10+ with improved performance and stability.
+   */
+  | "WGC";
+
+/**
  * Type of source to capture during screen recording or streaming.
  *
  * These source types determine what part of the system the capture engine will target.
@@ -1179,11 +1196,6 @@ type kNVENCEncoderMultipass =
    */
   | 'disabled';
 
-
-/**
- */
-type kNVENCEncoderTuning = 'hq' | 'll' | 'ull';
-
 /**
  * Specifies tuning presets for NVIDIA's NVENC encoder.
  *
@@ -1211,6 +1223,13 @@ type kNVENCEncoderTuning =
    * Best used in competitive gaming or remote control scenarios.
    */
   | 'ull';
+
+/**
+ * Controls the H.264 bitstream profile used by NVENC,
+ * affecting decoder compatibility and compression efficiency. `main` is the
+ * broad-compatibility choice and is commonly the default in OBS for NVENC.
+ */
+type kNVENCEncoderProfile = 'main';
 
 /**
  * Specifies the supported H.264 encoding profiles for NVIDIA's NVENC encoder.
@@ -2964,7 +2983,6 @@ type ErrorCode =
   | 0     // Operation succeeded. 'Success'
   | 1     // Operation succeeded but stopped early due to low disk space. 'SuccessLowDiskSpace'
   | 2;    // Reserved or undefined success code.
-2;
 
  // Replay stopped while creating replay 'SuccessWithError'
 
