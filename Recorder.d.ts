@@ -2320,7 +2320,7 @@ interface EncoderSettingsNVENC extends VideoEncoderSettingsBase {
    * 
    * @default 'main'
    * 
-   * @see {@link kNVENCEncoderProfile}
+   * 
    */
   profile?: kNVENCEncoderProfile | string;
 }
@@ -3616,7 +3616,7 @@ interface IOverwolfRecordingApi {
    * Registers games to monitor and track for launch/exit detection.
    *
    * @param filter Filtering rules for which games to track.
-   * @see {@link GamesFilter}
+   * 
    */
   registerGames(filter: GamesFilter): void;
 

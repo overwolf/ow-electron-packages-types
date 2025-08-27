@@ -1,11 +1,11 @@
 /**
- * APIs for controlling overlays in apps. Overlay is the ability to show a window on top of the current game window. 
+ * APIs for controlling and creating overlays in games. Overlay is the ability to show windows on top of the current game window.
  * 
  * ## Standard mode
- * Standard mode is available in games where the mouse is enabled when playing the game. For example, in MOBA games such as League of Legends, Dota 2, and others, the mouse cursor is available, and therefore you are able to interact with the app windows without the need to pull keyboard and mouse focus input from the game.
+ * Standard mode is used in games where the mouse is visible while playing the game. For example, in MOBA games such as League of Legends, Dota 2, and others, the mouse cursor is visible during gameplay, and therefore you are able to interact with the app windows without the need to pull keyboard and mouse focus input from the game.
 * 
 * ## Exclusive mode
-* Exclusive mode is available in games where the mouse is disabled when playing the game. For example, in FPS games such as CS2, Fortnite and others, there’s no mouse cursor, so the only way to interact with the Overwolf app window is by activating exclusive mode. This will show a semi-transparent window overlaid on the game window and doesn't allow keyboard or mouse input to pass into the game.
+* Exclusive mode is used in games where the mouse is not visible while playing the game. For example, in FPS games such as Apex Legends, Fortnite and others, the mouse cursor is not visible during gameplay, so the only way to interact with the Overwolf app window is by entering exclusive mode. This will show a semi-transparent window overlaid on the game window and doesn't allow keyboard or mouse input to pass into the game.
  * 
  * @packageDocumentation
  */
@@ -15,7 +15,7 @@
 /**
  * Information about a running game process.
  *
- * This type is used to describe metadata related to a running game process,
+ * This type is used to describe data related to a running game process,
  * such as its PID, execution path, and other process attributes.
  *
  */
@@ -53,17 +53,25 @@ type GameProcessInfo = {
  */
 type GameInfo = {
   /**
-   * Game Id.
+   * The running game's ID as declared by the gameslist.
+   * For example: League of Legends game id is: 5426
    */
   id: number;
 
+  /**
+   * The running game's class ID as declared by the gameslist.
+   * For example: League of Legends game class id is: 54261
+   */
   classId: number;
   
   /**
-   * Name of the game detected or running.
+   * Name of the detected or running game.
    */
   name: string;
 
+  /**
+   * Indicates if the game supports Overlay.
+   */
   supported: boolean;
 
   /**
@@ -71,6 +79,9 @@ type GameInfo = {
    */
   processInfo?: GameProcessInfo;
 
+  /**
+   * Gameslist flags associated with the game.
+   */
   flags?: any;
 
   /**
@@ -88,7 +99,7 @@ type GameInfo = {
  * Type of the detected game.
  *
  * Used to differentiate whether the currently tracked process
- * is a standalone game, a game launcher, or undefined.
+ * is a game, a game launcher, or undefined.
  *
  * @example
  * ```ts
@@ -109,21 +120,21 @@ type GameInfoType = 'Game' | 'Launcher' | undefined;
  * Information about a game installed on the user's system.
  * 
  * Includes:
- * - Game unique ID.
- * - Location.
- * - Display name.
+ * - The Game's ID.
+ * - Installation path.
+ * - Name of the game.
  * - Type (`game` or `launcher`).
  * - Overlay support status.
  * 
  */
 type InstalledGameInfo = {
   /**
-   * Overwolf game class id.
+   * The game's ID as declared by the gameslist.
    */
   id: number;
 
   /**
-   * Game installation path.
+   * The full file system path to the game's installation directory.
    */
   path?: string;
 
@@ -138,7 +149,7 @@ type InstalledGameInfo = {
   type?: GameInfoType,
 
   /**
-   * Overlay supported game.
+   * Indicates if the game supports Overlay.
    */
   supported?: boolean; 
 }
@@ -148,23 +159,25 @@ type InstalledGameInfo = {
 
 // -----------------------------------------------------------------------------
 /**
- * Filter used to specify overlay support in games.
- * 
+ * Filter object for game overlays.
+ *
+ * Used to specify which games to include or exclude from overlay tracking.
  */
 interface GamesFilter {
   /**
-   * Track supported or unsupported overlay games. (Default: false)
+   * Include tracking of unsupported overlay games. (Default: false)
    */
   includeUnsupported?: boolean;
 
   /**
-   * Set games id's to track.
-   * `null` or empty filters all games.
+   * Array of game IDs to track.
+   * 
+   * If `null` or empty, filters all games.
    */
   gamesIds?: number[];
 
   /**
-   * `true` will filter all games.
+   * Include all games in the overlay tracking.
    */
   all?: boolean;
 }
@@ -172,49 +185,50 @@ interface GamesFilter {
 
 
 /**
- * Input passthrough settings:
+ * Type of input passthrough behavior for overlay windows.
  *
- * - `noPassThrough`&mdash;window will handle input and block from game (Default).
- * - `PassThrough`&mdash;window will not handle any input.
- * - `passThroughAndNotify`&mdash;window will handle input and also pass it to the game.
- * 
+ * - `noPassThrough`&mdash;All input will be handled by the window and blocked from the game (Default).
+ * - `PassThrough`&mdash;All input will be passed through to the game.
+ * - `passThroughAndNotify`&mdash;All input will be passed through to the game, and the window will be notified of the input events.
  */
 type PassthroughType = "noPassThrough" | "passThrough" | "passThroughAndNotify";
 
 
 
 /**
- * Overlay layering of overlapping windows along the z-axis (depth).
- * 
- * - `default`&mdash;the default setting in Windows.
- * - `topMost`&mdash;bring overlay to the top most position.
- * - `bottomMost`&mdash;put window in the bottom most position.
- * 
+ * Type of overlay window stacking behavior.
+ *
+ * Used to control the z-order (stacking order) of the overlay window relative to other windows.
+ *
+ * - `default`&mdash;Bring to front the currently focused overlay window.
+ * - `topMost`&mdash;Set the overlay window to the top most position, above all other windows.
+ * - `bottomMost`&mdash;Set the overlay window to the bottom most position, below all other windows.
+ *
  */
 type ZOrderType = "default" | "topMost" | "bottomMost";
 
 
 
 /**
- * Configuration options for creating or modifying an overlay window.
+ * Overlay configuration options for creating or modifying an overlay window.
  *
  * Control over:
- * - User input.
- * - Window stacking.
- * - Keyboard event handling.
+ * - Input passthrough behavior.
+ * - Overlay window stacking behavior.
+ * - Keyboard input interception.
  *
  * @example
  * ```ts
  * const options: OverlayOptions = {
- *   passthrough: 'mouseOnly',
- *   zOrder: 'alwaysOnTop',
- *   ignoreKeyboardInput: true
+ *   passthrough: 'noPassThrough',
+ *   zOrder: 'default',
+ *   ignoreKeyboardInput: false
  * };
  * ```
  */
 interface OverlayOptions {
   /**
-   * Controls how input events are handled by the overlay window.
+   * Controls how input is handled by the overlay window.
    * @default 'noPassThrough' 
    * @see {@link PassthroughType}.
    *
@@ -222,13 +236,15 @@ interface OverlayOptions {
   passthrough?: PassthroughType;
 
   /**
-   * Controls the Z-order (stacking order) of the overlay window relative to other window.
+   * Controls the z-order (stacking order) of the overlay window.
    * @default 'default' 
    * @see {@link ZOrderType}.
    */
   zOrder?: ZOrderType;
 
   /**
+   * Controls whether the overlay intercepts keyboard input.
+   * 
    * `true`&mdash;the overlay won't intercept keyboard input.
    * @default false
    */
@@ -239,15 +255,11 @@ interface OverlayOptions {
 
 /**
  * Configuration options for an overlay window.
- * 
- * Combines standard Electron `BrowserWindowConstructorOptions` with additional
- * overlay specific behaviors defined in `OverlayOptions`.
  *
- * Used to define overlay window:
- * - Rendering.
- * - Stacking.
- * - Input behavior.
- * - Hardware acceleration.
+ * Used at creation time to define the overlay window's behavior and appearance.
+ * Extends:
+ * - Standard Electron `BrowserWindowConstructorOptions`.
+ * - Overlay specific behaviors using `OverlayOptions`.
  */
 interface OverlayWindowOptions
   extends BrowserWindowConstructorOptions,
@@ -273,7 +285,8 @@ interface OverlayWindowOptions
 
   /**
    * `true`&mdash;the overlay window will be DPI aware (Main monitor DPI).
-   * 
+   *
+   * This allows the overlay to scale correctly on high DPI displays.
    * @default false
    * 
    * @since 1.7.0
@@ -282,18 +295,19 @@ interface OverlayWindowOptions
 }
 
 /**
- * Hotkey configuration used by the overlay.
+ * Represents an overlay hotkey configuration.
  *
  * Defines:
- * - Main key.
+ * - Unique name.
+ * - Main keycode.
  * - Optional modifier keys.
  * - Passthrough behavior.
  *
  * @example
  * ```ts
  * const screenshotHotkey: IOverlayHotkey = {
- *   name: 'screenshot',
- *   keyCode: 44, // Print Screen
+ *   name: 'take-screenshot',
+ *   keyCode: 80, // p
  *   modifiers: { ctrl: true, alt: true },
  *   passthrough: false
  * };
@@ -304,10 +318,12 @@ interface IOverlayHotkey {
    * Unique name of the hotkey.
    */
   name: string;
+
   /**
    * Primary key code for the hotkey. Use standard keyboard codes.
    */
   keyCode: number;
+
   /**
    * Modifier keys that must be pressed along with the main key.
    */
@@ -333,9 +349,14 @@ interface IOverlayHotkey {
      */
     meta?: boolean;
   };
+
   /**
-   * `true`&mdash;the hotkey will be passed through to the underlying game.
-   * `false`&mdash;the hotkey will be captured exclusively by the overlay.
+   * Controls whether the hotkey will be passed through to the underlying game.
+   * 
+   * - If `true`, the hotkey will be captured by the overlay and pass to the game.
+   * - If `false`, the hotkey will be captured exclusively by the overlay.
+   * 
+   * @default false
    */
   passthrough?: boolean;
 }
@@ -344,9 +365,7 @@ interface IOverlayHotkey {
 
 
 /**
- * Configuration flags for launching or injecting the overlay into a game process.
- *
- * Overrides default behavior related to *Overwolf's Out-of-Process Overlay* (OOPO) for compatibility or debugging.
+ * Configuration options for controlling the type of overlay we inject.
  *
  * @example
  * ```ts
@@ -368,7 +387,8 @@ export interface GameLaunchEventOptions {
 
   /**
    * Force OOPO mixed-mode mouse control.
-   * Use for debugging or enabling hybrid input behavior in games that don't support it.
+   * 
+   * Used for debugging or enabling hybrid input behavior in games that don't support it.
    * @default false
    */
   forceOOPOMixedMode?: boolean;
@@ -377,7 +397,7 @@ export interface GameLaunchEventOptions {
 
 
 /**
- * Event fired when a supported game is launched.
+ * Event fired when a game is launched.
  *
  * Provides handlers to inject or dismiss the overlay at game detection.
  *
@@ -395,7 +415,8 @@ export interface GameLaunchEventOptions {
 interface GameLaunchEvent {
   /**
    * Inject the overlay into the game.
-   * @param options - Injection of configuration options. 
+   * @param options - Injection of configuration options.
+   * @see {@link GameLaunchEventOptions}.
    * @since 1.8.0.
    */
   inject: (options?: GameLaunchEventOptions) => void;
@@ -408,12 +429,11 @@ interface GameLaunchEvent {
 
 
 /**
- * Active overlay window instance.
- * 
- *  Wraps an Electron `BrowserWindow` with metadata and configuration
- * specific to the overlay:
- * - ID.
+ * Represents an overlay window instance.
+ *
+ * Wraps an Electron `BrowserWindow` with metadata and configuration specific to the overlay:
  * - Name.
+ * - ID.
  * - Display behavior.
  * 
  */
@@ -422,7 +442,7 @@ interface OverlayBrowserWindow {
   
   /**
    * Overlay specific configuration options used when this window was created.
-   * @see {@ink OverlayOptions}.
+   * @see {@link OverlayOptions}.
    */
   readonly overlayOptions: OverlayOptions;
   
@@ -441,13 +461,7 @@ interface OverlayBrowserWindow {
  * 
  * Used in event callbacks or API responses to describe issues
  * preventing successful injection into a game.
- *
- * @example
- * ```ts
- * overlay.on('game-injection-error', (gameInfo, error) => {
- *   console.error('Injection failed:', error.error);
- * });
- * ```
+ * 
  */
 interface InjectionError {
   error: string;
@@ -457,14 +471,15 @@ interface InjectionError {
  * Information about a running game's window.
  * 
  * Used to determine:
+ * - Window size.
  * - Window focus.
- * - Screen location.
- * - Rendering context
- * - Integration details for display or input interception.
+ * - Graphics API used by the game.
+ * - Screen display information.
+ * - Bounding rectangle of the game window.
  *
  * @example
  * ```ts
- * overlay.on('game-focus-changed', (windowInfo, gameInfo, isFocused) => {
+ * overlay.on('game-window-changed', (windowInfo, gameInfo, reason) => {
  *   if (windowInfo.focused) {
  *     console.log(`Game window is focused. Size: ${windowInfo.size.width}x${windowInfo.size.height}`);
  *   }
@@ -498,7 +513,11 @@ interface GameWindowInfo {
   readonly screen?: Display;
 
   /** 
-   * The bounding rectangle of the game window in screen coordinates.
+   * The bounding rectangle of the game window in the screen's coordinates.
+   *
+   * For example: `bounds: { x: 100, y: 100, width: 800, height: 600 }`
+   * 
+   * Means the game window is positioned at (100, 100) on the screen and has a size of 800x600 pixels.
    * @since 1.5.11.
    */
   readonly bounds?: Rectangle;
@@ -521,28 +540,27 @@ interface GameWindowInfo {
  */
 interface GameInputInterception {
   /**
-   * Can the overlay window process input.
-   * Related to `mixed mode when available` and/or `exclusive only` games.
+   * Can the overlay window intercept input.
    */
   readonly canInterceptInput?: boolean;
   /**
-   * `true`&mdash;overlay has full input control blocking input from the game.
+   * Is the overlay currently in exclusive input mode.
    */
   readonly exclusiveMode?: boolean;
 }
 
 
 /**
- * Current state of an actively running and detected game.
+ * Info about the currently running game.
  *
  * Combines general game metadata, window information, and input interception state,
  * allowing the overlay to assess readiness and manage behavior accordingly.
  *
  * @example
  * ```ts
- * const activeGame = overlay.getActiveGameInfo();
- * if (activeGame?.gameInputInfo.canInterceptInput) {
- *   console.log(`Overlay input active for ${activeGame.gameInfo.title}`);
+ * const activeGameInfo = overlay.getActiveGameInfo();
+ * if (activeGameInfo?.gameInfo) {
+ *   console.log(`The active game is ${activeGameInfo.gameInfo.title}`);
  * }
  * ```
  */
@@ -623,7 +641,7 @@ type HotkeyCallback = (
  * Configuration options for entering exclusive input mode in the overlay.
  *
  * These settings control the visual and behavioral aspects of the overlay
- * when it takes exclusive control over input, preventing the game from receiving user input.
+ * when it enters exclusive mode, whiche prevents the game from receiving user input.
  */
 interface ExclusiveInputOptions {
   /**
@@ -658,30 +676,44 @@ interface ExclusiveInputOptions {
  *
  * Hotkeys are identified by unique names and support modifier keys and passthrough options.
  *
- * @example
- * ```ts
- * const hotkey: IOverlayHotkey = {
- *   name: 'toggleOverlay',
- *   keyCode: 192, // `
- *   modifiers: { ctrl: true },
- *   passthrough: false
- * };
- *
- * overlay.hotkeys.register(hotkey, (hotKey, state) => {
- *   if (state === 'pressed') toggleOverlay();
- * });
- * ```
  */
 interface IOverlayHotkeys {
   /**
-   * Register new hotkey.
-   * Throw error when hotkey already exits, or callback is missing.
+   * Register a new hotkey.
+   * 
+   * @example
+   * ```ts
+   * const hotkey: IOverlayHotkey = {
+   *   name: 'toggleOverlay',
+   *   keyCode: 192, // `
+   *   modifiers: { ctrl: true },
+   *   passthrough: false
+   * };
+   *
+   * overlay.hotkeys.register(hotkey, (hotKey, state) => {
+   *   if (state === 'pressed') {
+   *     toggleOverlay();
+   *   }
+   * });
+   * ```
    */
   register(hotKey: IOverlayHotkey, callback: HotkeyCallback): void;
 
   /**
-   * Update existing hotkey.
+   * Update an existing hotkey.
    * Return `false` if hotkey doesn't exist.
+   * 
+   * @example
+   * ```ts
+   * const updatedHotkey: IOverlayHotkey = {
+   *   name: 'toggleOverlay',
+   *   keyCode: 192, // `
+   *   modifiers: { ctrl: true, alt: true },
+   *   passthrough: false
+   * };
+   *
+   * overlay.hotkeys.update(updatedHotkey);
+   * ```
    */
   update(hotKey: IOverlayHotkey): boolean;
 
@@ -693,6 +725,11 @@ interface IOverlayHotkeys {
   /**
    * Remove hotkey by name.
    * Return `false` if doesn't exits.
+   * 
+   * @example
+   * ```ts
+   * overlay.hotkeys.unregister('toggleOverlay');
+   * ```
    */
   unregister(name: string): boolean;
 
@@ -705,7 +742,7 @@ interface IOverlayHotkeys {
 
 
 /**
- * API managing Overwolf overlay windows, hotkeys, input modes, and game integration.
+ * APIs for managing Overwolf overlay windows, hotkeys, input modes, and game integration.
  *
  * Enables apps to:
  * - Register and track game activity.
@@ -718,10 +755,10 @@ interface IOverlayHotkeys {
  *
  * @example
  * ```ts
- * const overlay: IOverwolfOverlayApi = getOverlayApi();
+ * private _overlayApi: IOverwolfOverlayApi;
  *
- * overlay.on('game-launched', (event, gameInfo) => {
- *   if (gameInfo.isSupported) {
+ * this._overlayApi.on('game-launched', (event, gameInfo) => {
+ *   if (gameInfo.supported === true) {
  *     event.inject();
  *   }
  * });
@@ -738,7 +775,7 @@ interface IOverwolfOverlayApi extends EventEmitter {
   createWindow(options: OverlayWindowOptions): Promise<OverlayBrowserWindow>;
 
   /**
-   * Game launch registration.
+   * Register games to track for overlay injection.
    * @param filter - Configuration specifying which games to register and whether to include unsupported titles.
    * @see {@link GamesFilter}.
    */
@@ -789,19 +826,18 @@ interface IOverwolfOverlayApi extends EventEmitter {
   readonly version: string;
 
   /**
-   * Enters Overlay "Exclusive Mode" and the game no longer receives user
-   * input (all input will go to the overlay windows).
+   * Enters Overlay "Exclusive Mode" to intercept user input in games where the mouse cursor is not visible.
    *
    * The `game-input-exclusive-mode-changed` event fires if exclusive mode was entered.
    *
-   * NOTE: This is only supported when `getActiveGameInfo` returns
-   * `"canInterceptInput" == false`. Calling this function when unsupported will
+   * NOTE: This is only supported when `getActiveGameInfo().gameInputInfo.canInterceptInput` is `false`.
+   * Calling this function when unsupported will
    * be ignored and will not throw an exception.
    */
   enterExclusiveMode(options?: ExclusiveInputOptions): void;
 
   /**
-   * Enters exclusive input mode, redirecting all user input to overlay windows only.
+   * Exits Overlay "Exclusive Mode", allowing user input to be sent to the game.
    *
    * This is only effective if `getActiveGameInfo().gameInputInfo.canInterceptInput` is `true`.
    *
@@ -809,12 +845,12 @@ interface IOverwolfOverlayApi extends EventEmitter {
   exitExclusiveMode(): void;
 
   /**
-   * Exits exclusive input mode, returning input control back to the game.
+   * Fires when an internal error occurs within the overlay system.
    */
   on(eventName: 'error', listener: (...args: any[]) => void): this;
 
   /**
-   * Fires when a registered game is detected.
+   * Fires when a registered game is launched.
    * Call `event.inject()` to enable the overlay for the game.
    *
    * @param eventName - The event identifier for when a game is launched.
@@ -824,10 +860,9 @@ interface IOverwolfOverlayApi extends EventEmitter {
   on(eventName: 'game-launched', listener: (gameInfo: GameInfo) => void): this;
 
 /**
- * Fired when a registered game process terminates.
+ * Fires when a registered game process terminates.
  *
- * Triggered on game exit.
- * Useful for performing cleanup, UI updates, or stopping background tasks.
+ * Useful for performing cleanup, UI updates, or closing overlay windows.
  *
  * @param eventName - The event identifier for when the game exits.
  * @param listener - A callback function that receives the game info of the exited game.
@@ -836,7 +871,7 @@ interface IOverwolfOverlayApi extends EventEmitter {
  * ```ts
  * overlay.on('game-exit', (gameInfo) => {
  *   console.log(`Game exited: ${gameInfo.title}`);
- *   cleanupOverlayResources();
+ *   closeOverlayWindows();
  * });
  * ```
  * 

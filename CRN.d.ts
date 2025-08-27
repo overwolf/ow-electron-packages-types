@@ -1,7 +1,7 @@
 /**
  * The *Content Recommendation Notification* (CRN) APIs give you tools to help manage the content notification settings in your app. 
  * 
- * CRN recommends new apps for players that could offer them value.
+ * CRN is a tool that recommends new apps for players that could offer them more value, and enhance their gaming experience.
  * 
  * @packageDocumentation
  */
@@ -11,18 +11,17 @@
  * Used to create cancellable or abortable event.
  *
  * @example
- * ```ts
- * const event: ICRNEvent = createCancelableEvent();
+ * crnApi.on('before-notification', (event: ICRNEvent, args) => {
+ *  // Check if the notification should be shown
+ *  if (!shouldShowNotification(args)) {
+ *    event.abort();
+ *   }
+ * });
  *
- * // Later in the flow
- * if (shouldCancel) {
- *   event.abort();
- * }
- * ```
  */
 export interface ICRNEvent {
   /**
-   *  Cancels the ongoing event, stopping its propagation or execution. 
+   *  Cancels the ongoing event, stopping its propagation or execution.
    * 
    */
   abort: () => void;
@@ -39,13 +38,12 @@ export interface ICRNEvent {
  * user intent or automated conditions.
  *
  * @example
- * ```ts
- * function handleAction(action: CRNActionType) {
- *   if (action === 'OpenExternalUrl') {
- *     // Open a browser tab
+ * crnApi.on('notification-action', (action: CRNActionType) => {
+ *   if (action === 'Dismissed') {
+ *     // Count the dismissal for internal analytics
  *   }
- * }
- * ```
+ * });
+ * 
  */
 export type CRNActionType =
   /**
@@ -118,7 +116,7 @@ export interface IOverwolfCRNApi {
   allowNotifications(enable: boolean): void;
 
   /**
-   * Fired before a notification is shown.
+   * Fires before a notification is shown. Typically used to abort a notification (e.g., inappropriate timing).
    * @param eventName
    * @param listener
    */
@@ -128,7 +126,7 @@ export interface IOverwolfCRNApi {
   ): this;
 
   /**
-   * Fired when a notification action is triggered.
+   * Fires when a notification action is triggered.
    * @param eventName
    * @param listener
    */
