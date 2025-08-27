@@ -857,7 +857,7 @@ interface IOverwolfOverlayApi extends EventEmitter {
    * @param listener - Callback with game launch event and game metadata.
    * @see {@link GameInfo}.
    */
-  on(eventName: 'game-launched', listener: (gameInfo: GameInfo) => void): this;
+  on(eventName: 'game-launched', listener: (event: GameLaunchEvent, gameInfo: GameInfo) => void): this;
 
 /**
  * Fires when a registered game process terminates.
@@ -869,15 +869,15 @@ interface IOverwolfOverlayApi extends EventEmitter {
  *
  * @example
  * ```ts
- * overlay.on('game-exit', (gameInfo) => {
- *   console.log(`Game exited: ${gameInfo.title}`);
+ * overlay.on('game-exit', (gameInfo, wasInjected) => {
+ *   console.log(`Game exited: ${gameInfo.title} and ${wasInjected ? 'was injected' : 'was not injected'}`);
  *   closeOverlayWindows();
  * });
  * ```
  * 
  * @see {@link GameInfo}.
  */
-  on(eventName: 'game-exit', listener: (gameInfo: GameInfo) => void): this;
+  on(eventName: 'game-exit', listener: (gameInfo: GameInfo, wasInjected: boolean) => void): this;
 
   /**
    * Fires when the overlay is ready and successfully injected into the game.

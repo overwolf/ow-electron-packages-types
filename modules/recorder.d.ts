@@ -408,9 +408,9 @@ type CaptureSourceType =
  * };
  */
 interface AudioDevice {
-/**
-   * The type of the audio device (input or output).
-   */
+  /**
+     * The type of the audio device (input or output).
+     */
   readonly type: AudioDeviceType;
 
   /**
@@ -427,6 +427,7 @@ interface AudioDevice {
    * Whether this device is currently set as the system default.
    */
   readonly isDefault: boolean;
+}
 
 /**
  * The base `structure for an encoder, including codec and display name.
