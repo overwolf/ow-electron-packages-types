@@ -12,7 +12,7 @@ import { EventEmitter } from 'events';
 
 // -----------------------------------------------------------------------------
 
-// --- modules\Utility.d.ts ---
+// --- modules\utility.d.ts ---
 /**
  * @packageDocumentation
  *
@@ -81,7 +81,7 @@ interface IOverwolfUtilityApi {
 }
 
 
-// --- modules\Recorder.d.ts ---
+// --- modules\recorder.d.ts ---
 /**
  * 
  * The Overwolf Electron recording APIs integrate recording into the Overwolf Electron framework allowing you to record both audio and video.
@@ -3747,7 +3747,7 @@ interface IOverwolfRecordingApi {
 }
 
 
-// --- modules\Packages.d.ts ---
+// --- modules\packages.d.ts ---
 // -----------------------------------------------------------------------------
 //
 /**
@@ -3804,7 +3804,7 @@ interface OWPackages extends overwolf.packages.OverwolfPackageManager {
 }
 
 
-// --- modules\Overlay.d.ts ---
+// --- modules\overlay.d.ts ---
 /**
  * APIs for controlling and creating overlays in games. Overlay is the ability to show windows on top of the current game window.
  * 
@@ -4769,7 +4769,7 @@ interface IOverwolfOverlayApi extends EventEmitter {
 }
 
 
-// --- modules\CRN.d.ts ---
+// --- modules\crn.d.ts ---
 /**
  * The *Content Recommendation Notification* (CRN) APIs give you tools to help manage the content notification settings in your app. 
  * 
