@@ -437,7 +437,7 @@ interface GameLaunchEvent {
  * - Display behavior.
  * 
  */
-interface OverlayBrowserWindow {
+export interface OverlayBrowserWindow {
   window: BrowserWindow;
   
   /**
@@ -454,6 +454,33 @@ interface OverlayBrowserWindow {
    * ID assigned to the overlay window.
    */
   readonly id: number;
+
+  /**
+   * The window DPI in percentage (1.25 = 125%).
+   */
+  readonly scaleFactor: number;
+
+  /**
+   * Initiates dragging of the overlay window.
+   *
+   * Works only when the window is both visible and focused.
+   * Triggered by the `mousedown` event on the overlay window.
+   *
+   * You can achieve the same behavior by applying
+   * the CSS property `-webkit-app-region: drag` to the draggable element.
+   *
+   * @example
+   * // Using the API
+   * startDraggingButton.addEventListener('mousedown', () => {
+   *   overlayBrowserWindow.startDragging();
+   * });
+   *
+   * @example
+   * // Using CSS
+   * <div style="-webkit-app-region: drag">Drag Me</div>
+   */
+  startDragging(): void;
+
 }
 
 /**
