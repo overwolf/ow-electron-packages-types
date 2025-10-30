@@ -470,14 +470,28 @@ export interface OverlayBrowserWindow {
    * the CSS property `-webkit-app-region: drag` to the draggable element.
    *
    * @example
-   * // Using the API
-   * startDraggingButton.addEventListener('mousedown', () => {
-   *   overlayBrowserWindow.startDragging();
+   * ```ts
+   * renderer:
+   * 
+   * 
+   * 
+   * const startDraggingButton = document.getElementById("startDragging");
+   * startDraggingButton.addEventListener("mousedown", () => {
+   *   ipcRenderer.send('startDraggingOsr');
    * });
    *
-   * @example
-   * // Using CSS
-   * <div style="-webkit-app-region: drag">Drag Me</div>
+   * main:
+   *  
+   *   
+   *  
+   * ipcMain.on('startDraggingOsr', (e) => {
+   *   const overlayWindow = this.overlayApi.fromWebContents(e.sender);
+   *   if (!overlayWindow) {
+   *     return;
+   *   }
+   *   overlayWindow.startDragging();
+   * });
+   * ```
    */
   startDragging(): void;
 

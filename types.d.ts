@@ -3609,6 +3609,21 @@ interface IOverwolfRecordingApi {
   options: RecordingAppOptions;
 
   /**
+   * Overlay package version.
+   */
+  readonly version: string;
+
+  /**
+   * Path to ffmpeg file.
+   */
+  readonly ffmpegPath: string;
+
+  /**
+   * Path to OBS binaries folder.
+   */
+  readonly binFolderPath: string;
+
+  /**
    * Checks if either recording or replays are currently active.
    */
   isActive(): Promise<boolean>;
@@ -4263,7 +4278,7 @@ interface GameLaunchEvent {
  * - Display behavior.
  * 
  */
-interface OverlayBrowserWindow {
+export interface OverlayBrowserWindow {
   window: BrowserWindow;
   
   /**
@@ -4280,6 +4295,47 @@ interface OverlayBrowserWindow {
    * ID assigned to the overlay window.
    */
   readonly id: number;
+
+  /**
+   * The window DPI in percentage (1.25 = 125%).
+   */
+  readonly scaleFactor: number;
+
+  /**
+   * Initiates dragging of the overlay window.
+   *
+   * Works only when the window is both visible and focused.
+   * Triggered by the `mousedown` event on the overlay window.
+   *
+   * You can achieve the same behavior by applying
+   * the CSS property `-webkit-app-region: drag` to the draggable element.
+   *
+   * @example
+   * ```ts
+   * renderer:
+   * 
+   * 
+   * 
+   * const startDraggingButton = document.getElementById("startDragging");
+   * startDraggingButton.addEventListener("mousedown", () => {
+   *   ipcRenderer.send('startDraggingOsr');
+   * });
+   *
+   * main:
+   *  
+   *   
+   *  
+   * ipcMain.on('startDraggingOsr', (e) => {
+   *   const overlayWindow = this.overlayApi.fromWebContents(e.sender);
+   *   if (!overlayWindow) {
+   *     return;
+   *   }
+   *   overlayWindow.startDragging();
+   * });
+   * ```
+   */
+  startDragging(): void;
+
 }
 
 /**
