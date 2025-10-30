@@ -3609,22 +3609,22 @@ interface IOverwolfRecordingApi {
   options: RecordingAppOptions;
 
   /**
-   * Overlay package version.
+   * Overlay package version
    */
   readonly version: string;
 
   /**
-   * Path to ffmpeg file.
+   * Path to ffmpeg executable
    */
   readonly ffmpegPath: string;
 
   /**
-   * Path to OBS binaries folder.
+   * Path to bin folder
    */
   readonly binFolderPath: string;
 
   /**
-   * Checks if either recording or replays are currently active.
+   * Is recording or replays active
    */
   isActive(): Promise<boolean>;
 
