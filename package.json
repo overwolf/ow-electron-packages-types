@@ -1,9 +1,9 @@
 {
     "name": "@overwolf/ow-electron-packages-types",
-    "version": "0.0.16",
+    "version": "1.0.0-beta.4",
     "description": "Type definition file for autocompletion and documentation purposes for ow-electron packages",
     "license": "MIT",
-    "types": "overlay.d.ts",
+    "types": "types.d.ts",
     "keywords": [
         "types",
         "npm",
@@ -19,5 +19,19 @@
     "repository": {
         "type": "git",
         "url": "https://github.com/overwolf/ow-electron-packages-types"
+    },
+    "exports": {
+        ".": {
+            "types": "./types.d.ts"
+        },
+        "./game-list": {
+            "types": "./game-list.d.ts"
+        },
+        "./gep-supported-games": {
+            "types": "./gep-supported-games.d.ts"
+        }
+    },
+    "publishConfig": {
+        "tag": "beta"
     }
 }

@@ -1,2 +1,9 @@
 node_modules/
 yarn.lock
+recorder.d.ts
+overlay.d.ts
+utility.d.ts
+crn.d.ts
+packages.d.ts
+combine-dts.js
+modules/

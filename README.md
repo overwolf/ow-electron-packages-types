@@ -39,3 +39,7 @@ Alternatively, you can add it directly to your tsconfig file, like so:
 ```
 
 This way, it will always be available in all of your files, even without an explicit import.
+
+## Getting started with ow-electron packages
+
+[ow-electron packages](./docs/packages.md)
