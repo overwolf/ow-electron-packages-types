@@ -1,4 +1,4 @@
-// game list version: 39
+// game list version: 40
 
 export const enum kLaunchersIds {
   LOLLauncher = 10902,
@@ -3249,6 +3249,7 @@ export const enum kGameIds {
   WorldofGoo = 4274,
   WorldofGoo2 = 25720,
   WORLDOFHORROR = 23460,
+  WorldOfTanks = 6365,
   WorldofTanksBlitz = 10896,
   WorldofWarships = 10746,
   WorldofZoo = 5504,
@@ -3329,4 +3330,3 @@ export const enum kGameIds {
   Zortch = 25010,
   Zula = 10768,
 }
-
