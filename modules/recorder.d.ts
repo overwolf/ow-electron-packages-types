@@ -1888,7 +1888,11 @@ interface AudioGeneralSettings {
    */
   lowLatencyAudioBuffering?: boolean;
 }
-
+/**
+ * Defines the alignment options specifying a position by using [Vertical][Horizontal]
+ * (e.g., 'TopLeft', 'Center', 'BottomRight'). Typically used for positioning
+ * UI elements, popovers, or text blocks.
+ */
 export declare type AlignmentOptions =
   | 'TopLeft'
   | 'TopCenter'
@@ -1900,6 +1904,13 @@ export declare type AlignmentOptions =
   | 'BottomCenter'
   | 'BottomRight';
 
+/**
+ * Defines the type of bounding or scaling applied to an element's dimensions
+ * within a container.
+ *
+ * Typically used to control how content (like an image or video)
+ * is resized to fit or fill a specific area.
+ */
 export declare type BoundsType =
   | 'None'
   | 'Stretch'
@@ -1909,32 +1920,35 @@ export declare type BoundsType =
   | 'ScaleToHeight'
   | 'MaxOnly';
 
+/**
+ * Options for transforming and positioning a source element (e.g. an image or video) within an output container or scene.
+ * 
+ * Typically used to control how content is translated, scaled, rotated, aligned,
+ * and cropped within a visual presentation area.
+ */
 export interface SourceTransformOptions {
   /**
-   * Position X in pixels
-   * Default is 0
+   * Position X in pixels. Default is 0.
    */
   positionX?: number;
 
   /**
-   * Position Y in pixels
-   * Default is 0
+   * Position Y in pixels. Default is 0.
    */
   positionY?: number;
 
   /**
-   * Rotation in degrees (-360.0 to 360.0)
-   * Default is 0
+   * Rotation in degrees (-360.0 to 360.0). Default is 0.
    */
   rotation?: number;
 
   /**
-   * Size Width in pixels
+   * Size Width in pixels.
    */
   sizeWidth?: number;
 
   /**
-   * Size Height in pixels
+   * Size Height in pixels.
    */
   sizeHeight?: number;
 
@@ -1942,7 +1956,7 @@ export interface SourceTransformOptions {
    * Alignment of the source within the output.
    * The alignment is relative to the top-left corner of the output.
    *
-   * Default is TopLeft
+   * Default is TopLeft.
    */
   alignment?: AlignmentOptions;
 
@@ -1961,7 +1975,7 @@ export interface SourceTransformOptions {
    * Alignment of the source within the bounding box.
    * 
    * Relevant only when bounds width or height are defined.
-   * Default is Center
+   * Default is Center.
    */
   boundsAlignment?: AlignmentOptions;
 
@@ -1976,14 +1990,12 @@ export interface SourceTransformOptions {
   boundsHeight?: number;
 
   /**
-   * Crop to bounds
-   * Default is False
+   * Crop to bounds. Default is False.
    */
   cropToBounds?: boolean;
 
   /**
-   * Crop options in pixels
-   * Default is no crop
+   * Crop options in pixels. Default is no crop.
    */
   cropLeft?: number;
   cropRight?: number;
@@ -1991,9 +2003,15 @@ export interface SourceTransformOptions {
   cropBottom?: number;
 }
 
+/**
+ * Defines a complete transformation operation to be applied to a specific source element.
+ *
+ * Typically used on a target source by its name with the full set of
+ * transformation and positioning properties it should adopt.
+ */
 export interface SourceTransform {
   /**
-   * Source name to update
+   * Source name to update.
    */
   readonly sourceName: string;
 
@@ -2008,7 +2026,7 @@ export interface SourceTransform {
  */
 interface CaptureSourceSettings {
   /**
-   * Unique Source name (for easier identification)
+   * Unique Source name (for easier identification).
    */
   name?: string;
 
@@ -2018,7 +2036,7 @@ interface CaptureSourceSettings {
    * When set to `true`, the source will automatically scale and center itself to match
    * the output resolution, even if it requires stretching.
    *
-   * @default true (if transform is not provided)
+   * @default true (if transform is not provided).
    */
   stretchToOutputSize?: boolean;
 
@@ -2212,9 +2230,9 @@ interface CaptureSource {
   readonly properties: any;
 
   /**
-   * An optional name for the capture source.
+   * Optional name for the capture source.
    *
-   * This can be used later for setting transform properties.
+   * Can be used later for setting transform properties.
    */
   readonly name?: string;
 }
@@ -2909,7 +2927,7 @@ interface CaptureSettingsBuilder extends CaptureSettings {
 
   /**
    * Add Window video capture source
-   * settings.executable is mandatory
+   * settings. Executable is mandatory.
    * @param settings
    */
   addWindowSource(
@@ -2918,7 +2936,7 @@ interface CaptureSettingsBuilder extends CaptureSettings {
 
   /**
    * Add Electron window capture source
-   * settings.executable is optional
+   * settings. Executable is optional.
    * @param browserWindow
    * @param settings
    */
@@ -3801,10 +3819,10 @@ interface IOverwolfRecordingApi {
   updateAudioDevice(device: AudioDeviceSettingsUpdateInfo): Promise<void>;
 
   /**
-   * Set a source transform.
+   * Set a source to transform.
    * 
-   * This defines how the source will be rendered (for example, position, scale, crop, etc.).
-   * Will throw error if source not found or transform is invalid.
+   * Defines how the source will be rendered (for example, position, scale, crop, etc.).
+   * Throws an error if the source is not found or if the transform is invalid.
    * 
    * @param sourceTransform
    */
