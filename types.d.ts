@@ -1972,6 +1972,135 @@ interface AudioGeneralSettings {
    */
   lowLatencyAudioBuffering?: boolean;
 }
+/**
+ * Defines the alignment options specifying a position by using [Vertical][Horizontal]
+ * (e.g., 'TopLeft', 'Center', 'BottomRight'). Typically used for positioning
+ * UI elements, popovers, or text blocks.
+ */
+export declare type AlignmentOptions =
+  | 'TopLeft'
+  | 'TopCenter'
+  | 'TopRight'
+  | 'CenterLeft'
+  | 'Center'
+  | 'CenterRight'
+  | 'BottomLeft'  
+  | 'BottomCenter'
+  | 'BottomRight';
+
+/**
+ * Defines the type of bounding or scaling applied to an element's dimensions
+ * within a container.
+ *
+ * Typically used to control how content (like an image or video)
+ * is resized to fit or fill a specific area.
+ */
+export declare type BoundsType =
+  | 'None'
+  | 'Stretch'
+  | 'ScaleInner'
+  | 'ScaleOuter'
+  | 'ScaleToWidth'
+  | 'ScaleToHeight'
+  | 'MaxOnly';
+
+/**
+ * Options for transforming and positioning a source element (e.g. an image or video) within an output container or scene.
+ * 
+ * Typically used to control how content is translated, scaled, rotated, aligned,
+ * and cropped within a visual presentation area.
+ */
+export interface SourceTransformOptions {
+  /**
+   * Position X in pixels. Default is 0.
+   */
+  positionX?: number;
+
+  /**
+   * Position Y in pixels. Default is 0.
+   */
+  positionY?: number;
+
+  /**
+   * Rotation in degrees (-360.0 to 360.0). Default is 0.
+   */
+  rotation?: number;
+
+  /**
+   * Size Width in pixels.
+   */
+  sizeWidth?: number;
+
+  /**
+   * Size Height in pixels.
+   */
+  sizeHeight?: number;
+
+  /**
+   * Alignment of the source within the output.
+   * The alignment is relative to the top-left corner of the output.
+   *
+   * Default is TopLeft.
+   */
+  alignment?: AlignmentOptions;
+
+  /**
+   * Defines a bounding box for the source within the output.
+   *
+   * Changing the bounds type or alignment only has an effect
+   * if a bounds width or height is specified.
+   *
+   * Type of bounds to apply.
+   * Default is None.
+   */
+  boundsType?: BoundsType;
+
+  /**
+   * Alignment of the source within the bounding box.
+   * 
+   * Relevant only when bounds width or height are defined.
+   * Default is Center.
+   */
+  boundsAlignment?: AlignmentOptions;
+
+  /**
+   * Bounding box width in pixels.
+   */
+  boundsWidth?: number;
+
+  /**
+   * Bounding box height in pixels.
+   */
+  boundsHeight?: number;
+
+  /**
+   * Crop to bounds. Default is False.
+   */
+  cropToBounds?: boolean;
+
+  /**
+   * Crop options in pixels. Default is no crop.
+   */
+  cropLeft?: number;
+  cropRight?: number;
+  cropTop?: number;
+  cropBottom?: number;
+}
+
+/**
+ * Defines a complete transformation operation to be applied to a specific source element.
+ *
+ * Typically used on a target source by its name with the full set of
+ * transformation and positioning properties it should adopt.
+ */
+export interface SourceTransform {
+  /**
+   * Source name to update.
+   */
+  readonly sourceName: string;
+
+  readonly transform: SourceTransformOptions;
+}
 
 /**
  * Configuration settings for how a capture source is rendered in the output video.
@@ -1981,14 +2110,24 @@ interface AudioGeneralSettings {
  */
 interface CaptureSourceSettings {
   /**
+   * Unique Source name (for easier identification).
+   */
+  name?: string;
+
+  /**
    * Whether the capture source should be centered and stretched to fit the output video size.
    *
    * When set to `true`, the source will automatically scale and center itself to match
    * the output resolution, even if it requires stretching.
    *
-   * @default true
+   * @default true (if transform is not provided).
    */
   stretchToOutputSize?: boolean;
+
+  /**
+   * Transform options for the source.
+   */
+  transform?: SourceTransformOptions;
 }
 
 /**
@@ -2106,8 +2245,16 @@ interface WindowCaptureSourceSettings extends CaptureSourceSettings {
    * The name of the executable associated with the window to capture.
    *
    * This is typically the process name (e.g., `"notepad.exe"` or `"chrome.exe"`).
+   *
+   * Mandatory field when using Window Capture source.
+   * Optional when using Browser Window source.
    */
-  executable: string;
+  executable?: string;
+
+  /**
+   * The window title, if multiple windows of the same executable exist.
+   */
+  windowTitle?: string;
 
   /**
    * The capture method used to record the window.
@@ -2165,6 +2312,13 @@ interface CaptureSource {
    * capture method, and more, depending on the selected source type.
    */
   readonly properties: any;
+
+  /**
+   * Optional name for the capture source.
+   *
+   * Can be used later for setting transform properties.
+   */
+  readonly name?: string;
 }
 
 /**
@@ -2856,6 +3010,26 @@ interface CaptureSettingsBuilder extends CaptureSettings {
   addGameSource(settings: GameCaptureSourceSettings): CaptureSettingsBuilder;
 
   /**
+   * Add Window video capture source
+   * settings. Executable is mandatory.
+   * @param settings
+   */
+  addWindowSource(
+    settings: WindowCaptureSourceSettings
+  ): CaptureSettingsBuilder;
+
+  /**
+   * Add Electron window capture source
+   * settings. Executable is optional.
+   * @param browserWindow
+   * @param settings
+   */
+  addBrowserWindowSource(
+    browserWindow: BrowserWindow,
+    setting: WindowCaptureSourceSettings
+  ): CaptureSettingsBuilder;
+
+  /**
    * Adds an audio device for capturing input or output audio.
    *
    * @param params - Parameters identifying the audio device.
@@ -3014,24 +3188,6 @@ interface RecordingAppOptions {
    * Can be used to troubleshoot issues during recording.
    */
   enableDebugLogs?: boolean;
-
-  /**
-   * Additional command-line arguments to pass when launching the recorder.
-   * This can be used to customize the underlying OBS runtime behavior.
-   */
-  customCommandLineArgs?: string[];
-
-  /**
-   * Specifies a custom folder path to override the default OBS binaries used by the recorder.
-   * Useful for testing with a modified or custom OBS build.
-   */
-  overrideOBSFolder?: string;
-
-  /**
-   * Interval in milliseconds for emitting 'stats' events.
-   * Default is 2000 (2 seconds). Set to `0` to disable stats reporting.
-   */
-  statsInterval?: number;
 }
 
 
@@ -3734,7 +3890,6 @@ interface IOverwolfRecordingApi {
    * Registers games to monitor and track for launch/exit detection.
    *
    * @param filter Filtering rules for which games to track.
-   * 
    */
   registerGames(filter: GamesFilter): void;
 
@@ -3745,9 +3900,17 @@ interface IOverwolfRecordingApi {
    * @see {@link AudioDeviceSettingsUpdateInfo}
    * @since 0.32.0
    */
-  updateAudioDevice(
-    device: AudioDeviceSettingsUpdateInfo
-  ): Promise<void>;
+  updateAudioDevice(device: AudioDeviceSettingsUpdateInfo): Promise<void>;
+
+  /**
+   * Set a source to transform.
+   * 
+   * Defines how the source will be rendered (for example, position, scale, crop, etc.).
+   * Throws an error if the source is not found or if the transform is invalid.
+   * 
+   * @param sourceTransform
+   */
+  setSourceTransform(sourceTransform: SourceTransform): Promise<void>;
 
   /** @event Fired when a registered game is launched. */
   on(eventName: 'game-launched', listener: (gameInfo: GameInfo) => void): this;
