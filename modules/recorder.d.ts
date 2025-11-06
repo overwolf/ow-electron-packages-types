@@ -3086,8 +3086,6 @@ interface EncoderInformation {
  * const options: RecordingAppOptions = {
  *   showDebugWindow: true,
  *   enableDebugLogs: true,
- *   customCommandLineArgs: ['--multi-threading'],
- *   overrideOBSFolder: 'C:/custom/obs',
  *   statsInterval: 5000
  * };
  * ```
