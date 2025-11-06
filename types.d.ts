@@ -3170,9 +3170,6 @@ interface EncoderInformation {
  * const options: RecordingAppOptions = {
  *   showDebugWindow: true,
  *   enableDebugLogs: true,
- *   customCommandLineArgs: ['--multi-threading'],
- *   overrideOBSFolder: 'C:/custom/obs',
- *   statsInterval: 5000
  * };
  * ```
  */
@@ -3938,7 +3935,7 @@ interface IOverwolfRecordingApi {
 
   /**
    * @event Fired periodically with recorder performance metrics.
-   * Interval is configured via {@link RecordingAppOptions.statsInterval}.
+   *
    */
   on(eventName: 'stats', listener: (args: RecorderStats) => void): this;
 }
