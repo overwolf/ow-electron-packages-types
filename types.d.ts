@@ -4230,7 +4230,7 @@ type ZOrderType = "default" | "topMost" | "bottomMost";
 interface OverlayOptions {
   /**
    * Controls how input is handled by the overlay window.
-   * @default 'noPassThrough' 
+   * @default 'noPassThrough'
    * @see {@link PassthroughType}.
    *
    */
@@ -4238,18 +4238,28 @@ interface OverlayOptions {
 
   /**
    * Controls the z-order (stacking order) of the overlay window.
-   * @default 'default' 
+   * @default 'default'
    * @see {@link ZOrderType}.
    */
   zOrder?: ZOrderType;
 
   /**
    * Controls whether the overlay intercepts keyboard input.
-   * 
+   *
    * `true`&mdash;the overlay won't intercept keyboard input.
    * @default false
    */
   ignoreKeyboardInput?: boolean;
+
+  /**
+   * When `true`, the overlay window is strictly confined to the game window boundaries.
+   *
+   * This prevents the overlay from being moved outside the game window area.
+   * @default false
+   * 
+   * @since 1.9.0
+   */
+  strictToGameWindow?: boolean;
 }
 
 
@@ -4529,22 +4539,22 @@ interface InjectionError {
  * ```
  */
 interface GameWindowInfo {
-  /** 
-   * The dimensions of the game window. 
+  /**
+   * The dimensions of the game window.
    */
   readonly size: Size;
 
-  /** 
+  /**
    * The native window handle (HWND) of the game window.
    */
   readonly nativeHandle: number;
 
-  /** 
+  /**
    * Indicates if the game window is currently in focus.
    */
   readonly focused: boolean;
 
-  /** 
+  /**
    * The graphics API used by the game (e.g., Direct3D 9, 11, 12, Vulkan).
    */
   readonly graphics: 'd3d9' | 'd3d12' | 'd3d11' | 'vulkan' | string | undefined;
@@ -4554,15 +4564,31 @@ interface GameWindowInfo {
    */
   readonly screen?: Display;
 
-  /** 
+  /**
    * The bounding rectangle of the game window in the screen's coordinates.
    *
    * For example: `bounds: { x: 100, y: 100, width: 800, height: 600 }`
-   * 
+   *
    * Means the game window is positioned at (100, 100) on the screen and has a size of 800x600 pixels.
    * @since 1.5.11.
    */
   readonly bounds?: Rectangle;
+
+  /**
+   * Indicates if the game is currently running in fullscreen exclusive mode.
+   *
+   * Relevant only for OOPO games.
+   * @since 1.9.0
+   */
+  readonly isFullscreen?: boolean;
+
+  /**
+   * Indicates if fullscreen rendering is disabled.
+   * 
+   * Relevant only for OOPO games.
+   * @since 1.9.0
+   */
+  readonly isOOPOFullscreenRenderingDisabled?: boolean;
 }
 
 /**
@@ -4809,7 +4835,7 @@ interface IOverlayHotkeys {
 interface IOverwolfOverlayApi extends EventEmitter {
   /**
    *  Create new Overlay window.
-   * @param options - Window configuration including name, z-order, passthrough, etc. 
+   * @param options - Window configuration including name, z-order, passthrough, etc.
    * @returns A promise that resolves to the created `OverlayBrowserWindow`.
    * @see {@link OverlayWindowOptions}.
    * @see {@link OverlayBrowserWindow}.
@@ -4838,13 +4864,12 @@ interface IOverwolfOverlayApi extends EventEmitter {
 
   /**
    * Returns the overlay window associated with a given `WebContents` instance.
-   * @param webContents - The Electron WebContents to query. 
+   * @param webContents - The Electron WebContents to query.
    * @see {@link OverlayBrowserWindow}.
-   * @returns The corresponding overlay window or `null` if not found. 
+   * @returns The corresponding overlay window or `null` if not found.
    */
   fromWebContents(webContents: WebContents): OverlayBrowserWindow | null;
 
-  
   /**
    * Returns the overlay window associated with a given `BrowserWindow`.
    *
@@ -4854,7 +4879,19 @@ interface IOverwolfOverlayApi extends EventEmitter {
    */
   fromBrowserWindow(browserWindow: BrowserWindow): OverlayBrowserWindow | null;
 
- /**
+  /**
+   * Requests game injection for the specified class ID (late injection).
+   *
+   * If the game is running, the 'game-launched' event will be emitted, and you can call `event.inject()` to inject the overlay.
+   * If another game is already injected, the overlay will move to the newly injected game.
+   *
+   * Throws an error if the game is not running.
+   *
+   * @param classId - The class ID of the game to inject the overlay into.
+   */
+  requestGameInjection(classId: number): Promise<void>;
+
+  /**
    * The hotkeys API used to register, update, and remove overlay hotkeys.
    * @see {@link IOverlayHotkeys}.
    */
@@ -4901,24 +4938,24 @@ interface IOverwolfOverlayApi extends EventEmitter {
    */
   on(eventName: 'game-launched', listener: (event: GameLaunchEvent, gameInfo: GameInfo) => void): this;
 
-/**
- * Fires when a registered game process terminates.
- *
- * Useful for performing cleanup, UI updates, or closing overlay windows.
- *
- * @param eventName - The event identifier for when the game exits.
- * @param listener - A callback function that receives the game info of the exited game.
- *
- * @example
- * ```ts
- * overlay.on('game-exit', (gameInfo, wasInjected) => {
- *   console.log(`Game exited: ${gameInfo.title} and ${wasInjected ? 'was injected' : 'was not injected'}`);
- *   closeOverlayWindows();
- * });
- * ```
- * 
- * @see {@link GameInfo}.
- */
+  /**
+   * Fires when a registered game process terminates.
+   *
+   * Useful for performing cleanup, UI updates, or closing overlay windows.
+   *
+   * @param eventName - The event identifier for when the game exits.
+   * @param listener - A callback function that receives the game info of the exited game.
+   *
+   * @example
+   * ```ts
+   * overlay.on('game-exit', (gameInfo, wasInjected) => {
+   *   console.log(`Game exited: ${gameInfo.title} and ${wasInjected ? 'was injected' : 'was not injected'}`);
+   *   closeOverlayWindows();
+   * });
+   * ```
+   *
+   * @see {@link GameInfo}.
+   */
   on(eventName: 'game-exit', listener: (gameInfo: GameInfo, wasInjected: boolean) => void): this;
 
   /**
@@ -4983,7 +5020,7 @@ interface IOverwolfOverlayApi extends EventEmitter {
    * @param eventName - `game-input-interception-changed`
    * @param listener - Callback with updated input state.
    * @see {@link GameInputInterception}.
-   * 
+   *
    */
   on(
     eventName: 'game-input-interception-changed',
