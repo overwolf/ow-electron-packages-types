@@ -251,7 +251,7 @@ interface OverlayOptions {
   ignoreKeyboardInput?: boolean;
 
   /**
-   * If `true`, the overlay window will be strictly confined to the game window boundaries.
+   * When `true`, the overlay window is strictly confined to the game window boundaries.
    *
    * This prevents the overlay from being moved outside the game window area.
    * @default false
@@ -884,7 +884,7 @@ interface IOverwolfOverlayApi extends EventEmitter {
    * If the game is running, the 'game-launched' event will be emitted, and you can call `event.inject()` to inject the overlay.
    * If another game is already injected, the overlay will move to the newly injected game.
    *
-   * Note: Will throw an error if the game is not running.
+   * Throws an error if the game is not running.
    *
    * @param classId - The class ID of the game to inject the overlay into.
    */
