@@ -491,7 +491,7 @@ interface EncoderProperty {
   /**
    * The default value for this encoder property.
    */
-  readonly default: any;
+  readonly default?: any;
 
   /**
    * A human-readable explanation of the property's purpose.
@@ -499,10 +499,16 @@ interface EncoderProperty {
   readonly description: string;
 
   /**
-   * Optional map of possible values to their corresponding display labels.
+   * Optional array of possible values for this property.
    * Useful for dropdowns or presets.
    */
-  readonly values?: Record<string | number, string>;
+  readonly values?: (string | number)[];
+
+  /**
+   * Optional array of descriptions corresponding to the `values` array.
+   * Helps provide additional context for each option.
+   */
+  readonly valuesDesc?: string[];
 }
 
 /**
@@ -595,7 +601,7 @@ interface AdapterInfo {
   /**
    * The index of the adapter (usually starts at 0 for the primary GPU).
    */
-  readonly index: 0;
+  readonly index: number;
 
   /**
    * The display name of the GPU adapter.
