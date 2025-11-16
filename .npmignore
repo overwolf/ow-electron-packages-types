@@ -7,3 +7,4 @@ crn.d.ts
 packages.d.ts
 combine-dts.js
 modules/
+npm-publish.yml

@@ -1,0 +1,36 @@
+name: NPM Publish (Beta)
+
+on:
+  push:
+    branches:
+      - beta
+
+jobs:
+  publish:
+    name: Publish Beta Package
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: "https://registry.npmjs.org/"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Publish to NPM Beta Tag
+        run: npm publish --access public --tag beta
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Confirm Publication
+        run: echo "Successfully published branch ${{ github.ref_name }} to npm with tag 'beta'."
