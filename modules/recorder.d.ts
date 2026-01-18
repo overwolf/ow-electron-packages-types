@@ -1579,7 +1579,101 @@ type VideoRecordingSplitType =
   /** `manual` — Splitting is controlled programmatically or by user input. */
   | 'manual';
 
+export interface AudioFilterBase {
+  id: string;
+  parameters?: Record<string, number | string>;
+}
 
+export interface AudioCompressorFilter extends AudioFilterBase {
+  id: 'compressor_filter';
+  parameters?: {
+    /** range [1.00, 32.00] */
+    ratio?: number;
+    /** range [-60.0, 0.00] */
+    threshold?: number;
+    /** range [1, 500] */
+    attack_time?: number;
+    /** range [1, 1000] */
+    release_time?: number;
+    /** range [-32.00, 32.00] */
+    output_gain?: number;
+  };
+}
+
+export interface AudioExpanderFilter extends AudioFilterBase {
+  id: 'expander_filter';
+  parameters?: {
+    presets?: 'expander' | 'gate';
+    /** range [1.00, 20.00] */
+    ratio?: number;
+    /** range [-60.00, 0.00] */
+    threshold?: number;
+    /** range [1, 100] */
+    attack_time?: number;
+    /** range [1, 1000] */
+    release_time?: number;
+    /** range [-32.00, 32.00] */
+    output_gain?: number;
+    detector?: 'RMS' | 'peak';
+  };
+}
+
+export interface AudioGainFilter extends AudioFilterBase {
+  id: 'gain_filter';
+  parameters?: {
+    /** range [-30.00, 30.00] */
+    db?: number;
+  };
+}
+
+export interface AudioInvertPolarityFilter extends AudioFilterBase {
+  id: 'invert_polarity_filter';
+  parameters?: {};
+}
+
+export interface AudioLimiterFilter extends AudioFilterBase {
+  id: 'limiter_filter';
+  parameters?: {
+    /** range [-60.00, 0.00] */
+    threshold?: number;
+    /** range [1, 1000] */
+    release_time?: number;
+  };
+}
+
+export interface AudioNoiseGateFilter extends AudioFilterBase {
+  id: 'noise_gate_filter';
+  parameters?: {
+    /** range [-96.00, 0.00] */
+    close_threshold?: number;
+    /** range [-96.00, 0.00] */
+    open_threshold?: number;
+    /** range [0, 10000] */
+    attack_time?: number;
+    /** range [0, 10000] */
+    hold_time?: number;
+    /** range [0, 10000] */
+    release_time?: number;
+  };
+}
+
+export interface AudioNoiseSuppressFilterV2 extends AudioFilterBase {
+  id: 'noise_suppress_filter_v2';
+  parameters?: {
+    method?: 'rnnoise' | 'speex';
+    /** range [-60.00, 0.00] available when choosing 'speex' method */
+    suppress_level?: number;
+  };
+}
+
+export type AudioFilter =
+  | AudioCompressorFilter
+  | AudioExpanderFilter
+  | AudioGainFilter
+  | AudioInvertPolarityFilter
+  | AudioLimiterFilter
+  | AudioNoiseGateFilter
+  | AudioNoiseSuppressFilterV2;
 
 /**
  * Configuration options for video recording settings.
@@ -1729,6 +1823,14 @@ interface AudioDeviceSettings {
    * @default false
    */
   use_device_timing?: boolean;
+
+  /**
+   * List of audio filters to apply to the device's audio signal.
+   * 
+   * Each filter can modify the audio in various ways, 
+   * such as compression, gain adjustment, noise suppression, etc.
+   */
+  filters?: AudioFilter[];
 }
 
 
