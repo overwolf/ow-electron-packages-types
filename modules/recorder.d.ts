@@ -1579,93 +1579,364 @@ type VideoRecordingSplitType =
   /** `manual` — Splitting is controlled programmatically or by user input. */
   | 'manual';
 
+/**
+ * The base configuration for an audio processing filter.
+ * 
+ * This interface serves as a blueprint for all audio filters within the system,
+ * ensuring they have a unique identifier and a flexible container for settings.
+ * * @example
+ * ```typescript
+ * const lowPass: AudioFilterBase = {
+ * id: 'low-pass-001',
+ * parameters: {
+ * cutoff: 500,
+ * resonance: 1.2
+ * }
+ * };
+ * ```
+ */
 export interface AudioFilterBase {
+  /**
+   * A unique identifier for the filter instance.
+   */
   id: string;
+
+  /**
+   * A collection of key-value pairs representing the filter's configuration.
+   * 
+   */
   parameters?: Record<string, number | string>;
 }
 
+/**
+ * A specialized filter for dynamic range compression.
+ * * @example
+ * ```typescript
+ * const vocalComp: AudioCompressorFilter = {
+ * id: 'compressor_filter',
+ * parameters: {
+ * ratio: 4,
+ * threshold: -20
+ * }
+ * };
+ * ```
+ */
 export interface AudioCompressorFilter extends AudioFilterBase {
+  /**
+   * A unique identifier for the filter instance.
+   */
   id: 'compressor_filter';
+
+  /**
+   * Configuration settings specific to the compressor.
+   */
   parameters?: {
-    /** range [1.00, 32.00] */
+    /**
+     * The amount of gain reduction applied once the signal exceeds the threshold.
+     * Valid range: [1.00, 32.00]
+     */
     ratio?: number;
-    /** range [-60.0, 0.00] */
+
+    /**
+     * The level (in dB) above which compression begins.
+     * Valid range: [-60.0, 0.00]
+     */
     threshold?: number;
-    /** range [1, 500] */
+
+    /**
+     * How quickly (in ms) the compressor reduces the volume.
+     * Valid range: [1, 500]
+     */
     attack_time?: number;
-    /** range [1, 1000] */
+
+    /**
+     * How quickly (in ms) the compressor returns to normal volume after the signal drops.
+     * Valid range: [1, 1000]
+     */
     release_time?: number;
-    /** range [-32.00, 32.00] */
+
+    /**
+     * The gain (in dB) applied to the signal after compression to compensate for volume loss.
+     * Valid range: [-32.00, 32.00]
+     */
     output_gain?: number;
   };
 }
 
+/**
+ * A specialized filter for dynamic range expansion or noise gating.
+ * * @example
+ * ```typescript
+ * const noiseGate: AudioExpanderFilter = {
+ * id: 'expander_filter',
+ * parameters: {
+ * presets: 'gate',
+ * threshold: -40,
+ * detector: 'peak'
+ * }
+ * };
+ * ```
+ */
 export interface AudioExpanderFilter extends AudioFilterBase {
+  /**
+   * A unique identifier for the filter instance.
+   */
   id: 'expander_filter';
+
+  /**
+   * Configuration settings specific to the expander/gate.
+   */
   parameters?: {
+    /**
+     * Pre-defined configuration modes for common expansion tasks.
+     */
     presets?: 'expander' | 'gate';
-    /** range [1.00, 20.00] */
+
+    /**
+     * The ratio of expansion. Higher values result in more aggressive reduction 
+     * of signals below the threshold.
+     * Valid range: [1.00, 20.00]
+     */
     ratio?: number;
-    /** range [-60.00, 0.00] */
+
+    /**
+     * The level (in dB) below which expansion or gating begins.
+     * Valid range: [-60.00, 0.00]
+     */
     threshold?: number;
-    /** range [1, 100] */
+
+    /**
+     * How quickly (in ms) the expander reduces the volume once the signal drops below threshold.
+     * Valid range: [1, 100]
+     */
     attack_time?: number;
-    /** range [1, 1000] */
+
+    /**
+     * How quickly (in ms) the expander returns to unity gain once the signal rises above threshold.
+     * Valid range: [1, 1000]
+     */
     release_time?: number;
-    /** range [-32.00, 32.00] */
+
+    /**
+     * The gain (in dB) applied to the signal after processing.
+     * Valid range: [-32.00, 32.00]
+     */
     output_gain?: number;
+
+    /**
+     * The method used to calculate the signal level.
+     * - `RMS`: Root Mean Square (average power).
+     * - `peak`: Highest instantaneous signal level.
+     */
     detector?: 'RMS' | 'peak';
   };
 }
 
+/**
+ * A simple filter used to adjust the volume or amplitude of an audio signal.
+ * * @example
+ * ```typescript
+ * const boost: AudioGainFilter = {
+ * id: 'gain_filter',
+ * parameters: {
+ * db: 6.5
+ * }
+ * };
+ * ```
+ */
 export interface AudioGainFilter extends AudioFilterBase {
+  /**
+   * A unique identifier for the filter instance.
+   */
   id: 'gain_filter';
+
+  /**
+   * Configuration settings for gain adjustment.
+   */
   parameters?: {
-    /** range [-30.00, 30.00] */
+    /**
+     * The amount of gain to apply to the signal, measured in decibels (dB).
+     * Positive values amplify the signal, while negative values attenuate it.
+     * * Valid range: [-30.00, 30.00]
+     */
     db?: number;
   };
 }
 
+/**
+ * A utility filter that flips the phase of the audio signal by 180 degrees.
+ * * @example
+ * ```typescript
+ * const phaseFlip: AudioInvertPolarityFilter = {
+ * id: 'invert_polarity_filter',
+ * parameters: {}
+ * };
+ * ```
+ */
 export interface AudioInvertPolarityFilter extends AudioFilterBase {
+  /**
+   * A unique identifier for the filter instance.
+   */
   id: 'invert_polarity_filter';
+
+  /**
+   * This filter does not currently support any adjustable parameters.
+   */
   parameters?: {};
 }
 
+/**
+ * A specialized dynamics processor used to prevent an audio signal from exceeding a specific decibel level.
+ * * @example
+ * ```typescript
+ * const masterLimiter: AudioLimiterFilter = {
+ * id: 'limiter_filter',
+ * parameters: {
+ * threshold: -0.3,
+ * release_time: 100
+ * }
+ * };
+ * ```
+ */
 export interface AudioLimiterFilter extends AudioFilterBase {
+  /**
+   * A unique identifier for the filter instance.
+   */
   id: 'limiter_filter';
+
+  /**
+   * Configuration settings for the limiter.
+   */
   parameters?: {
-    /** range [-60.00, 0.00] */
+    /**
+     * The maximum peak level (in dB) the signal is allowed to reach. 
+     * Signals exceeding this level are strictly attenuated.
+     * * Valid range: [-60.00, 0.00]
+     */
     threshold?: number;
-    /** range [1, 1000] */
+
+    /**
+     * The time (in ms) it takes for the gain to return to unity after the 
+     * signal falls below the threshold.
+     * * Valid range: [1, 1000]
+     */
     release_time?: number;
   };
 }
 
+/**
+ * A noise gate filter used to attenuate signals that fall below a certain threshold.
+ * It is primarily used to remove background noise during silent passages.
+ * * @example
+ * ```typescript
+ * const gate: AudioNoiseGateFilter = {
+ * id: 'noise_gate_filter',
+ * parameters: {
+ * open_threshold: -40,
+ * close_threshold: -45,
+ * hold_time: 200
+ * }
+ * };
+ * ```
+ */
 export interface AudioNoiseGateFilter extends AudioFilterBase {
+  /**
+   * A unique identifier for the filter instance.
+   */
   id: 'noise_gate_filter';
+
+  /**
+   * Configuration settings for the noise gate.
+   */
   parameters?: {
-    /** range [-96.00, 0.00] */
+    /**
+     * The level (in dB) at which the gate closes, silencing the signal.
+     * Valid range: [-96.00, 0.00]
+     */
     close_threshold?: number;
-    /** range [-96.00, 0.00] */
+
+    /**
+     * The level (in dB) at which the gate opens, allowing the signal to pass.
+     * Valid range: [-96.00, 0.00]
+     */
     open_threshold?: number;
-    /** range [0, 10000] */
+
+    /**
+     * The time (in ms) it takes for the gate to fully open once the signal
+     * exceeds the open threshold.
+     * Valid range: [0, 10000]
+     */
     attack_time?: number;
-    /** range [0, 10000] */
+
+    /**
+     * The duration (in ms) the gate remains fully open after the signal
+     * drops below the close threshold before the release phase begins.
+     * Valid range: [0, 10000]
+     */
     hold_time?: number;
-    /** range [0, 10000] */
+
+    /**
+     * The time (in ms) it takes for the gate to fully close after the hold period.
+     * Valid range: [0, 10000]
+     */
     release_time?: number;
   };
 }
 
+/**
+ * An advanced noise suppression filter utilizing machine learning or digital signal processing algorithms.
+ * * @example
+ * ```typescript
+ * const aiDenoise: AudioNoiseSuppressFilterV2 = {
+ * id: 'noise_suppress_filter_v2',
+ * parameters: {
+ * method: 'rnnoise'
+ * }
+ * };
+ * ```
+ */
 export interface AudioNoiseSuppressFilterV2 extends AudioFilterBase {
+  /**
+   * A unique identifier for the filter instance.
+   */
   id: 'noise_suppress_filter_v2';
+
+  /**
+   * Configuration settings for the noise suppression algorithm.
+   */
   parameters?: {
+    /**
+     * The suppression algorithm to be used.
+     * - `rnnoise`: A recurrent neural network-based noise suppression (ideal for voice).
+     * - `speex`: A traditional DSP-based noise suppression.
+     */
     method?: 'rnnoise' | 'speex';
-    /** range [-60.00, 0.00] available when choosing 'speex' method */
+
+    /**
+     * The level of noise reduction to apply in decibels (dB).
+     * 
+     * Valid range: [-60.00, 0.00]
+     */
     suppress_level?: number;
   };
 }
 
+/**
+ * A union type representing all available audio filters.
+ * 
+ * This type uses the `id` property as a type discriminator. When used in a switch 
+ * statement or conditional, TypeScript will narrow the `parameters` to the 
+ * specific interface associated with that ID.
+ * * @example
+ * ```typescript
+ * function applyFilter(filter: AudioFilter) {
+ * if (filter.id === 'gain_filter') {
+ * // TypeScript knows filter.parameters.db exists here
+ * console.log(filter.parameters?.db);
+ * }
+ * }
+ * ```
+ */
 export type AudioFilter =
   | AudioCompressorFilter
   | AudioExpanderFilter
