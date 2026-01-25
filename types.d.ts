@@ -575,7 +575,7 @@ interface EncoderProperty {
   /**
    * The default value for this encoder property.
    */
-  readonly default: any;
+  readonly default?: any;
 
   /**
    * A human-readable explanation of the property's purpose.
@@ -583,10 +583,16 @@ interface EncoderProperty {
   readonly description: string;
 
   /**
-   * Optional map of possible values to their corresponding display labels.
+   * Optional array of possible values for this property.
    * Useful for dropdowns or presets.
    */
-  readonly values?: Record<string | number, string>;
+  readonly values?: (string | number)[];
+
+  /**
+   * Optional array of descriptions corresponding to the `values` array.
+   * Helps provide additional context for each option.
+   */
+  readonly valuesDesc?: string[];
 }
 
 /**
@@ -679,7 +685,7 @@ interface AdapterInfo {
   /**
    * The index of the adapter (usually starts at 0 for the primary GPU).
    */
-  readonly index: 0;
+  readonly index: number;
 
   /**
    * The display name of the GPU adapter.
@@ -1657,7 +1663,372 @@ type VideoRecordingSplitType =
   /** `manual` — Splitting is controlled programmatically or by user input. */
   | 'manual';
 
+/**
+ * The base configuration for an audio processing filter.
+ * 
+ * This interface serves as a blueprint for all audio filters within the system,
+ * ensuring they have a unique identifier and a flexible container for settings.
+ * * @example
+ * ```typescript
+ * const lowPass: AudioFilterBase = {
+ * id: 'low-pass-001',
+ * parameters: {
+ * cutoff: 500,
+ * resonance: 1.2
+ * }
+ * };
+ * ```
+ */
+export interface AudioFilterBase {
+  /**
+   * A unique identifier for the filter instance.
+   */
+  id: string;
 
+  /**
+   * A collection of key-value pairs representing the filter's configuration.
+   * 
+   */
+  parameters?: Record<string, number | string>;
+}
+
+/**
+ * A specialized filter for dynamic range compression.
+ * * @example
+ * ```typescript
+ * const vocalComp: AudioCompressorFilter = {
+ * id: 'compressor_filter',
+ * parameters: {
+ * ratio: 4,
+ * threshold: -20
+ * }
+ * };
+ * ```
+ */
+export interface AudioCompressorFilter extends AudioFilterBase {
+  /**
+   * A unique identifier for the filter instance.
+   */
+  id: 'compressor_filter';
+
+  /**
+   * Configuration settings specific to the compressor.
+   */
+  parameters?: {
+    /**
+     * The amount of gain reduction applied once the signal exceeds the threshold.
+     * Valid range: [1.00, 32.00]
+     */
+    ratio?: number;
+
+    /**
+     * The level (in dB) above which compression begins.
+     * Valid range: [-60.0, 0.00]
+     */
+    threshold?: number;
+
+    /**
+     * How quickly (in ms) the compressor reduces the volume.
+     * Valid range: [1, 500]
+     */
+    attack_time?: number;
+
+    /**
+     * How quickly (in ms) the compressor returns to normal volume after the signal drops.
+     * Valid range: [1, 1000]
+     */
+    release_time?: number;
+
+    /**
+     * The gain (in dB) applied to the signal after compression to compensate for volume loss.
+     * Valid range: [-32.00, 32.00]
+     */
+    output_gain?: number;
+  };
+}
+
+/**
+ * A specialized filter for dynamic range expansion or noise gating.
+ * * @example
+ * ```typescript
+ * const noiseGate: AudioExpanderFilter = {
+ * id: 'expander_filter',
+ * parameters: {
+ * presets: 'gate',
+ * threshold: -40,
+ * detector: 'peak'
+ * }
+ * };
+ * ```
+ */
+export interface AudioExpanderFilter extends AudioFilterBase {
+  /**
+   * A unique identifier for the filter instance.
+   */
+  id: 'expander_filter';
+
+  /**
+   * Configuration settings specific to the expander/gate.
+   */
+  parameters?: {
+    /**
+     * Pre-defined configuration modes for common expansion tasks.
+     */
+    presets?: 'expander' | 'gate';
+
+    /**
+     * The ratio of expansion. Higher values result in more aggressive reduction 
+     * of signals below the threshold.
+     * Valid range: [1.00, 20.00]
+     */
+    ratio?: number;
+
+    /**
+     * The level (in dB) below which expansion or gating begins.
+     * Valid range: [-60.00, 0.00]
+     */
+    threshold?: number;
+
+    /**
+     * How quickly (in ms) the expander reduces the volume once the signal drops below threshold.
+     * Valid range: [1, 100]
+     */
+    attack_time?: number;
+
+    /**
+     * How quickly (in ms) the expander returns to unity gain once the signal rises above threshold.
+     * Valid range: [1, 1000]
+     */
+    release_time?: number;
+
+    /**
+     * The gain (in dB) applied to the signal after processing.
+     * Valid range: [-32.00, 32.00]
+     */
+    output_gain?: number;
+
+    /**
+     * The method used to calculate the signal level.
+     * - `RMS`: Root Mean Square (average power).
+     * - `peak`: Highest instantaneous signal level.
+     */
+    detector?: 'RMS' | 'peak';
+  };
+}
+
+/**
+ * A simple filter used to adjust the volume or amplitude of an audio signal.
+ * * @example
+ * ```typescript
+ * const boost: AudioGainFilter = {
+ * id: 'gain_filter',
+ * parameters: {
+ * db: 6.5
+ * }
+ * };
+ * ```
+ */
+export interface AudioGainFilter extends AudioFilterBase {
+  /**
+   * A unique identifier for the filter instance.
+   */
+  id: 'gain_filter';
+
+  /**
+   * Configuration settings for gain adjustment.
+   */
+  parameters?: {
+    /**
+     * The amount of gain to apply to the signal, measured in decibels (dB).
+     * Positive values amplify the signal, while negative values attenuate it.
+     * * Valid range: [-30.00, 30.00]
+     */
+    db?: number;
+  };
+}
+
+/**
+ * A utility filter that flips the phase of the audio signal by 180 degrees.
+ * * @example
+ * ```typescript
+ * const phaseFlip: AudioInvertPolarityFilter = {
+ * id: 'invert_polarity_filter',
+ * parameters: {}
+ * };
+ * ```
+ */
+export interface AudioInvertPolarityFilter extends AudioFilterBase {
+  /**
+   * A unique identifier for the filter instance.
+   */
+  id: 'invert_polarity_filter';
+
+  /**
+   * This filter does not currently support any adjustable parameters.
+   */
+  parameters?: {};
+}
+
+/**
+ * A specialized dynamics processor used to prevent an audio signal from exceeding a specific decibel level.
+ * * @example
+ * ```typescript
+ * const masterLimiter: AudioLimiterFilter = {
+ * id: 'limiter_filter',
+ * parameters: {
+ * threshold: -0.3,
+ * release_time: 100
+ * }
+ * };
+ * ```
+ */
+export interface AudioLimiterFilter extends AudioFilterBase {
+  /**
+   * A unique identifier for the filter instance.
+   */
+  id: 'limiter_filter';
+
+  /**
+   * Configuration settings for the limiter.
+   */
+  parameters?: {
+    /**
+     * The maximum peak level (in dB) the signal is allowed to reach. 
+     * Signals exceeding this level are strictly attenuated.
+     * * Valid range: [-60.00, 0.00]
+     */
+    threshold?: number;
+
+    /**
+     * The time (in ms) it takes for the gain to return to unity after the 
+     * signal falls below the threshold.
+     * * Valid range: [1, 1000]
+     */
+    release_time?: number;
+  };
+}
+
+/**
+ * A noise gate filter used to attenuate signals that fall below a certain threshold.
+ * It is primarily used to remove background noise during silent passages.
+ * * @example
+ * ```typescript
+ * const gate: AudioNoiseGateFilter = {
+ * id: 'noise_gate_filter',
+ * parameters: {
+ * open_threshold: -40,
+ * close_threshold: -45,
+ * hold_time: 200
+ * }
+ * };
+ * ```
+ */
+export interface AudioNoiseGateFilter extends AudioFilterBase {
+  /**
+   * A unique identifier for the filter instance.
+   */
+  id: 'noise_gate_filter';
+
+  /**
+   * Configuration settings for the noise gate.
+   */
+  parameters?: {
+    /**
+     * The level (in dB) at which the gate closes, silencing the signal.
+     * Valid range: [-96.00, 0.00]
+     */
+    close_threshold?: number;
+
+    /**
+     * The level (in dB) at which the gate opens, allowing the signal to pass.
+     * Valid range: [-96.00, 0.00]
+     */
+    open_threshold?: number;
+
+    /**
+     * The time (in ms) it takes for the gate to fully open once the signal
+     * exceeds the open threshold.
+     * Valid range: [0, 10000]
+     */
+    attack_time?: number;
+
+    /**
+     * The duration (in ms) the gate remains fully open after the signal
+     * drops below the close threshold before the release phase begins.
+     * Valid range: [0, 10000]
+     */
+    hold_time?: number;
+
+    /**
+     * The time (in ms) it takes for the gate to fully close after the hold period.
+     * Valid range: [0, 10000]
+     */
+    release_time?: number;
+  };
+}
+
+/**
+ * An advanced noise suppression filter utilizing machine learning or digital signal processing algorithms.
+ * * @example
+ * ```typescript
+ * const aiDenoise: AudioNoiseSuppressFilterV2 = {
+ * id: 'noise_suppress_filter_v2',
+ * parameters: {
+ * method: 'rnnoise'
+ * }
+ * };
+ * ```
+ */
+export interface AudioNoiseSuppressFilterV2 extends AudioFilterBase {
+  /**
+   * A unique identifier for the filter instance.
+   */
+  id: 'noise_suppress_filter_v2';
+
+  /**
+   * Configuration settings for the noise suppression algorithm.
+   */
+  parameters?: {
+    /**
+     * The suppression algorithm to be used.
+     * - `rnnoise`: A recurrent neural network-based noise suppression (ideal for voice).
+     * - `speex`: A traditional DSP-based noise suppression.
+     */
+    method?: 'rnnoise' | 'speex';
+
+    /**
+     * The level of noise reduction to apply in decibels (dB).
+     * 
+     * Valid range: [-60.00, 0.00]
+     */
+    suppress_level?: number;
+  };
+}
+
+/**
+ * A union type representing all available audio filters.
+ * 
+ * This type uses the `id` property as a type discriminator. When used in a switch 
+ * statement or conditional, TypeScript will narrow the `parameters` to the 
+ * specific interface associated with that ID.
+ * * @example
+ * ```typescript
+ * function applyFilter(filter: AudioFilter) {
+ * if (filter.id === 'gain_filter') {
+ * // TypeScript knows filter.parameters.db exists here
+ * console.log(filter.parameters?.db);
+ * }
+ * }
+ * ```
+ */
+export type AudioFilter =
+  | AudioCompressorFilter
+  | AudioExpanderFilter
+  | AudioGainFilter
+  | AudioInvertPolarityFilter
+  | AudioLimiterFilter
+  | AudioNoiseGateFilter
+  | AudioNoiseSuppressFilterV2;
 
 /**
  * Configuration options for video recording settings.
@@ -1807,6 +2178,14 @@ interface AudioDeviceSettings {
    * @default false
    */
   use_device_timing?: boolean;
+
+  /**
+   * List of audio filters to apply to the device's audio signal.
+   * 
+   * Each filter can modify the audio in various ways, 
+   * such as compression, gain adjustment, noise suppression, etc.
+   */
+  filters?: AudioFilter[];
 }
 
 
@@ -1972,6 +2351,135 @@ interface AudioGeneralSettings {
    */
   lowLatencyAudioBuffering?: boolean;
 }
+/**
+ * Defines the alignment options specifying a position by using [Vertical][Horizontal]
+ * (e.g., 'TopLeft', 'Center', 'BottomRight'). Typically used for positioning
+ * UI elements, popovers, or text blocks.
+ */
+export declare type AlignmentOptions =
+  | 'TopLeft'
+  | 'TopCenter'
+  | 'TopRight'
+  | 'CenterLeft'
+  | 'Center'
+  | 'CenterRight'
+  | 'BottomLeft'  
+  | 'BottomCenter'
+  | 'BottomRight';
+
+/**
+ * Defines the type of bounding or scaling applied to an element's dimensions
+ * within a container.
+ *
+ * Typically used to control how content (like an image or video)
+ * is resized to fit or fill a specific area.
+ */
+export declare type BoundsType =
+  | 'None'
+  | 'Stretch'
+  | 'ScaleInner'
+  | 'ScaleOuter'
+  | 'ScaleToWidth'
+  | 'ScaleToHeight'
+  | 'MaxOnly';
+
+/**
+ * Options for transforming and positioning a source element (e.g. an image or video) within an output container or scene.
+ * 
+ * Typically used to control how content is translated, scaled, rotated, aligned,
+ * and cropped within a visual presentation area.
+ */
+export interface SourceTransformOptions {
+  /**
+   * Position X in pixels. Default is 0.
+   */
+  positionX?: number;
+
+  /**
+   * Position Y in pixels. Default is 0.
+   */
+  positionY?: number;
+
+  /**
+   * Rotation in degrees (-360.0 to 360.0). Default is 0.
+   */
+  rotation?: number;
+
+  /**
+   * Size Width in pixels.
+   */
+  sizeWidth?: number;
+
+  /**
+   * Size Height in pixels.
+   */
+  sizeHeight?: number;
+
+  /**
+   * Alignment of the source within the output.
+   * The alignment is relative to the top-left corner of the output.
+   *
+   * Default is TopLeft.
+   */
+  alignment?: AlignmentOptions;
+
+  /**
+   * Defines a bounding box for the source within the output.
+   *
+   * Changing the bounds type or alignment only has an effect
+   * if a bounds width or height is specified.
+   *
+   * Type of bounds to apply.
+   * Default is None.
+   */
+  boundsType?: BoundsType;
+
+  /**
+   * Alignment of the source within the bounding box.
+   * 
+   * Relevant only when bounds width or height are defined.
+   * Default is Center.
+   */
+  boundsAlignment?: AlignmentOptions;
+
+  /**
+   * Bounding box width in pixels.
+   */
+  boundsWidth?: number;
+
+  /**
+   * Bounding box height in pixels.
+   */
+  boundsHeight?: number;
+
+  /**
+   * Crop to bounds. Default is False.
+   */
+  cropToBounds?: boolean;
+
+  /**
+   * Crop options in pixels. Default is no crop.
+   */
+  cropLeft?: number;
+  cropRight?: number;
+  cropTop?: number;
+  cropBottom?: number;
+}
+
+/**
+ * Defines a complete transformation operation to be applied to a specific source element.
+ *
+ * Typically used on a target source by its name with the full set of
+ * transformation and positioning properties it should adopt.
+ */
+export interface SourceTransform {
+  /**
+   * Source name to update.
+   */
+  readonly sourceName: string;
+
+  readonly transform: SourceTransformOptions;
+}
 
 /**
  * Configuration settings for how a capture source is rendered in the output video.
@@ -1981,14 +2489,24 @@ interface AudioGeneralSettings {
  */
 interface CaptureSourceSettings {
   /**
+   * Unique Source name (for easier identification).
+   */
+  name?: string;
+
+  /**
    * Whether the capture source should be centered and stretched to fit the output video size.
    *
    * When set to `true`, the source will automatically scale and center itself to match
    * the output resolution, even if it requires stretching.
    *
-   * @default true
+   * @default true (if transform is not provided).
    */
   stretchToOutputSize?: boolean;
+
+  /**
+   * Transform options for the source.
+   */
+  transform?: SourceTransformOptions;
 }
 
 /**
@@ -2106,8 +2624,16 @@ interface WindowCaptureSourceSettings extends CaptureSourceSettings {
    * The name of the executable associated with the window to capture.
    *
    * This is typically the process name (e.g., `"notepad.exe"` or `"chrome.exe"`).
+   *
+   * Mandatory field when using Window Capture source.
+   * Optional when using Browser Window source.
    */
-  executable: string;
+  executable?: string;
+
+  /**
+   * The window title, if multiple windows of the same executable exist.
+   */
+  windowTitle?: string;
 
   /**
    * The capture method used to record the window.
@@ -2165,6 +2691,13 @@ interface CaptureSource {
    * capture method, and more, depending on the selected source type.
    */
   readonly properties: any;
+
+  /**
+   * Optional name for the capture source.
+   *
+   * Can be used later for setting transform properties.
+   */
+  readonly name?: string;
 }
 
 /**
@@ -2856,6 +3389,26 @@ interface CaptureSettingsBuilder extends CaptureSettings {
   addGameSource(settings: GameCaptureSourceSettings): CaptureSettingsBuilder;
 
   /**
+   * Add Window video capture source
+   * settings. Executable is mandatory.
+   * @param settings
+   */
+  addWindowSource(
+    settings: WindowCaptureSourceSettings
+  ): CaptureSettingsBuilder;
+
+  /**
+   * Add Electron window capture source
+   * settings. Executable is optional.
+   * @param browserWindow
+   * @param settings
+   */
+  addBrowserWindowSource(
+    browserWindow: BrowserWindow,
+    setting: WindowCaptureSourceSettings
+  ): CaptureSettingsBuilder;
+
+  /**
    * Adds an audio device for capturing input or output audio.
    *
    * @param params - Parameters identifying the audio device.
@@ -2996,9 +3549,6 @@ interface EncoderInformation {
  * const options: RecordingAppOptions = {
  *   showDebugWindow: true,
  *   enableDebugLogs: true,
- *   customCommandLineArgs: ['--multi-threading'],
- *   overrideOBSFolder: 'C:/custom/obs',
- *   statsInterval: 5000
  * };
  * ```
  */
@@ -3014,24 +3564,6 @@ interface RecordingAppOptions {
    * Can be used to troubleshoot issues during recording.
    */
   enableDebugLogs?: boolean;
-
-  /**
-   * Additional command-line arguments to pass when launching the recorder.
-   * This can be used to customize the underlying OBS runtime behavior.
-   */
-  customCommandLineArgs?: string[];
-
-  /**
-   * Specifies a custom folder path to override the default OBS binaries used by the recorder.
-   * Useful for testing with a modified or custom OBS build.
-   */
-  overrideOBSFolder?: string;
-
-  /**
-   * Interval in milliseconds for emitting 'stats' events.
-   * Default is 2000 (2 seconds). Set to `0` to disable stats reporting.
-   */
-  statsInterval?: number;
 }
 
 
@@ -3734,7 +4266,6 @@ interface IOverwolfRecordingApi {
    * Registers games to monitor and track for launch/exit detection.
    *
    * @param filter Filtering rules for which games to track.
-   * 
    */
   registerGames(filter: GamesFilter): void;
 
@@ -3745,9 +4276,17 @@ interface IOverwolfRecordingApi {
    * @see {@link AudioDeviceSettingsUpdateInfo}
    * @since 0.32.0
    */
-  updateAudioDevice(
-    device: AudioDeviceSettingsUpdateInfo
-  ): Promise<void>;
+  updateAudioDevice(device: AudioDeviceSettingsUpdateInfo): Promise<void>;
+
+  /**
+   * Set a source to transform.
+   * 
+   * Defines how the source will be rendered (for example, position, scale, crop, etc.).
+   * Throws an error if the source is not found or if the transform is invalid.
+   * 
+   * @param sourceTransform
+   */
+  setSourceTransform(sourceTransform: SourceTransform): Promise<void>;
 
   /** @event Fired when a registered game is launched. */
   on(eventName: 'game-launched', listener: (gameInfo: GameInfo) => void): this;
@@ -3775,7 +4314,7 @@ interface IOverwolfRecordingApi {
 
   /**
    * @event Fired periodically with recorder performance metrics.
-   * Interval is configured via {@link RecordingAppOptions.statsInterval}.
+   *
    */
   on(eventName: 'stats', listener: (args: RecorderStats) => void): this;
 }
@@ -4070,7 +4609,7 @@ type ZOrderType = "default" | "topMost" | "bottomMost";
 interface OverlayOptions {
   /**
    * Controls how input is handled by the overlay window.
-   * @default 'noPassThrough' 
+   * @default 'noPassThrough'
    * @see {@link PassthroughType}.
    *
    */
@@ -4078,18 +4617,28 @@ interface OverlayOptions {
 
   /**
    * Controls the z-order (stacking order) of the overlay window.
-   * @default 'default' 
+   * @default 'default'
    * @see {@link ZOrderType}.
    */
   zOrder?: ZOrderType;
 
   /**
    * Controls whether the overlay intercepts keyboard input.
-   * 
+   *
    * `true`&mdash;the overlay won't intercept keyboard input.
    * @default false
    */
   ignoreKeyboardInput?: boolean;
+
+  /**
+   * When `true`, the overlay window is strictly confined to the game window boundaries.
+   *
+   * This prevents the overlay from being moved outside the game window area.
+   * @default false
+   * 
+   * @since 1.9.0
+   */
+  strictToGameWindow?: boolean;
 }
 
 
@@ -4369,22 +4918,22 @@ interface InjectionError {
  * ```
  */
 interface GameWindowInfo {
-  /** 
-   * The dimensions of the game window. 
+  /**
+   * The dimensions of the game window.
    */
   readonly size: Size;
 
-  /** 
+  /**
    * The native window handle (HWND) of the game window.
    */
   readonly nativeHandle: number;
 
-  /** 
+  /**
    * Indicates if the game window is currently in focus.
    */
   readonly focused: boolean;
 
-  /** 
+  /**
    * The graphics API used by the game (e.g., Direct3D 9, 11, 12, Vulkan).
    */
   readonly graphics: 'd3d9' | 'd3d12' | 'd3d11' | 'vulkan' | string | undefined;
@@ -4394,15 +4943,31 @@ interface GameWindowInfo {
    */
   readonly screen?: Display;
 
-  /** 
+  /**
    * The bounding rectangle of the game window in the screen's coordinates.
    *
    * For example: `bounds: { x: 100, y: 100, width: 800, height: 600 }`
-   * 
+   *
    * Means the game window is positioned at (100, 100) on the screen and has a size of 800x600 pixels.
    * @since 1.5.11.
    */
   readonly bounds?: Rectangle;
+
+  /**
+   * Indicates if the game is currently running in fullscreen exclusive mode.
+   *
+   * Relevant only for OOPO games.
+   * @since 1.9.0
+   */
+  readonly isFullscreen?: boolean;
+
+  /**
+   * Indicates if fullscreen rendering is disabled.
+   * 
+   * Relevant only for OOPO games.
+   * @since 1.9.0
+   */
+  readonly isOOPOFullscreenRenderingDisabled?: boolean;
 }
 
 /**
@@ -4649,7 +5214,7 @@ interface IOverlayHotkeys {
 interface IOverwolfOverlayApi extends EventEmitter {
   /**
    *  Create new Overlay window.
-   * @param options - Window configuration including name, z-order, passthrough, etc. 
+   * @param options - Window configuration including name, z-order, passthrough, etc.
    * @returns A promise that resolves to the created `OverlayBrowserWindow`.
    * @see {@link OverlayWindowOptions}.
    * @see {@link OverlayBrowserWindow}.
@@ -4678,13 +5243,12 @@ interface IOverwolfOverlayApi extends EventEmitter {
 
   /**
    * Returns the overlay window associated with a given `WebContents` instance.
-   * @param webContents - The Electron WebContents to query. 
+   * @param webContents - The Electron WebContents to query.
    * @see {@link OverlayBrowserWindow}.
-   * @returns The corresponding overlay window or `null` if not found. 
+   * @returns The corresponding overlay window or `null` if not found.
    */
   fromWebContents(webContents: WebContents): OverlayBrowserWindow | null;
 
-  
   /**
    * Returns the overlay window associated with a given `BrowserWindow`.
    *
@@ -4694,7 +5258,19 @@ interface IOverwolfOverlayApi extends EventEmitter {
    */
   fromBrowserWindow(browserWindow: BrowserWindow): OverlayBrowserWindow | null;
 
- /**
+  /**
+   * Requests game injection for the specified class ID (late injection).
+   *
+   * If the game is running, the 'game-launched' event will be emitted, and you can call `event.inject()` to inject the overlay.
+   * If another game is already injected, the overlay will move to the newly injected game.
+   *
+   * Throws an error if the game is not running.
+   *
+   * @param classId - The class ID of the game to inject the overlay into.
+   */
+  requestGameInjection(classId: number): Promise<void>;
+
+  /**
    * The hotkeys API used to register, update, and remove overlay hotkeys.
    * @see {@link IOverlayHotkeys}.
    */
@@ -4741,24 +5317,24 @@ interface IOverwolfOverlayApi extends EventEmitter {
    */
   on(eventName: 'game-launched', listener: (event: GameLaunchEvent, gameInfo: GameInfo) => void): this;
 
-/**
- * Fires when a registered game process terminates.
- *
- * Useful for performing cleanup, UI updates, or closing overlay windows.
- *
- * @param eventName - The event identifier for when the game exits.
- * @param listener - A callback function that receives the game info of the exited game.
- *
- * @example
- * ```ts
- * overlay.on('game-exit', (gameInfo, wasInjected) => {
- *   console.log(`Game exited: ${gameInfo.title} and ${wasInjected ? 'was injected' : 'was not injected'}`);
- *   closeOverlayWindows();
- * });
- * ```
- * 
- * @see {@link GameInfo}.
- */
+  /**
+   * Fires when a registered game process terminates.
+   *
+   * Useful for performing cleanup, UI updates, or closing overlay windows.
+   *
+   * @param eventName - The event identifier for when the game exits.
+   * @param listener - A callback function that receives the game info of the exited game.
+   *
+   * @example
+   * ```ts
+   * overlay.on('game-exit', (gameInfo, wasInjected) => {
+   *   console.log(`Game exited: ${gameInfo.title} and ${wasInjected ? 'was injected' : 'was not injected'}`);
+   *   closeOverlayWindows();
+   * });
+   * ```
+   *
+   * @see {@link GameInfo}.
+   */
   on(eventName: 'game-exit', listener: (gameInfo: GameInfo, wasInjected: boolean) => void): this;
 
   /**
@@ -4823,7 +5399,7 @@ interface IOverwolfOverlayApi extends EventEmitter {
    * @param eventName - `game-input-interception-changed`
    * @param listener - Callback with updated input state.
    * @see {@link GameInputInterception}.
-   * 
+   *
    */
   on(
     eventName: 'game-input-interception-changed',

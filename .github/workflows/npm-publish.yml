@@ -1,0 +1,72 @@
+name: NPM Publish Workflow
+
+on:
+  push:
+    branches:
+      - beta
+      - main
+    paths:
+      - "package.json"
+
+jobs:
+  publish-beta:
+    name: Publish Beta Package
+    runs-on: ubuntu-latest
+
+    if: github.ref == 'refs/heads/beta'
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: "https://registry.npmjs.org/"
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Publish to NPM Beta Tag
+        run: npm publish --access public --tag beta
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Confirm Publication
+        run: echo "Successfully published branch ${{ github.ref_name }} to npm with tag 'beta'."
+
+  publish-main:
+    name: Publish Main Package
+    runs-on: ubuntu-latest
+
+    if: github.ref == 'refs/heads/main'
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: "https://registry.npmjs.org/"
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Publish to NPM Latest Tag
+        run: npm publish --access public --tag latest
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Confirm Publication
+        run: echo "Successfully published branch ${{ github.ref_name }} to npm with tag 'latest'."
