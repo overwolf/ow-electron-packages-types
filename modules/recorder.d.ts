@@ -406,7 +406,15 @@ type CaptureSourceType =
   /**
    * Capture a specific application window.
    */
-  | 'Window';
+  | 'Window'
+  /**
+   * Capture a specific image.
+   */
+  | 'Image'
+  /**
+   * Capture a solid color screen.
+   */
+  | 'Color';
 
 
 
@@ -2589,6 +2597,44 @@ interface WindowCaptureSourceSettings extends CaptureSourceSettings {
 }
 
 /**
+ * Settings for capturing a static image as a source.
+ * 
+ * Extends {@link CaptureSourceSettings} with image-specific options such as file path.
+ * 
+ * @see CaptureSourceSettings
+ */
+export interface ImageCaptureSourceSettings extends CaptureSourceSettings {
+  /**
+   * Image file path.
+   */
+  path: string;
+}
+
+/**
+ * Settings for capturing a solid color as a source.
+ * 
+ * Extends {@link CaptureSourceSettings} with color-specific options such as color value, width, and height.
+ * 
+ * @see CaptureSourceSettings
+ */
+export interface ColorCaptureSourceSettings extends CaptureSourceSettings {
+  /**
+   * Color in #AARRGGBB format. (alpha red green blue)
+   */
+  color: string;
+
+  /**
+   * Width in pixels
+   */
+  width: number;
+
+  /**
+   * Height in pixels
+   */
+  height: number;
+}
+
+/**
  * Information about a generic capture source configuration, used for identifying and configuring
  * a video capture input such as a display, game, or application window.
  */
@@ -2689,6 +2735,54 @@ interface WindowCaptureSource extends CaptureSource {
    * @see WindowCaptureSourceSettings
    */
   readonly properties: WindowCaptureSourceSettings;
+}
+
+/**
+ * Image-based capture source configuration.
+ * 
+ * Extends {@link CaptureSource} with the `'Image'` type and
+ * configuration options for capturing a static image file.
+ */
+export interface ImageCaptureSource extends CaptureSource {
+  /**
+   * The capture source type.
+   * 
+   * Always set to `'Image'` for this interface.
+   */
+  readonly type: 'Image';
+
+  /**
+   * Configuration settings for image capture.
+   * 
+   * Includes file path.
+   * 
+   * @see ImageCaptureSourceSettings
+   */
+  readonly properties: ImageCaptureSourceSettings;
+}
+
+/**
+ * Color-based capture source configuration.
+ * 
+ * Extends {@link CaptureSource} with the `'Color'` type and
+ * configuration options for capturing a solid color.
+ */
+export interface ColorCaptureSource extends CaptureSource {
+  /**
+   * The capture source type.
+   * 
+   * Always set to `'Color'` for this interface.
+   */
+  readonly type: 'Color';
+
+  /**
+   * Configuration settings for color capture.
+   * 
+   * Includes color value, width, and height.
+   * 
+   * @see ColorCaptureSourceSettings
+   */
+  readonly properties: ColorCaptureSourceSettings;
 }
 
 
@@ -3293,7 +3387,7 @@ interface CaptureSettingsBuilder extends CaptureSettings {
    * @returns The builder instance for chaining.
    */
   addScreenSource(
-    settings: MonitorCaptureSourceSettings
+    settings: MonitorCaptureSourceSettings,
   ): CaptureSettingsBuilder;
 
   /**
@@ -3310,7 +3404,7 @@ interface CaptureSettingsBuilder extends CaptureSettings {
    * @param settings
    */
   addWindowSource(
-    settings: WindowCaptureSourceSettings
+    settings: WindowCaptureSourceSettings,
   ): CaptureSettingsBuilder;
 
   /**
@@ -3321,8 +3415,20 @@ interface CaptureSettingsBuilder extends CaptureSettings {
    */
   addBrowserWindowSource(
     browserWindow: BrowserWindow,
-    setting: WindowCaptureSourceSettings
+    setting: WindowCaptureSourceSettings,
   ): CaptureSettingsBuilder;
+
+  /**
+   * Add Image capture source
+   * @param settings
+   */
+  addImageSource(settings: ImageCaptureSourceSettings): CaptureSettingsBuilder;
+
+  /**
+   * Add Color capture source
+   * @param settings
+   */
+  addColorSource(settings: ColorCaptureSourceSettings): CaptureSettingsBuilder;
 
   /**
    * Adds an audio device for capturing input or output audio.
@@ -3333,7 +3439,7 @@ interface CaptureSettingsBuilder extends CaptureSettings {
    */
   addAudioCapture(
     params: AudioDeviceParams,
-    settings?: AudioDeviceSettings
+    settings?: AudioDeviceSettings,
   ): CaptureSettingsBuilder;
 
   /**
@@ -3347,7 +3453,7 @@ interface CaptureSettingsBuilder extends CaptureSettings {
   addAudioDefaultCapture(
     type: AudioDeviceType,
     params?: DefaultAudioDeviceParams,
-    settings?: AudioDeviceSettings
+    settings?: AudioDeviceSettings,
   ): CaptureSettingsBuilder;
 
   /**
@@ -3359,7 +3465,7 @@ interface CaptureSettingsBuilder extends CaptureSettings {
    */
   addApplicationAudioCapture(
     param: ApplicationAudioCaptureParams,
-    settings?: AudioDeviceSettings
+    settings?: AudioDeviceSettings,
   ): CaptureSettingsBuilder;
 
   /**
