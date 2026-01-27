@@ -1,6 +1,6 @@
 {
     "name": "@overwolf/ow-electron-packages-types",
-    "version": "1.0.6",
+    "version": "1.0.1-beta.2",
     "description": "Type definition file for autocompletion and documentation purposes for ow-electron packages",
     "license": "MIT",
     "types": "types.d.ts",
@@ -30,5 +30,8 @@
         "./gep-supported-games": {
             "types": "./gep-supported-games.d.ts"
         }
+    },
+    "dependencies": {
+        "glob": "^13.0.0"
     }
 }
