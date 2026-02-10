@@ -2621,7 +2621,7 @@ export interface ImageCaptureSourceSettings extends CaptureSourceSettings {
  */
 export interface ColorCaptureSourceSettings extends CaptureSourceSettings {
   /**
-   * Color in #AARRGGBB format. (alpha red green blue)
+   * Color in #RRGGBBAA format. (red green blue alpha)
    */
   color: string;
 
