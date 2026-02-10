@@ -2019,7 +2019,9 @@ export interface AudioNoiseSuppressFilterV2 extends AudioFilterBase {
  * This type uses the `id` property as a type discriminator. When used in a switch 
  * statement or conditional, TypeScript will narrow the `parameters` to the 
  * specific interface associated with that ID.
- * * @example
+ * 
+ * For more information about the filter types, see [OBS Audio Filters](https://obsproject.com/kb/filters-guide#:~:text=the%20Source%20image-,Audio/Video%20Filters,-Compressor).
+ *  @example
  * ```typescript
  * function applyFilter(filter: AudioFilter) {
  * if (filter.id === 'gain_filter') {
@@ -2703,7 +2705,7 @@ export interface ImageCaptureSourceSettings extends CaptureSourceSettings {
  */
 export interface ColorCaptureSourceSettings extends CaptureSourceSettings {
   /**
-   * Color in #AARRGGBB format. (alpha red green blue)
+   * Color in #RRGGBBAA format. (red green blue alpha)
    */
   color: string;
 
