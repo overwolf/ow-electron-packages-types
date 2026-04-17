@@ -142,6 +142,7 @@ export const enum kGameIds {
   ArenaofFate = 10804,
   Arhaekon = 26220,
   ArkanoidEternalBattle = 23838,
+  ArknightsEndfield = 27724,
   ArkNova = 26140,
   ARKSurvivalAscended = 23476,
   ARKSurvivalEvolved = 10778,
