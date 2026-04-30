@@ -4809,6 +4809,14 @@ interface OverlayWindowOptions
  *   modifiers: { ctrl: true, alt: true },
  *   passthrough: false
  * };
+ *
+ * // Since 1.13.3: use W3C KeyboardEvent.code strings (preferred, layout-independent)
+ * const toggleHotkey: IOverlayHotkey = {
+ *   name: 'toggle',
+ *   keyCode: 'KeyF',
+ *   modifiers: { ctrl: true, custom: 'Tab' },
+ *   passthrough: true
+ * };
  * ```
  */
 interface IOverlayHotkey {
@@ -4818,16 +4826,21 @@ interface IOverlayHotkey {
   name: string;
 
   /**
-   * Primary key code for the hotkey. Use standard keyboard codes.
+   * Primary key code for the hotkey.
+   *
+   * Accepts a numeric Windows Virtual-Key code or, since 1.13.3, a W3C
+   * `KeyboardEvent.code` string (e.g. `'KeyA'`, `'F10'`, `'ArrowUp'`).
+   * String values are resolved to VK codes at registration time; an unknown
+   * string throws an error.
    */
-  keyCode: number;
+  keyCode: number | string;
 
   /**
    * Modifier keys that must be pressed along with the main key.
    */
   modifiers?: {
     /**
-     * Used for `alt` ket.
+     * Used for `alt` key.
      */
     alt?: boolean;
     /**
@@ -4839,9 +4852,11 @@ interface IOverlayHotkey {
      */
     shift?: boolean;
     /**
-     * Custom key binding. Use key code.
+     * Custom key binding. Accepts a numeric Windows Virtual-Key code or,
+     * since 1.13.3, a W3C `KeyboardEvent.code` string (same format as
+     * `keyCode`).
      */
-    custom?: number;
+    custom?: number | string;
     /**
      * Use for the `windows` or `command` key.
      */
@@ -4850,10 +4865,10 @@ interface IOverlayHotkey {
 
   /**
    * Controls whether the hotkey will be passed through to the underlying game.
-   * 
+   *
    * - If `true`, the hotkey will be captured by the overlay and pass to the game.
    * - If `false`, the hotkey will be captured exclusively by the overlay.
-   * 
+   *
    * @default false
    */
   passthrough?: boolean;
