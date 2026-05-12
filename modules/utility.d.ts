@@ -46,6 +46,22 @@ interface IOverwolfUtilityApi {
    */
   scan(filter?: GamesFilter): Promise<InstalledGameInfo[]>;
 
+   /**
+   * install ow-electron helpers to
+   * %CommonProgramFiles%\<app-name>\ with UAC elevation.
+   * will allow us to inject into high elevation games
+   * No-ops if files are already present.
+   * @throws {HelperInstallError} exitCode 1223 — user cancelled the UAC prompt (ERROR_CANCELLED)
+   * @throws {HelperInstallError} any other non-zero exitCode — installation failed
+   */
+  installHighElevationHelper?(): Promise<void>;
+
+  /**
+   * Returns true if ow-electron helpers is already installed in
+   * %CommonProgramFiles%\<app-name>\.
+   */
+  isHighElevationHelperInstalled?(): Promise<boolean>;
+
   /**
    * Fires when a tracked game is launched.
    *
