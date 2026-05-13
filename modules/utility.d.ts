@@ -41,6 +41,9 @@ interface IOverwolfUtilityApi {
   /**
    * Scans the system for installed games that match the provided filter.
    *
+   * If a game is installed on multiple platforms (e.g. both Steam and Epic Games),
+   * each installation is returned as a separate `InstalledGameInfo` entry.
+   *
    * @param filter - Optional. Configuration specifying which games to include in the scan.
    * @returns A promise that resolves to an array of `InstalledGameInfo` objects representing the installed games.
    */

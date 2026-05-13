@@ -118,14 +118,16 @@ type GameInfoType = 'Game' | 'Launcher' | undefined;
 
 /**
  * Information about a game installed on the user's system.
- * 
+ *
  * Includes:
  * - The Game's ID.
- * - Installation path.
+ * - Installation path and install folder.
+ * - Steam store ID (if installed via Steam).
+ * - Epic Games store ID (if installed via Epic Games Launcher).
  * - Name of the game.
  * - Type (`game` or `launcher`).
  * - Overlay support status.
- * 
+ *
  */
 type InstalledGameInfo = {
   /**
@@ -137,6 +139,22 @@ type InstalledGameInfo = {
    * The full file system path to the game's installation directory.
    */
   path?: string;
+
+  /**
+   * The root folder where the game is installed.
+   * (when detected from steam or epic)
+   */
+  installFolder?: string;
+
+  /**
+   * The game's Steam store ID.
+   */
+  steamId?: number;
+
+  /**
+   * The game's Epic Games store ID.
+   */
+  epicId?: string;
 
   /**
    * Name of the game.

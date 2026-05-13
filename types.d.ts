@@ -56,6 +56,9 @@ interface IOverwolfUtilityApi {
   /**
    * Scans the system for installed games that match the provided filter.
    *
+   * If a game is installed on multiple platforms (e.g. both Steam and Epic Games),
+   * each installation is returned as a separate `InstalledGameInfo` entry.
+   *
    * @param filter - Optional. Configuration specifying which games to include in the scan.
    * @returns A promise that resolves to an array of `InstalledGameInfo` objects representing the installed games.
    */
@@ -69,13 +72,13 @@ interface IOverwolfUtilityApi {
    * @throws {HelperInstallError} exitCode 1223 — user cancelled the UAC prompt (ERROR_CANCELLED)
    * @throws {HelperInstallError} any other non-zero exitCode — installation failed
    */
-  installHighElevationHelper(): Promise<void>;
+  installHighElevationHelper?(): Promise<void>;
 
   /**
    * Returns true if ow-electron helpers is already installed in
    * %CommonProgramFiles%\<app-name>\.
    */
-  isHighElevationHelperInstalled(): Promise<boolean>;
+  isHighElevationHelperInstalled?(): Promise<boolean>;
 
   /**
    * Fires when a tracked game is launched.
@@ -4622,14 +4625,16 @@ type GameInfoType = 'Game' | 'Launcher' | undefined;
 
 /**
  * Information about a game installed on the user's system.
- * 
+ *
  * Includes:
  * - The Game's ID.
- * - Installation path.
+ * - Installation path and install folder.
+ * - Steam store ID (if installed via Steam).
+ * - Epic Games store ID (if installed via Epic Games Launcher).
  * - Name of the game.
  * - Type (`game` or `launcher`).
  * - Overlay support status.
- * 
+ *
  */
 type InstalledGameInfo = {
   /**
@@ -4641,6 +4646,22 @@ type InstalledGameInfo = {
    * The full file system path to the game's installation directory.
    */
   path?: string;
+
+  /**
+   * The root folder where the game is installed.
+   * (when detected from steam or epic)
+   */
+  installFolder?: string;
+
+  /**
+   * The game's Steam store ID.
+   */
+  steamId?: number;
+
+  /**
+   * The game's Epic Games store ID.
+   */
+  epicId?: string;
 
   /**
    * Name of the game.
@@ -5449,13 +5470,13 @@ interface IOverwolfOverlayApi extends EventEmitter {
    * @throws {HelperInstallError} exitCode 1223 — user cancelled the UAC prompt (ERROR_CANCELLED)
    * @throws {HelperInstallError} any other non-zero exitCode — installation failed
    */
-  installHighElevationHelper(): Promise<void>;
+  installHighElevationHelper?(): Promise<void>;
 
   /**
    * Returns true if ow-electron helpers is already installed in
    * %CommonProgramFiles%\<app-name>\.
    */
-  isHighElevationHelperInstalled(): Promise<boolean>;
+  isHighElevationHelperInstalled?(): Promise<boolean>;
 
   /**
    * Fires when an internal error occurs within the overlay system.
