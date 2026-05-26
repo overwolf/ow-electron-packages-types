@@ -3856,6 +3856,20 @@ interface ReplayOptions extends RecordingBaseOptions {
    * Example: `"C:/Recordings/Replays"`
    */
   rootFolder: string;
+
+  /**
+   * How long (ms) to wait for OBS to acknowledge a stop before force-killing
+   * the process. Defaults to `30000` ms.
+   */
+  stopReplaysKillTimeoutMs?: number;
+
+  /**
+   * Output frame-skip rate (0–1) at which OBS is considered critically
+   * overloaded during an active recording. If this threshold is reached when
+   * the stop-replays timeout fires, OBS is force-killed even while a recording
+   * is active. Defaults to `0.5`.
+   */
+  criticalEncodeSkipRate?: number;
 }
 
 /**
