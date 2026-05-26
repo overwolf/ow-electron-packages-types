@@ -2596,6 +2596,11 @@ interface WindowCaptureSourceSettings extends CaptureSourceSettings {
    * May improve stability when using traditional window capture on systems with more than one GPU.
    */
   compatibility?: boolean;
+
+  /**
+   * If `true`, captures the overlay when recording an OOPO-injected game window.
+   */
+  captureOOPO?: boolean;
 }
 
 /**
