@@ -2949,7 +2949,7 @@ interface EncoderSettingsNVENC extends VideoEncoderSettingsBase {
    * If `true`, the encoder dynamically determines the number of B-frames up to `bf`.
    * Improves quality but increases GPU usage.
    *
-   * @default false
+   * @default true
    */
   lookahead?: boolean;
 
