@@ -358,10 +358,47 @@ interface IOverlayHotkey {
   /**
    * Primary key code for the hotkey.
    *
-   * Accepts a numeric Windows Virtual-Key code or, since 1.13.3, a W3C
-   * `KeyboardEvent.code` string (e.g. `'KeyA'`, `'F10'`, `'ArrowUp'`).
-   * String values are resolved to VK codes at registration time; an unknown
-   * string throws an error.
+   * Accepts a numeric Windows Virtual-Key (VK) code or a W3C {@link https://www.w3.org/TR/uievents-code/ | KeyboardEvent.code}
+   * string (e.g. `'KeyF'`, `'F10'`, `'ArrowUp'`).
+   *
+   * @remarks
+   * Numeric VK codes are layout-dependent — the same physical key produces a different
+   * VK number on non-QWERTY keyboards. Passing a `KeyboardEvent.code` string identifies
+   * the physical key unambiguously regardless of the user's keyboard layout.
+   *
+   * String values are resolved to VK codes at registration time. An unrecognized string
+   * throws immediately so misconfigured hotkeys are caught early.
+   *
+   * **Supported string codes include:** `KeyA`–`KeyZ`, `Digit0`–`Digit9`,
+   * `F1`–`F24`, `Numpad0`–`Numpad9`, `ArrowUp`/`Down`/`Left`/`Right`, `Tab`, `Enter`,
+   * `Space`, `Backspace`, `Delete`, `Escape`, `Home`, `End`, `PageUp`, `PageDown`,
+   * `ShiftLeft`/`Right`, `ControlLeft`/`Right`, `AltLeft`/`Right`, `Backquote`,
+   * `Minus`, `Equal`, `BracketLeft`/`Right`, `Semicolon`, `Quote`, `Comma`,
+   * `Period`, `Slash`, `Backslash`, and media/browser/launch keys.
+   *
+   * @throws `Error('Unknown hotkey code: "<value>". Pass a valid KeyboardEvent.code string…')`
+   * thrown at registration time when the string does not map to a known VK code.
+   * Validate the string before calling `register` if the value comes from user input.
+   *
+   * @example
+   * ```ts
+   * // Preferred: physical key position, layout-independent
+   * api.hotkeys.register({ name: 'toggle', keyCode: 'KeyF' }, callback);
+   *
+   * // With modifier using string code
+   * api.hotkeys.register({
+   *   name: 'screenshot',
+   *   keyCode: 'KeyP',
+   *   modifiers: { ctrl: true }
+   * }, callback);
+   *
+   * // Legacy: numeric VK code (still valid)
+   * api.hotkeys.register({ name: 'toggle-legacy', keyCode: 70 }, callback);
+   *
+   * // Throws at registration — unknown string
+   * api.hotkeys.register({ name: 'bad', keyCode: 'Bogus' }, callback);
+   * // Error: Unknown hotkey code: "Bogus". Pass a valid KeyboardEvent.code string…
+   * ```
    */
   keyCode: number | string;
 
