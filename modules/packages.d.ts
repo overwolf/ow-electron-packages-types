@@ -9,6 +9,8 @@
  * - `overlay`&mdash;in-game overlay window management and hotkeys
  * - `utility`&mdash;game tracking and scanning utilities
  * - `crn`&mdash;crash report and notification system
+ * - `gep`&mdash;subscribe to real-time in-game events and info updates
+ * from supported games.
  *
  * It acts as a unified entry point for interacting with Overwolf's capabilities within a packaged app.
  * @packageDocumentation
@@ -51,4 +53,9 @@ interface OWPackages extends overwolf.packages.OverwolfPackageManager {
    * Access to crash reporting and notification APIs.
    */
   crn: IOverwolfCRNApi;
+
+  /**
+   * Allows your app to subscribe to real-time in-game events and info updates from supported games.
+   */
+  gep: OverwolfGameEventPackage;
 }

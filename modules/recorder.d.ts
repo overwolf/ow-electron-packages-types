@@ -2596,6 +2596,11 @@ interface WindowCaptureSourceSettings extends CaptureSourceSettings {
    * May improve stability when using traditional window capture on systems with more than one GPU.
    */
   compatibility?: boolean;
+
+  /**
+   * If `true`, captures the overlay when recording an OOPO-injected game window.
+   */
+  captureOOPO?: boolean;
 }
 
 /**
@@ -2944,7 +2949,7 @@ interface EncoderSettingsNVENC extends VideoEncoderSettingsBase {
    * If `true`, the encoder dynamically determines the number of B-frames up to `bf`.
    * Improves quality but increases GPU usage.
    *
-   * @default false
+   * @default true
    */
   lookahead?: boolean;
 
@@ -3748,6 +3753,20 @@ interface ReplayOptions extends RecordingBaseOptions {
    * Example: `"C:/Recordings/Replays"`
    */
   rootFolder: string;
+
+  /**
+   * How long (ms) to wait for OBS to acknowledge a stop before force-killing
+   * the process. Defaults to `30000` ms.
+   */
+  stopReplaysKillTimeoutMs?: number;
+
+  /**
+   * Output frame-skip rate (0–1) at which OBS is considered critically
+   * overloaded during an active recording. If this threshold is reached when
+   * the stop-replays timeout fires, OBS is force-killed even while a recording
+   * is active. Defaults to `0.5`.
+   */
+  criticalEncodeSkipRate?: number;
 }
 
 /**
