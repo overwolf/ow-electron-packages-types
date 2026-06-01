@@ -358,10 +358,47 @@ interface IOverlayHotkey {
   /**
    * Primary key code for the hotkey.
    *
-   * Accepts a numeric Windows Virtual-Key code or, since 1.13.3, a W3C
-   * `KeyboardEvent.code` string (e.g. `'KeyA'`, `'F10'`, `'ArrowUp'`).
-   * String values are resolved to VK codes at registration time; an unknown
-   * string throws an error.
+   * Accepts a numeric Windows Virtual-Key (VK) code or a W3C {@link https://www.w3.org/TR/uievents-code/ | KeyboardEvent.code}
+   * string (e.g. `'KeyF'`, `'F10'`, `'ArrowUp'`).
+   *
+   * @remarks
+   * Numeric VK codes are layout-dependent — the same physical key produces a different
+   * VK number on non-QWERTY keyboards. Passing a `KeyboardEvent.code` string identifies
+   * the physical key unambiguously regardless of the user's keyboard layout.
+   *
+   * String values are resolved to VK codes at registration time. An unrecognized string
+   * throws immediately so misconfigured hotkeys are caught early.
+   *
+   * **Supported string codes include:** `KeyA`–`KeyZ`, `Digit0`–`Digit9`,
+   * `F1`–`F24`, `Numpad0`–`Numpad9`, `ArrowUp`/`Down`/`Left`/`Right`, `Tab`, `Enter`,
+   * `Space`, `Backspace`, `Delete`, `Escape`, `Home`, `End`, `PageUp`, `PageDown`,
+   * `ShiftLeft`/`Right`, `ControlLeft`/`Right`, `AltLeft`/`Right`, `Backquote`,
+   * `Minus`, `Equal`, `BracketLeft`/`Right`, `Semicolon`, `Quote`, `Comma`,
+   * `Period`, `Slash`, `Backslash`, and media/browser/launch keys.
+   *
+   * @throws `Error('Unknown hotkey code: "<value>". Pass a valid KeyboardEvent.code string…')`
+   * thrown at registration time when the string does not map to a known VK code.
+   * Validate the string before calling `register` if the value comes from user input.
+   *
+   * @example
+   * ```ts
+   * // Preferred: physical key position, layout-independent
+   * api.hotkeys.register({ name: 'toggle', keyCode: 'KeyF' }, callback);
+   *
+   * // With modifier using string code
+   * api.hotkeys.register({
+   *   name: 'screenshot',
+   *   keyCode: 'KeyP',
+   *   modifiers: { ctrl: true }
+   * }, callback);
+   *
+   * // Legacy: numeric VK code (still valid)
+   * api.hotkeys.register({ name: 'toggle-legacy', keyCode: 70 }, callback);
+   *
+   * // Throws at registration — unknown string
+   * api.hotkeys.register({ name: 'bad', keyCode: 'Bogus' }, callback);
+   * // Error: Unknown hotkey code: "Bogus". Pass a valid KeyboardEvent.code string…
+   * ```
    */
   keyCode: number | string;
 
@@ -956,18 +993,69 @@ interface IOverwolfOverlayApi extends EventEmitter {
   exitExclusiveMode(): void;
 
    /**
-   * install ow-electron helpers to
+   * Install ow-electron helpers to
    * %CommonProgramFiles%\<app-name>\ with UAC elevation.
-   * will allow us to inject into high elevation games
+   * Allows injection into high elevation games.
    * No-ops if files are already present.
-   * @throws {HelperInstallError} exitCode 1223 — user cancelled the UAC prompt (ERROR_CANCELLED)
-   * @throws {HelperInstallError} any other non-zero exitCode — installation failed
+   * @throws {HelperInstallError} `exitCode 1223` — user cancelled the UAC prompt (ERROR_CANCELLED)
+   * @throws - {HelperInstallError} `err.exitCode !== 1223` — the installer process failed. Log `err.exitCode` and
+  investigate.
+   * @throws {HelperInstallError} any other non-zero exitCode — installation failed.
+   *
+   * @remarks
+   * The helper binaries are installed to:
+   * - `%CommonProgramFiles%\<app-name>\owe-helper-ui.exe` (x64)
+   * - `%CommonProgramFiles%\<app-name>\owe-helper-ui-x86.exe` (x86)
+   *
+   * @example
+   * ```ts
+   * // Check whether the helper is already installed
+   * const installed: boolean = await api.isHighElevationHelperInstalled();
+   *
+   * // Trigger UAC-elevated installation (shows a UAC prompt to the user)
+   * try {
+   *   await api.installHighElevationHelper();
+   *   console.log('Helper installed successfully');
+   * } catch (err: any) {
+   *   if (err.exitCode === 1223) {
+   *     // User cancelled the UAC prompt — not an error, just inform the user
+   *     console.warn('User cancelled UAC prompt');
+   *   } else {
+   *     console.error('Installation failed, exitCode:', err.exitCode);
+   *   }
+   * }
+   * ```
+   *
+   * @example Typical integration flow
+   * ```ts
+   * async function ensureElevatedInjection(api: IOverwolfOverlayApi) {
+   *   const installed = await api.isHighElevationHelperInstalled();
+   *   if (!installed) {
+   *     await api.installHighElevationHelper(); // may throw — handle UAC cancel
+   *   }
+   *   // Injection into elevated games now happens automatically on game launch
+   * }
+   * ```
+   * @returns `Promise<void>` — resolves when installation completes.
+   * 
+   * 
+   * 
    */
   installHighElevationHelper?(): Promise<void>;
 
   /**
    * Returns true if ow-electron helpers is already installed in
    * %CommonProgramFiles%\<app-name>\.
+   * 
+   * @returns `Promise<boolean>` — `true` if the helper is installed and ready.
+   * 
+   * @example
+   * ```ts 
+   * const installed: boolean = await api.isHighElevationHelperInstalled();
+   * if (!installed) {
+   *   // Prompt the user to run the one-time setup before injecting into elevated games
+   * }
+   * ```
    */
   isHighElevationHelperInstalled?(): Promise<boolean>;
 
