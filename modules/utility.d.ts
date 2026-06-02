@@ -51,7 +51,7 @@ interface IOverwolfUtilityApi {
 
    /**
    * Install ow-electron helpers to
-   * %CommonProgramFiles%\<app-name>\ with UAC elevation.
+   * `%CommonProgramFiles%\<app-name>\` with UAC elevation.
    * Allows injection into high elevation games.
    * No-ops if files are already present.
    * @throws {HelperInstallError} `exitCode 1223` — user cancelled the UAC prompt (ERROR_CANCELLED)
@@ -98,7 +98,7 @@ interface IOverwolfUtilityApi {
 
    /**
    * Returns true if ow-electron helpers is already installed in
-   * %CommonProgramFiles%\<app-name>\.
+   * `%CommonProgramFiles%\<app-name>\`.
    * 
    * @returns `Promise<boolean>` — `true` if the helper is installed and ready.
    * 
