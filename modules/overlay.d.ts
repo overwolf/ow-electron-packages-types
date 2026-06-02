@@ -1036,7 +1036,7 @@ interface IOverwolfOverlayApi extends EventEmitter {
    *   // Injection into elevated games now happens automatically on game launch
    * }
    * ```
-   * @returns `Promise<void>` — resolves when installation completes.
+   * @returns Resolves when installation completes.
    * 
    * 
    * 
@@ -1047,7 +1047,7 @@ interface IOverwolfOverlayApi extends EventEmitter {
    * Returns true if ow-electron helpers is already installed in
    * `%CommonProgramFiles%\<app-name>\`.
    * 
-   * @returns `Promise<boolean>` — `true` if the helper is installed and ready.
+   * @returns `true` if the helper is installed and ready.
    * 
    * @example
    * ```ts 
