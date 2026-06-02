@@ -998,7 +998,7 @@ interface IOverwolfOverlayApi extends EventEmitter {
    * Allows injection into high elevation games.
    * No-ops if files are already present.
    *
-   * @throws {HelperInstallError}
+   * @throws \{HelperInstallError\}
    *  - `exitCode 1223` — user cancelled the UAC prompt (ERROR_CANCELLED)
    *  - `err.exitCode !== 1223` — the installer process failed. Log `err.exitCode` and investigate.
    *  - any other non-zero exitCode — installation failed.
