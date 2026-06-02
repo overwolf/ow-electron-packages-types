@@ -994,13 +994,14 @@ interface IOverwolfOverlayApi extends EventEmitter {
 
    /**
    * Install ow-electron helpers to
-   * %CommonProgramFiles%\<app-name>\ with UAC elevation.
+   * `%CommonProgramFiles%\<app-name>\` with UAC elevation.
    * Allows injection into high elevation games.
    * No-ops if files are already present.
-   * @throws {HelperInstallError} `exitCode 1223` — user cancelled the UAC prompt (ERROR_CANCELLED)
-   * @throws - {HelperInstallError} `err.exitCode !== 1223` — the installer process failed. Log `err.exitCode` and
-  investigate.
-   * @throws {HelperInstallError} any other non-zero exitCode — installation failed.
+   *
+   * @throws \{HelperInstallError\}
+   *  - `exitCode 1223` — user cancelled the UAC prompt (ERROR_CANCELLED)
+   *  - `err.exitCode !== 1223` — the installer process failed. Log `err.exitCode` and investigate.
+   *  - any other non-zero exitCode — installation failed.
    *
    * @remarks
    * The helper binaries are installed to:
@@ -1036,7 +1037,7 @@ interface IOverwolfOverlayApi extends EventEmitter {
    *   // Injection into elevated games now happens automatically on game launch
    * }
    * ```
-   * @returns `Promise<void>` — resolves when installation completes.
+   * @returns Resolves when installation completes.
    * 
    * 
    * 
@@ -1045,9 +1046,9 @@ interface IOverwolfOverlayApi extends EventEmitter {
 
   /**
    * Returns true if ow-electron helpers is already installed in
-   * %CommonProgramFiles%\<app-name>\.
+   * `%CommonProgramFiles%\<app-name>\`.
    * 
-   * @returns `Promise<boolean>` — `true` if the helper is installed and ready.
+   * @returns `true` if the helper is installed and ready.
    * 
    * @example
    * ```ts 
