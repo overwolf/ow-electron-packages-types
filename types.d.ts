@@ -4367,10 +4367,11 @@ interface IOverwolfRecordingApi {
   /**
    * Queries supported encoders, audio/video devices, and configuration options.
    *
+   * @param overrideCache If `true`, bypasses cached result and queries OBS directly.
    * @returns A promise that resolves to the full recording capability information.
    * @see {@link RecordingInformation}
    */
-  queryInformation(): Promise<RecordingInformation>;
+  queryInformation(overrideCache?: boolean): Promise<RecordingInformation>;
 
   /**
    * Creates a capture settings builder instance to configure video/audio sources.
@@ -4461,7 +4462,7 @@ interface IOverwolfRecordingApi {
    *
    * @param filter Filtering rules for which games to track.
    */
-  registerGames(filter: GamesFilter): void;
+  registerGames(filter: GamesFilter): Promise<void>;
 
   /**
    * Updates runtime settings for an audio device while recording.
