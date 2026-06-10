@@ -5833,7 +5833,7 @@ interface OverwolfGameEventPackage extends NodeJS.EventEmitter {
   getSupportedGames(): Promise<{
     name: string;
     id: number;
-  }>;
+  }[]>;
 
   /**
    * Returns the target game's current Game Info.
