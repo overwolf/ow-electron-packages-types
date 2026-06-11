@@ -1061,6 +1061,57 @@ interface IOverwolfOverlayApi extends EventEmitter {
   isHighElevationHelperInstalled?(): Promise<boolean>;
 
   /**
+   * Captures the current game frame and saves it to disk.
+   *
+   * Only one screenshot can be in progress at a time. Calling this method
+   * while a previous capture is still pending will reject immediately —
+   * wait for the returned promise to settle before issuing the next call.
+   *
+   * The file extension in `filePath` is normalized automatically: if it does
+   * not already end with `.jpg` or `.bmp` (matching `format`), the correct
+   * extension is appended.
+   *
+   * Internally all backends (D3D9, D3D11, D3D12, Vulkan) capture as BMP
+   * first and transcode to JPEG on demand, ensuring correct colors across
+   * all graphics APIs and formats.
+   *
+   * @param filePath - Absolute path (UTF-8) where the image will be saved.
+   * @param format - Output image format: `'jpg'` or `'bmp'`. Defaults to `'bmp'`.
+   * @returns A promise that resolves with `void` when the file is written.
+   *
+   * @throws `'no active game'` — the overlay is not currently injected into
+   *   any game. Wait for the `game-injected` event before calling.
+   * @throws `'screenshot already in progress'` — a previous capture has not
+   *   yet completed. Await the previous promise before calling again.
+   * @throws `'no active graphics device'` — the game has no active GPU
+   *   device at this moment (e.g. the game window is minimized or in a
+   *   device-lost state). Try again once the game is in the foreground.
+   * @throws `'capture failed: <backend>'` — the GPU-side readback failed
+   *   (e.g. staging texture creation, memory map, or WIC encode error).
+   *
+   * @example
+   * ```ts
+   * overlay.on('game-injected', () => {
+   *   overlay.hotkeys.register(
+   *     { name: 'screenshot', keyCode: 'F9', passthrough: false },
+   *     async (hotkey, state) => {
+   *       if (state !== 'pressed') return;
+   *       const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+   *       const filePath = path.join(app.getPath('pictures'), `screenshot_${ts}`);
+   *       try {
+   *         await overlay.takeScreenshot(filePath, 'jpg');
+   *         // file written to filePath + '.jpg'
+   *       } catch (err) {
+   *         console.error('Screenshot failed:', err.message);
+   *       }
+   *     }
+   *   );
+   * });
+   * ```
+   */
+  takeScreenshot(filePath: string, format?: 'jpg' | 'bmp'): Promise<void>;
+
+  /**
    * Fires when an internal error occurs within the overlay system.
    */
   on(eventName: 'error', listener: (...args: any[]) => void): this;
