@@ -992,7 +992,7 @@ interface IOverwolfOverlayApi extends EventEmitter {
    */
   exitExclusiveMode(): void;
 
-   /**
+  /**
    * Install ow-electron helpers to
    * `%CommonProgramFiles%\<app-name>\` with UAC elevation.
    * Allows injection into high elevation games.
@@ -1038,20 +1038,20 @@ interface IOverwolfOverlayApi extends EventEmitter {
    * }
    * ```
    * @returns Resolves when installation completes.
-   * 
-   * 
-   * 
+   *
+   *
+   *
    */
   installHighElevationHelper?(): Promise<void>;
 
   /**
    * Returns true if ow-electron helpers is already installed in
    * `%CommonProgramFiles%\<app-name>\`.
-   * 
+   *
    * @returns `true` if the helper is installed and ready.
-   * 
+   *
    * @example
-   * ```ts 
+   * ```ts
    * const installed: boolean = await api.isHighElevationHelperInstalled();
    * if (!installed) {
    *   // Prompt the user to run the one-time setup before injecting into elevated games
@@ -1067,17 +1067,24 @@ interface IOverwolfOverlayApi extends EventEmitter {
    * while a previous capture is still pending will reject immediately —
    * wait for the returned promise to settle before issuing the next call.
    *
-   * The file extension in `filePath` is normalized automatically: if it does
-   * not already end with `.jpg` or `.bmp` (matching `format`), the correct
-   * extension is appended.
+   * The output format is resolved by precedence: an explicit `format`
+   * argument wins; otherwise the extension already present in `filePath`
+   * (`.jpg`/`.jpeg` or `.bmp`) is used; otherwise it defaults to `'bmp'`.
+   * The file extension is then normalized to match the resolved format, so
+   * an existing extension is rewritten rather than doubled (e.g.
+   * `shot.jpg` stays `shot.jpg`, and `shot.png` with `format: 'jpg'` becomes
+   * `shot.jpg`).
    *
    * Internally all backends (D3D9, D3D11, D3D12, Vulkan) capture as BMP
    * first and transcode to JPEG on demand, ensuring correct colors across
    * all graphics APIs and formats.
    *
    * @param filePath - Absolute path (UTF-8) where the image will be saved.
-   * @param format - Output image format: `'jpg'` or `'bmp'`. Defaults to `'bmp'`.
-   * @returns A promise that resolves with `void` when the file is written.
+   * @param format - Output image format: `'jpg'` or `'bmp'`. When omitted,
+   *   the extension in `filePath` is used, falling back to `'bmp'`.
+   * @returns A promise that resolves with the absolute path the file was
+   *   actually written to, including the normalized extension (which may
+   *   differ from `filePath`).
    *
    * @throws `'no active game'` — the overlay is not currently injected into
    *   any game. Wait for the `game-injected` event before calling.
@@ -1099,8 +1106,8 @@ interface IOverwolfOverlayApi extends EventEmitter {
    *       const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
    *       const filePath = path.join(app.getPath('pictures'), `screenshot_${ts}`);
    *       try {
-   *         await overlay.takeScreenshot(filePath, 'jpg');
-   *         // file written to filePath + '.jpg'
+   *         const savedPath = await overlay.takeScreenshot(filePath, 'jpg');
+   *         console.log('screenshot written to', savedPath); // ...filePath.jpg
    *       } catch (err) {
    *         console.error('Screenshot failed:', err.message);
    *       }
@@ -1124,7 +1131,10 @@ interface IOverwolfOverlayApi extends EventEmitter {
    * @param listener - Callback with game launch event and game metadata.
    * @see {@link GameInfo}.
    */
-  on(eventName: 'game-launched', listener: (event: GameLaunchEvent, gameInfo: GameInfo) => void): this;
+  on(
+    eventName: 'game-launched',
+    listener: (event: GameLaunchEvent, gameInfo: GameInfo) => void,
+  ): this;
 
   /**
    * Fires when a registered game process terminates.
@@ -1144,7 +1154,10 @@ interface IOverwolfOverlayApi extends EventEmitter {
    *
    * @see {@link GameInfo}.
    */
-  on(eventName: 'game-exit', listener: (gameInfo: GameInfo, wasInjected: boolean) => void): this;
+  on(
+    eventName: 'game-exit',
+    listener: (gameInfo: GameInfo, wasInjected: boolean) => void,
+  ): this;
 
   /**
    * Fires when the overlay is ready and successfully injected into the game.
@@ -1164,7 +1177,7 @@ interface IOverwolfOverlayApi extends EventEmitter {
    */
   on(
     eventName: 'game-injection-error',
-    listener: (gameInfo: GameInfo, error: string, ...args: any[]) => void
+    listener: (gameInfo: GameInfo, error: string, ...args: any[]) => void,
   ): this;
 
   /**
@@ -1180,8 +1193,8 @@ interface IOverwolfOverlayApi extends EventEmitter {
     listener: (
       window: GameWindowInfo,
       gameInfo: GameInfo,
-      focus: boolean
-    ) => void
+      focus: boolean,
+    ) => void,
   ): this;
 
   /**
@@ -1198,8 +1211,8 @@ interface IOverwolfOverlayApi extends EventEmitter {
     listener: (
       window: GameWindowInfo,
       gameInfo: GameInfo,
-      reason?: GameWindowUpdateReason
-    ) => void
+      reason?: GameWindowUpdateReason,
+    ) => void,
   ): this;
 
   /**
@@ -1212,7 +1225,7 @@ interface IOverwolfOverlayApi extends EventEmitter {
    */
   on(
     eventName: 'game-input-interception-changed',
-    listener: (info: GameInputInterception) => void
+    listener: (info: GameInputInterception) => void,
   ): this;
 
   /**
@@ -1224,6 +1237,6 @@ interface IOverwolfOverlayApi extends EventEmitter {
    */
   on(
     eventName: 'game-input-exclusive-mode-changed',
-    listener: (info: GameInputInterception) => void
+    listener: (info: GameInputInterception) => void,
   ): this;
 }
