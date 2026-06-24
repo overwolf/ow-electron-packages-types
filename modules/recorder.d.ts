@@ -4189,9 +4189,14 @@ interface IOverwolfRecordingApi {
   readonly version: string;
 
   /**
-   * Path to ffmpeg file.
+   * Path to ffmpeg executable
    */
   readonly ffmpegPath: string;
+
+  /**
+   * Path to ffprobe executable
+   */
+  readonly ffprobePath: string;
 
   /**
    * Path to OBS binaries folder.
