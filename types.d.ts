@@ -941,6 +941,38 @@ interface VideoInformation {
 }
 
 /**
+ * Information about the current Xbox Game DVR state on the system.
+ *
+ * Xbox Game DVR captures game video in the background and can interfere with
+ * recording. This interface reports whether it is active and the underlying
+ * registry values that drive it.
+ *
+ * @example
+ * const dvr: XboxDVRInfo = {
+ *   enabled: true,
+ *   appCaptureEnabled: true,
+ *   gameDVREnabled: false
+ * };
+ */
+interface XboxDVRInfo {
+  /**
+   * `true` if Xbox Game DVR is active via either capture path
+   * (`appCaptureEnabled || gameDVREnabled`).
+   */
+  readonly enabled: boolean;
+
+  /**
+   * The `AppCaptureEnabled` registry value.
+   */
+  readonly appCaptureEnabled: boolean;
+
+  /**
+   * The `GameDVR_Enabled` registry value.
+   */
+  readonly gameDVREnabled: boolean;
+}
+
+/**
  * Information about the complete recording configuration for the current system.
  *
  * This includes audio device and encoder information, video encoder and GPU adapter details,
@@ -975,6 +1007,13 @@ interface RecordingInformation {
    * @see MonitorInfo
    */
   monitors: MonitorInfo[];
+
+  /**
+   * The current Xbox Game DVR state on the system.
+   *
+   * @see XboxDVRInfo
+   */
+  xboxDVR: XboxDVRInfo;
 }
 
 
@@ -4372,11 +4411,30 @@ interface IOverwolfRecordingApi {
   /**
    * Queries supported encoders, audio/video devices, and configuration options.
    *
+   * The result also includes the current Xbox Game DVR state (`xboxDVR`).
+   *
    * @param overrideCache If `true`, bypasses cached result and queries OBS directly.
    * @returns A promise that resolves to the full recording capability information.
    * @see {@link RecordingInformation}
    */
   queryInformation(overrideCache?: boolean): Promise<RecordingInformation>;
+
+  /**
+   * Returns whether Xbox Game DVR is enabled, checking both the
+   * `GameDVR_Enabled` and `AppCaptureEnabled` registry values.
+   *
+   * @returns A promise that resolves to the current Xbox Game DVR state.
+   * @see {@link XboxDVRInfo}
+   */
+  isXboxDVREnabled(): Promise<XboxDVRInfo>;
+
+  /**
+   * Disables Xbox Game DVR by setting `AppCaptureEnabled` and
+   * `GameDVR_Enabled` to `0` in the registry.
+   *
+   * @returns A promise that resolves once the values have been written.
+   */
+  disableXboxDVR(): Promise<void>;
 
   /**
    * Creates a capture settings builder instance to configure video/audio sources.
