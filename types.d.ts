@@ -4641,6 +4641,30 @@ interface OWPackages extends overwolf.packages.OverwolfPackageManager {
   gep: OverwolfGameEventPackage;
 }
 
+/**
+ * Augments the base `OverwolfPackageManager` so that `app.overwolf.packages`
+ * is fully typed without any casting or manual global.d.ts augmentation in
+ * the consuming project.
+ */
+declare global {
+  namespace overwolf {
+    namespace packages {
+      interface OverwolfPackageManager {
+        /** Access to Overwolf's video recording and replay functionality. */
+        recorder: IOverwolfRecordingApi;
+        /** Access to overlay-related APIs such as window creation, input control, and hotkeys. */
+        overlay: IOverwolfOverlayApi;
+        /** Access to utility APIs for game launch tracking and game scanning. */
+        utility: IOverwolfUtilityApi;
+        /** Access to crash reporting and notification APIs. */
+        crn: IOverwolfCRNApi;
+        /** Subscribe to real-time in-game events and info updates from supported games. */
+        gep: OverwolfGameEventPackage;
+      }
+    }
+  }
+}
+
 
 // --- modules\overlay.d.ts ---
 /**
