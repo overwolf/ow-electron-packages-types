@@ -297,15 +297,26 @@ interface OverlayWindowOptions
    */
   name: string;
 
-  /** 
-   * 
-   * This option is not currently supported and has no effect. It is reserved for future use.
-   * 
+  /**
+   * `true`&mdash;disables hardware (GPU) acceleration for this overlay window
+   * only, rendering it via software (CPU) compositing. Unlike
+   * `app.disableHardwareAcceleration()`, this is scoped to the single window and
+   * does not affect the rest of the application.
+   *
+   * Note: shared-texture windows require hardware acceleration to be enabled.
+   * Disabling it turns off the GPU-backed shared-texture path, so this option is
+   * incompatible with (and ignored for) windows that render via a shared
+   * texture.
+   *
+   * Requires ow-electron >= 39.8.10; ignored on earlier versions.
+   *
+   * @default false
+   *
+   * @since 1.13.20
    */
-  enableHWAcceleration?: boolean;
-  
-  
-  /** 
+  disableHardwareAcceleration?: boolean;
+
+  /**
    * Enables Chromium process isolation (sandboxing).
    * Used to enforce stricter security policies or prevent resource sharing between renderer processes.
   */
