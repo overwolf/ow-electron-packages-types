@@ -3,8 +3,7 @@ const path = require('path');
 const glob = require('glob');
 
 // Header block to prepend
-const header = `import { overwolf } from '@overwolf/ow-electron';
-import type {
+const header = `import type {
   BrowserWindow,
   BrowserWindowConstructorOptions,
   Size,
@@ -52,7 +51,7 @@ function combineDTSFiles() {
     return;
   }
 
-  let combined = ''
+  let combined = header;
 
   for (const file of files) {
     const content = fs.readFileSync(file, "utf-8");
