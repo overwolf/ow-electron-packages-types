@@ -3,7 +3,7 @@ const path = require('path');
 const glob = require('glob');
 
 // Header block to prepend
-const header = `import { overwolf } from '@overwolf/ow-electron';
+const header = `import '@overwolf/ow-electron';
 import type {
   BrowserWindow,
   BrowserWindowConstructorOptions,
