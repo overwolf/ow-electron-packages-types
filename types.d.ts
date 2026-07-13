@@ -1,3 +1,4 @@
+import { overwolf } from '@overwolf/ow-electron';
 import type {
   BrowserWindow,
   BrowserWindowConstructorOptions,
