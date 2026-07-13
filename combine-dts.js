@@ -52,7 +52,7 @@ function combineDTSFiles() {
     return;
   }
 
-  let combined = header;
+  let combined = ''
 
   for (const file of files) {
     const content = fs.readFileSync(file, "utf-8");
