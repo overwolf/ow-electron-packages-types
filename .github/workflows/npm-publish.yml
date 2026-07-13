@@ -29,15 +29,34 @@ jobs:
           node-version: 20
           registry-url: "https://registry.npmjs.org/"
 
+      - name: Check if version already published
+        id: check
+        run: |
+          NAME=$(node -p "require('./package.json').name")
+          VERSION=$(node -p "require('./package.json').version")
+          echo "Checking $NAME@$VERSION ..."
+          if npm view "$NAME@$VERSION" version > /dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::$NAME@$VERSION already exists on npm — skipping publish."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "$NAME@$VERSION not found on npm — will publish."
+          fi
+
+      - name: Upgrade npm (OIDC Trusted Publishing requires npm >= 11.5.1)
+        if: steps.check.outputs.exists == 'false'
+        run: npm install -g npm@latest
+
       - name: Install Dependencies
+        if: steps.check.outputs.exists == 'false'
         run: npm install
 
       - name: Publish to NPM Beta Tag
-        run: npm publish --access public --tag beta
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        if: steps.check.outputs.exists == 'false'
+        run: npm publish --access public --tag beta --provenance
 
       - name: Confirm Publication
+        if: steps.check.outputs.exists == 'false'
         run: echo "Successfully published branch ${{ github.ref_name }} to npm with tag 'beta'."
 
   publish-main:
@@ -60,13 +79,32 @@ jobs:
           node-version: 20
           registry-url: "https://registry.npmjs.org/"
 
+      - name: Check if version already published
+        id: check
+        run: |
+          NAME=$(node -p "require('./package.json').name")
+          VERSION=$(node -p "require('./package.json').version")
+          echo "Checking $NAME@$VERSION ..."
+          if npm view "$NAME@$VERSION" version > /dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::$NAME@$VERSION already exists on npm — skipping publish."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "$NAME@$VERSION not found on npm — will publish."
+          fi
+
+      - name: Upgrade npm (OIDC Trusted Publishing requires npm >= 11.5.1)
+        if: steps.check.outputs.exists == 'false'
+        run: npm install -g npm@latest
+
       - name: Install Dependencies
+        if: steps.check.outputs.exists == 'false'
         run: npm install
 
       - name: Publish to NPM Latest Tag
-        run: npm publish --access public --tag latest
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        if: steps.check.outputs.exists == 'false'
+        run: npm publish --access public --tag latest --provenance
 
       - name: Confirm Publication
+        if: steps.check.outputs.exists == 'false'
         run: echo "Successfully published branch ${{ github.ref_name }} to npm with tag 'latest'."

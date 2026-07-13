@@ -1,4 +1,3 @@
-import { overwolf } from '@overwolf/ow-electron';
 import type {
   BrowserWindow,
   BrowserWindowConstructorOptions,
@@ -4641,6 +4640,30 @@ interface OWPackages extends overwolf.packages.OverwolfPackageManager {
   gep: OverwolfGameEventPackage;
 }
 
+/**
+ * Augments the base `OverwolfPackageManager` so that `app.overwolf.packages`
+ * is fully typed without any casting or manual global.d.ts augmentation in
+ * the consuming project.
+ */
+declare global {
+  namespace overwolf {
+    namespace packages {
+      interface OverwolfPackageManager {
+        /** Access to Overwolf's video recording and replay functionality. */
+        recorder: IOverwolfRecordingApi;
+        /** Access to overlay-related APIs such as window creation, input control, and hotkeys. */
+        overlay: IOverwolfOverlayApi;
+        /** Access to utility APIs for game launch tracking and game scanning. */
+        utility: IOverwolfUtilityApi;
+        /** Access to crash reporting and notification APIs. */
+        crn: IOverwolfCRNApi;
+        /** Subscribe to real-time in-game events and info updates from supported games. */
+        gep: OverwolfGameEventPackage;
+      }
+    }
+  }
+}
+
 
 // --- modules\overlay.d.ts ---
 /**
@@ -4942,15 +4965,26 @@ interface OverlayWindowOptions
    */
   name: string;
 
-  /** 
-   * 
-   * This option is not currently supported and has no effect. It is reserved for future use.
-   * 
+  /**
+   * `true`&mdash;disables hardware (GPU) acceleration for this overlay window
+   * only, rendering it via software (CPU) compositing. Unlike
+   * `app.disableHardwareAcceleration()`, this is scoped to the single window and
+   * does not affect the rest of the application.
+   *
+   * Note: shared-texture windows require hardware acceleration to be enabled.
+   * Disabling it turns off the GPU-backed shared-texture path, so this option is
+   * incompatible with (and ignored for) windows that render via a shared
+   * texture.
+   *
+   * Requires ow-electron >= 39.8.10; ignored on earlier versions.
+   *
+   * @default false
+   *
+   * @since 1.13.20
    */
-  enableHWAcceleration?: boolean;
-  
-  
-  /** 
+  disableHardwareAcceleration?: boolean;
+
+  /**
    * Enables Chromium process isolation (sandboxing).
    * Used to enforce stricter security policies or prevent resource sharing between renderer processes.
   */
