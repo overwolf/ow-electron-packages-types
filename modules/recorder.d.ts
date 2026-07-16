@@ -2921,6 +2921,18 @@ interface EncoderSettingsNVENC extends VideoEncoderSettingsBase {
   rate_control?: kNVENCEncoderRateControl;
 
   /**
+   * Constant Quantization Parameter (CQP) level.
+   *
+   * Sets a fixed quality level for the entire stream. Only applies when
+   * {@link rate_control} is `'CQP'`.
+   *
+   * Range: `1`–`51` (`1`–`63` for AV1).
+   *
+   * @default 20
+   */
+  cqp?: number;
+
+  /**
    * Encoding quality preset.
    *
    * Affects encoding speed vs. output quality.
@@ -3103,10 +3115,20 @@ interface EncoderSettingsAMF extends VideoEncoderSettingsBase {
   ffmpeg_opts?: string;
 
   /**
-   * Constant Peak Quantizer (CPQ) value.
-   * Determines the quality level when using quantizer-based rate control modes.
+   * Constant Quantization Parameter (CQP) level.
+   *
+   * Determines the quality level for quantizer-based rate control. Only applies
+   * when {@link rate_control} is `'CQP'` or `'QVBR'`.
+   *
+   * Range: `0`–`51` (`0`–`63` for AV1).
    *
    * @default 20
+   */
+  cqp?: number;
+
+  /**
+   * @deprecated Use {@link cqp} instead. Retained for backward compatibility;
+   * this value is ignored by the encoder.
    */
   cpq?: number;
 
@@ -3214,6 +3236,30 @@ interface EncoderSettingsQuickSync extends VideoEncoderSettingsBase {
   rate_control?: kQuickSyncEncoderRateControl;
 
   /**
+   * Constant Quantization Parameter (CQP) level.
+   *
+   * Sets a fixed quantizer for the entire stream. Only applies when
+   * {@link rate_control} is `'CQP'`.
+   *
+   * Range: `1`–`51` (`1`–`63` for AV1).
+   *
+   * @default 23
+   */
+  cqp?: number;
+
+  /**
+   * Intelligent Constant Quality (ICQ) level.
+   *
+   * Lower values yield higher quality. Only applies when
+   * {@link rate_control} is `'ICQ'`.
+   *
+   * Range: `1`–`51`.
+   *
+   * @default 23
+   */
+  icq_quality?: number;
+
+  /**
    * Target usage or encoding preset that balances performance and quality.
    *
    * Ranges from `'TU1'` (slowest, highest quality) to `'TU7'` (fastest, lowest quality).
@@ -3303,6 +3349,18 @@ interface EncoderSettingsX264 extends VideoEncoderSettingsBase {
    * @see {@link kX264EncoderRateControl}
    */
   rate_control?: kX264EncoderRateControl;
+
+  /**
+   * Constant Rate Factor (CRF) quality level.
+   *
+   * Lower values yield higher quality and larger files. Only applies when
+   * {@link rate_control} is `'CRF'` or `'VBR'`.
+   *
+   * Range: `0`–`51`.
+   *
+   * @default 23
+   */
+  crf?: number;
 
   /**
    * Specifies the encoding speed/quality trade-off preset.
@@ -3617,6 +3675,7 @@ interface EncoderInformation {
  * const options: RecordingAppOptions = {
  *   showDebugWindow: true,
  *   enableDebugLogs: true,
+ *   maxLogFiles: 20,
  * };
  * ```
  */
@@ -3632,6 +3691,14 @@ interface RecordingAppOptions {
    * Can be used to troubleshoot issues during recording.
    */
   enableDebugLogs?: boolean;
+
+  /**
+   * Maximum number of OBS log files to retain under the recorder's
+   * `ow-obs/logs` folder. Once the number of logs exceeds this value, the
+   * oldest logs are gradually pruned.
+   * Must be a positive integer. Defaults to `10`.
+   */
+  maxLogFiles?: number;
 }
 
 
