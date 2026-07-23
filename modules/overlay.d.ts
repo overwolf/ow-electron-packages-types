@@ -317,6 +317,33 @@ interface OverlayWindowOptions
   disableHardwareAcceleration?: boolean;
 
   /**
+   * ⚠️ BETA &mdash; this option is experimental and its behavior may change in
+   * a future release.
+   *
+   * `true`&mdash;renders this overlay window through a GPU shared texture
+   * instead of copying pixels through shared memory on every paint. The overlay
+   * forwards the GPU texture handle directly to the injected game process, which
+   * composites it without any CPU-side pixel copy, significantly lowering
+   * per-frame CPU overhead.
+   *
+   * Requires hardware acceleration to be enabled and the current game to report
+   * shared-texture support (see {@link GameWindowInfo.isSharedTextureSupported}).
+   * The flag is silently ignored when either condition is not met, falling back
+   * to the shared-memory (CPU copy) path.
+   *
+   * The rendering path follows the active game: when the overlay moves to a
+   * different game, a shared-texture window automatically falls back to the
+   * shared-memory (CPU copy) path on a game that does not support shared
+   * texture, and restores the shared-texture path on a game that does — so the
+   * window stays visible on every game.
+   *
+   * @default false
+   *
+   * @since 2.0.2
+   */
+  useSharedTexture?: boolean;
+
+  /**
    * Enables Chromium process isolation (sandboxing).
    * Used to enforce stricter security policies or prevent resource sharing between renderer processes.
   */
@@ -664,11 +691,17 @@ interface GameWindowInfo {
 
   /**
    * Indicates if fullscreen rendering is disabled.
-   * 
+   *
    * Relevant only for OOPO games.
    * @since 1.9.0
    */
   readonly isOOPOFullscreenRenderingDisabled?: boolean;
+
+  /**
+   * Indicates if the game supports shared-texture (GPU) overlay rendering.
+   * @since 2.0.0
+   */
+  readonly isSharedTextureSupported?: boolean;
 }
 
 /**
