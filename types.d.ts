@@ -3816,6 +3816,29 @@ interface EncoderInformation {
 }
 
 /**
+ * Crash dump detail level for the OBS host process.
+ * - `mini`: small dump (thread stacks + module list); the default.
+ * - `full`: complete-memory dump; large — opt-in for debugging only.
+ */
+type CrashDumpType = 'mini' | 'full';
+
+/**
+ * Crash dump configuration for the OBS host process.
+ */
+interface CrashDumpOptions {
+  /**
+   * Dump detail level; defaults to `mini`. See {@link CrashDumpType}.
+   */
+  type?: CrashDumpType;
+
+  /**
+   * Max crash dumps to retain in `ow-obs/crashdumps`; the oldest are deleted
+   * beyond this count. Positive integer, defaults to `3`.
+   */
+  maxFiles?: number;
+}
+
+/**
  * Configuration options for launching or customizing the recording application behavior.
  *
  * @see {@link CaptureSettings}
@@ -3850,6 +3873,14 @@ interface RecordingAppOptions {
    * Must be a positive integer. Defaults to `10`.
    */
   maxLogFiles?: number;
+
+  /**
+   * Tune OBS-host crash dumps. Mini-dump capture is always on; these options
+   * only change the detail level and retention count.
+   *
+   * @see {@link CrashDumpOptions}
+   */
+  crashDumps?: CrashDumpOptions;
 }
 
 
