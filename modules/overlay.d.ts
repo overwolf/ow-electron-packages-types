@@ -235,7 +235,7 @@ type ZOrderType = "default" | "topMost" | "bottomMost";
  *
  * @see {@link IOverwolfOverlayApi.setGpuPreference}.
  *
- * @since 2.1.0
+ * @since 2.0.5
  */
 type GpuPreference = "default" | "highPerformance";
 
@@ -255,7 +255,7 @@ type GpuPreference = "default" | "highPerformance";
  *
  * @see {@link IOverwolfOverlayApi.on} `shared-texture-unavailable`.
  *
- * @since 2.1.0
+ * @since 2.0.5
  */
 type SharedTextureUnavailableReason =
   | "unsupportedGraphicsApi"
@@ -761,7 +761,7 @@ interface GameWindowInfo {
    *
    * `undefined` until the game is injected and its graphics API is detected.
    *
-   * @since 2.1.0
+   * @since 2.0.5
    */
   readonly isSharedTextureAvailable?: boolean;
 }
@@ -1104,7 +1104,7 @@ interface IOverwolfOverlayApi extends EventEmitter {
    * Allows injection into high elevation games.
    * No-ops if files are already present.
    *
-   * @throws \{HelperInstallError\}
+   * @throws `HelperInstallError`
    *  - `exitCode 1223` — user cancelled the UAC prompt (ERROR_CANCELLED)
    *  - `err.exitCode !== 1223` — the installer process failed. Log `err.exitCode` and investigate.
    *  - any other non-zero exitCode — installation failed.
@@ -1263,7 +1263,7 @@ interface IOverwolfOverlayApi extends EventEmitter {
    * });
    * ```
    *
-   * @since 2.1.0
+   * @since 2.0.5
    */
   setGpuPreference(preference: GpuPreference): Promise<void>;
 
@@ -1278,7 +1278,7 @@ interface IOverwolfOverlayApi extends EventEmitter {
    * @see {@link IOverwolfOverlayApi.setGpuPreference}.
    * @see {@link GpuPreference}.
    *
-   * @since 2.1.0
+   * @since 2.0.5
    */
   getGpuPreference(): Promise<GpuPreference>;
 
@@ -1439,7 +1439,7 @@ interface IOverwolfOverlayApi extends EventEmitter {
    * });
    * ```
    *
-   * @since 2.1.0
+   * @since 2.0.5
    */
   on(
     eventName: 'shared-texture-unavailable',

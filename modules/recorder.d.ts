@@ -1631,7 +1631,8 @@ type VideoRecordingSplitType =
  * 
  * This interface serves as a blueprint for all audio filters within the system,
  * ensuring they have a unique identifier and a flexible container for settings.
- * * @example
+ *
+ * @example
  * ```typescript
  * const lowPass: AudioFilterBase = {
  * id: 'low-pass-001',
@@ -1657,7 +1658,8 @@ export interface AudioFilterBase {
 
 /**
  * A specialized filter for dynamic range compression.
- * * @example
+ *
+ * @example
  * ```typescript
  * const vocalComp: AudioCompressorFilter = {
  * id: 'compressor_filter',
@@ -1712,7 +1714,8 @@ export interface AudioCompressorFilter extends AudioFilterBase {
 
 /**
  * A specialized filter for dynamic range expansion or noise gating.
- * * @example
+ *
+ * @example
  * ```typescript
  * const noiseGate: AudioExpanderFilter = {
  * id: 'expander_filter',
@@ -1781,7 +1784,8 @@ export interface AudioExpanderFilter extends AudioFilterBase {
 
 /**
  * A simple filter used to adjust the volume or amplitude of an audio signal.
- * * @example
+ *
+ * @example
  * ```typescript
  * const boost: AudioGainFilter = {
  * id: 'gain_filter',
@@ -1812,7 +1816,8 @@ export interface AudioGainFilter extends AudioFilterBase {
 
 /**
  * A utility filter that flips the phase of the audio signal by 180 degrees.
- * * @example
+ *
+ * @example
  * ```typescript
  * const phaseFlip: AudioInvertPolarityFilter = {
  * id: 'invert_polarity_filter',
@@ -1834,7 +1839,8 @@ export interface AudioInvertPolarityFilter extends AudioFilterBase {
 
 /**
  * A specialized dynamics processor used to prevent an audio signal from exceeding a specific decibel level.
- * * @example
+ *
+ * @example
  * ```typescript
  * const masterLimiter: AudioLimiterFilter = {
  * id: 'limiter_filter',
@@ -1874,7 +1880,8 @@ export interface AudioLimiterFilter extends AudioFilterBase {
 /**
  * A noise gate filter used to attenuate signals that fall below a certain threshold.
  * It is primarily used to remove background noise during silent passages.
- * * @example
+ *
+ * @example
  * ```typescript
  * const gate: AudioNoiseGateFilter = {
  * id: 'noise_gate_filter',
@@ -1932,7 +1939,8 @@ export interface AudioNoiseGateFilter extends AudioFilterBase {
 
 /**
  * An advanced noise suppression filter utilizing machine learning or digital signal processing algorithms.
- * * @example
+ *
+ * @example
  * ```typescript
  * const aiDenoise: AudioNoiseSuppressFilterV2 = {
  * id: 'noise_suppress_filter_v2',

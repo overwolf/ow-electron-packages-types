@@ -70,9 +70,9 @@ interface IOverwolfUtilityApi {
    * Allows injection into high elevation games.
    * No-ops if files are already present.
    *
-   * @throws \{HelperInstallError\} `exitCode 1223` — user cancelled the UAC prompt (ERROR_CANCELLED)
-   * @throws - {HelperInstallError} `err.exitCode !== 1223` — the installer process failed. Log `err.exitCode` and investigate.
-   * @throws \{HelperInstallError\} any other non-zero exitCode — installation failed.
+   * @throws `HelperInstallError` `exitCode 1223` — user cancelled the UAC prompt (ERROR_CANCELLED)
+   * @throws `HelperInstallError` `err.exitCode !== 1223` — the installer process failed. Log `err.exitCode` and investigate.
+   * @throws `HelperInstallError` any other non-zero exitCode — installation failed.
    *
    * @remarks
    * The helper binaries are installed to:
@@ -1782,7 +1782,8 @@ type VideoRecordingSplitType =
  * 
  * This interface serves as a blueprint for all audio filters within the system,
  * ensuring they have a unique identifier and a flexible container for settings.
- * * @example
+ *
+ * @example
  * ```typescript
  * const lowPass: AudioFilterBase = {
  * id: 'low-pass-001',
@@ -1808,7 +1809,8 @@ export interface AudioFilterBase {
 
 /**
  * A specialized filter for dynamic range compression.
- * * @example
+ *
+ * @example
  * ```typescript
  * const vocalComp: AudioCompressorFilter = {
  * id: 'compressor_filter',
@@ -1863,7 +1865,8 @@ export interface AudioCompressorFilter extends AudioFilterBase {
 
 /**
  * A specialized filter for dynamic range expansion or noise gating.
- * * @example
+ *
+ * @example
  * ```typescript
  * const noiseGate: AudioExpanderFilter = {
  * id: 'expander_filter',
@@ -1932,7 +1935,8 @@ export interface AudioExpanderFilter extends AudioFilterBase {
 
 /**
  * A simple filter used to adjust the volume or amplitude of an audio signal.
- * * @example
+ *
+ * @example
  * ```typescript
  * const boost: AudioGainFilter = {
  * id: 'gain_filter',
@@ -1963,7 +1967,8 @@ export interface AudioGainFilter extends AudioFilterBase {
 
 /**
  * A utility filter that flips the phase of the audio signal by 180 degrees.
- * * @example
+ *
+ * @example
  * ```typescript
  * const phaseFlip: AudioInvertPolarityFilter = {
  * id: 'invert_polarity_filter',
@@ -1985,7 +1990,8 @@ export interface AudioInvertPolarityFilter extends AudioFilterBase {
 
 /**
  * A specialized dynamics processor used to prevent an audio signal from exceeding a specific decibel level.
- * * @example
+ *
+ * @example
  * ```typescript
  * const masterLimiter: AudioLimiterFilter = {
  * id: 'limiter_filter',
@@ -2025,7 +2031,8 @@ export interface AudioLimiterFilter extends AudioFilterBase {
 /**
  * A noise gate filter used to attenuate signals that fall below a certain threshold.
  * It is primarily used to remove background noise during silent passages.
- * * @example
+ *
+ * @example
  * ```typescript
  * const gate: AudioNoiseGateFilter = {
  * id: 'noise_gate_filter',
@@ -2083,7 +2090,8 @@ export interface AudioNoiseGateFilter extends AudioFilterBase {
 
 /**
  * An advanced noise suppression filter utilizing machine learning or digital signal processing algorithms.
- * * @example
+ *
+ * @example
  * ```typescript
  * const aiDenoise: AudioNoiseSuppressFilterV2 = {
  * id: 'noise_suppress_filter_v2',
@@ -5006,7 +5014,7 @@ type ZOrderType = "default" | "topMost" | "bottomMost";
  *
  * @see {@link IOverwolfOverlayApi.setGpuPreference}.
  *
- * @since 2.1.0
+ * @since 2.0.5
  */
 type GpuPreference = "default" | "highPerformance";
 
@@ -5026,7 +5034,7 @@ type GpuPreference = "default" | "highPerformance";
  *
  * @see {@link IOverwolfOverlayApi.on} `shared-texture-unavailable`.
  *
- * @since 2.1.0
+ * @since 2.0.5
  */
 type SharedTextureUnavailableReason =
   | "unsupportedGraphicsApi"
@@ -5532,7 +5540,7 @@ interface GameWindowInfo {
    *
    * `undefined` until the game is injected and its graphics API is detected.
    *
-   * @since 2.1.0
+   * @since 2.0.5
    */
   readonly isSharedTextureAvailable?: boolean;
 }
@@ -5875,7 +5883,7 @@ interface IOverwolfOverlayApi extends EventEmitter {
    * Allows injection into high elevation games.
    * No-ops if files are already present.
    *
-   * @throws \{HelperInstallError\}
+   * @throws `HelperInstallError`
    *  - `exitCode 1223` — user cancelled the UAC prompt (ERROR_CANCELLED)
    *  - `err.exitCode !== 1223` — the installer process failed. Log `err.exitCode` and investigate.
    *  - any other non-zero exitCode — installation failed.
@@ -6034,7 +6042,7 @@ interface IOverwolfOverlayApi extends EventEmitter {
    * });
    * ```
    *
-   * @since 2.1.0
+   * @since 2.0.5
    */
   setGpuPreference(preference: GpuPreference): Promise<void>;
 
@@ -6049,7 +6057,7 @@ interface IOverwolfOverlayApi extends EventEmitter {
    * @see {@link IOverwolfOverlayApi.setGpuPreference}.
    * @see {@link GpuPreference}.
    *
-   * @since 2.1.0
+   * @since 2.0.5
    */
   getGpuPreference(): Promise<GpuPreference>;
 
@@ -6210,7 +6218,7 @@ interface IOverwolfOverlayApi extends EventEmitter {
    * });
    * ```
    *
-   * @since 2.1.0
+   * @since 2.0.5
    */
   on(
     eventName: 'shared-texture-unavailable',
