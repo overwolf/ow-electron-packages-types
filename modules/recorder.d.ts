@@ -3666,17 +3666,20 @@ interface EncoderInformation {
 
 /**
  * Crash dump detail level for the OBS host process.
+ * - `off`: no crash dumps are captured. The OBS text crash report is still
+ *   written, and dump files already on disk are left untouched.
  * - `mini`: small dump (thread stacks + module list); the default.
  * - `full`: complete-memory dump; large — opt-in for debugging only.
  */
-type CrashDumpType = 'mini' | 'full';
+type CrashDumpType = 'off' | 'mini' | 'full';
 
 /**
  * Crash dump configuration for the OBS host process.
  */
 interface CrashDumpOptions {
   /**
-   * Dump detail level; defaults to `mini`. See {@link CrashDumpType}.
+   * Dump detail level; defaults to `mini`. Set to `off` to disable crash dump
+   * capture entirely. See {@link CrashDumpType}.
    */
   type?: CrashDumpType;
 
@@ -3724,8 +3727,9 @@ interface RecordingAppOptions {
   maxLogFiles?: number;
 
   /**
-   * Tune OBS-host crash dumps. Mini-dump capture is always on; these options
-   * only change the detail level and retention count.
+   * Tune OBS-host crash dumps. Mini-dump capture is on by default; these
+   * options change the detail level and retention count, or turn capture off
+   * entirely via `type: 'off'`.
    *
    * @see {@link CrashDumpOptions}
    */
