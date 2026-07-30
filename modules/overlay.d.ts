@@ -228,6 +228,43 @@ type ZOrderType = "default" | "topMost" | "bottomMost";
 
 
 /**
+ * Which GPU Windows should run this application on.
+ *
+ * - `default`&mdash;No preference is recorded; Windows decides (normally the adapter driving the primary display).
+ * - `highPerformance`&mdash;Pin the application to the high-performance (usually discrete) adapter.
+ *
+ * @see {@link IOverwolfOverlayApi.setGpuPreference}.
+ *
+ * @since 2.1.0
+ */
+type GpuPreference = "default" | "highPerformance";
+
+/**
+ * Why the shared-texture rendering path cannot be used with the current game.
+ *
+ * - `unsupportedGraphicsApi`&mdash;The game's graphics API cannot composite GPU textures
+ *   (D3D9 / OpenGL / Vulkan). Nothing to fix; the overlay uses the CPU copy path for this
+ *   game.
+ * - `gpuAdapterMismatch`&mdash;The game renders on a different GPU adapter than Chromium,
+ *   and a shared texture handle can only be opened on the adapter that created it. Fixable
+ *   with {@link IOverwolfOverlayApi.setGpuPreference} and an application restart.
+ * - `copyFailure`&mdash;The game repeatedly failed to open the shared texture handles it
+ *   received in-game. The overlay retried, then fell back to the CPU copy path.
+ *   {@link IOverwolfOverlayApi.setGpuPreference} may help when the root cause is
+ *   adapter-related.
+ *
+ * @see {@link IOverwolfOverlayApi.on} `shared-texture-unavailable`.
+ *
+ * @since 2.1.0
+ */
+type SharedTextureUnavailableReason =
+  | "unsupportedGraphicsApi"
+  | "gpuAdapterMismatch"
+  | "copyFailure";
+
+
+
+/**
  * Overlay configuration options for creating or modifying an overlay window.
  *
  * Control over:
@@ -315,6 +352,34 @@ interface OverlayWindowOptions
    * @since 1.13.20
    */
   disableHardwareAcceleration?: boolean;
+
+  /**
+   * ⚠️ BETA &mdash; this option is experimental and its behavior may change in
+   * a future release.
+   *
+   * `true`&mdash;renders this overlay window through a GPU shared texture
+   * instead of copying pixels through shared memory on every paint. The overlay
+   * forwards the GPU texture handle directly to the injected game process, which
+   * composites it without any CPU-side pixel copy, significantly lowering
+   * per-frame CPU overhead.
+   *
+   * Requires hardware acceleration to be enabled and the shared-texture path to
+   * be usable with the current game (see
+   * {@link GameWindowInfo.isSharedTextureAvailable}). The flag is silently
+   * ignored when either condition is not met, falling back to the
+   * shared-memory (CPU copy) path.
+   *
+   * The rendering path follows the active game: when the overlay moves to a
+   * different game, a shared-texture window automatically falls back to the
+   * shared-memory (CPU copy) path on a game that does not support shared
+   * texture, and restores the shared-texture path on a game that does — so the
+   * window stays visible on every game.
+   *
+   * @default false
+   *
+   * @since 2.0.2
+   */
+  useSharedTexture?: boolean;
 
   /**
    * Enables Chromium process isolation (sandboxing).
@@ -664,11 +729,41 @@ interface GameWindowInfo {
 
   /**
    * Indicates if fullscreen rendering is disabled.
-   * 
+   *
    * Relevant only for OOPO games.
    * @since 1.9.0
    */
   readonly isOOPOFullscreenRenderingDisabled?: boolean;
+
+  /**
+   * Indicates whether the game's **graphics API** supports shared-texture (GPU) overlay
+   * rendering: `true` for D3D11 / D3D12, `false` for D3D9 / OpenGL / Vulkan.
+   *
+   * This is a capability probe only &mdash; to decide whether the path can actually be used
+   * on this machine, gate on {@link GameWindowInfo.isSharedTextureAvailable} instead.
+   *
+   * `undefined` until the game is injected and its graphics API is detected.
+   *
+   * @since 2.0.0
+   */
+  readonly isSharedTextureSupported?: boolean;
+
+  /**
+   * Indicates whether shared-texture (GPU) overlay rendering can actually be used with this
+   * game &mdash; gate `useSharedTexture` window creation on it.
+   *
+   * `true` when the game's graphics API supports it
+   * ({@link GameWindowInfo.isSharedTextureSupported}), no GPU adapter mismatch was detected,
+   * **and** the path was not abandoned after repeated in-game copy failures. When it is
+   * `false`, the `shared-texture-unavailable` event names the reason. It can therefore turn
+   * `false` mid-game: the copy-failure verdict is reached only after frames were sent and
+   * repeatedly failed to draw.
+   *
+   * `undefined` until the game is injected and its graphics API is detected.
+   *
+   * @since 2.1.0
+   */
+  readonly isSharedTextureAvailable?: boolean;
 }
 
 /**
@@ -1130,6 +1225,64 @@ interface IOverwolfOverlayApi extends EventEmitter {
   takeScreenshot(filePath: string, format?: 'jpg' | 'bmp'): Promise<void>;
 
   /**
+   * Records a Windows per-executable GPU preference for this application, so
+   * Chromium's GPU process runs on the same adapter as games do.
+   *
+   * The shared-texture path requires that: a shared GPU texture handle can only be opened on
+   * the adapter that created it, and Chromium takes the adapter driving the **primary
+   * display** while games run on the discrete GPU. When those differ the overlay falls back
+   * to the CPU copy path and emits `shared-texture-unavailable`.
+   *
+   * **An application restart is normally required.** DXGI reads this preference when a
+   * process creates its D3D device, which Chromium's GPU process has already done by the time
+   * this API is reachable. Call {@link IOverwolfOverlayApi.getGpuPreference} to learn whether
+   * the application is *already* aligned and therefore needs no restart; this method is
+   * idempotent, so calling it unconditionally is safe.
+   *
+   * **Side effects &mdash; read before calling.** It moves the **entire application's**
+   * rendering to that GPU, draining laptop battery and keeping the discrete GPU awake; it is
+   * persistent, user-visible Windows state under
+   * Settings &rarr; System &rarr; Display &rarr; Graphics; and it is keyed on the executable
+   * path, so moving or renaming the application leaves a stale entry behind. It is therefore
+   * **never applied implicitly**. Pass `'default'` to remove the entry, the recommended
+   * revert on uninstall or when the user turns the overlay off.
+   *
+   * @param preference - `'highPerformance'` to pin this application to the high-performance
+   *   adapter, or `'default'` to remove the entry and let Windows decide.
+   * @returns A promise that resolves once the preference has been recorded.
+   * @throws If the registry cannot be written, or on a non-Windows platform.
+   * @see {@link GpuPreference}.
+   *
+   * @example
+   * ```ts
+   * overlay.on('shared-texture-unavailable', async (reason) => {
+   *   if (reason !== 'gpuAdapterMismatch') return;
+   *   if ((await overlay.getGpuPreference()) === 'highPerformance') return;
+   *   await overlay.setGpuPreference('highPerformance');
+   *   promptUserToRestart(); // takes effect on the next launch
+   * });
+   * ```
+   *
+   * @since 2.1.0
+   */
+  setGpuPreference(preference: GpuPreference): Promise<void>;
+
+  /**
+   * Returns the GPU preference currently recorded for this application's executable.
+   *
+   * Resolves to `'default'` when no entry exists &mdash; "no entry" and "let Windows decide"
+   * are the same state, so this never resolves `undefined`.
+   *
+   * @returns A promise resolving to the recorded preference.
+   * @throws On a non-Windows platform.
+   * @see {@link IOverwolfOverlayApi.setGpuPreference}.
+   * @see {@link GpuPreference}.
+   *
+   * @since 2.1.0
+   */
+  getGpuPreference(): Promise<GpuPreference>;
+
+  /**
    * Fires when an internal error occurs within the overlay system.
    */
   on(eventName: 'error', listener: (...args: any[]) => void): this;
@@ -1249,5 +1402,47 @@ interface IOverwolfOverlayApi extends EventEmitter {
   on(
     eventName: 'game-input-exclusive-mode-changed',
     listener: (info: GameInputInterception) => void,
+  ): this;
+
+  /**
+   * Fires when the shared-texture rendering path cannot be used with the current game, with
+   * the reason:
+   *
+   * - `unsupportedGraphicsApi`&mdash;the game's graphics API cannot composite GPU textures
+   *   (D3D9 / OpenGL / Vulkan). Nothing to fix.
+   * - `gpuAdapterMismatch`&mdash;the game renders on a **different GPU adapter than
+   *   Chromium**; a shared texture handle can only be opened on the adapter that created it.
+   *   Fixable with {@link IOverwolfOverlayApi.setGpuPreference} and a restart; both adapters
+   *   are named in the overlay log.
+   * - `copyFailure`&mdash;the game **repeatedly failed to open the shared texture handles it
+   *   received in-game**. The overlay retried, then abandoned the path for this game.
+   *   {@link IOverwolfOverlayApi.setGpuPreference} may help when the root cause is
+   *   adapter-related; details are in the overlay log.
+   *
+   * Fires at most **once per injected game**. The first two reasons are detected when the
+   * game's graphics are detected, before any frame is sent; `copyFailure` is reached only
+   * after frames were sent and repeatedly failed to draw. Either way, the affected overlay
+   * windows have already been switched to the CPU copy path by the time the event fires, so
+   * they stay visible and interactive, and
+   * {@link GameWindowInfo.isSharedTextureAvailable} reports `false` for the game.
+   *
+   * @param eventName - `shared-texture-unavailable`
+   * @param listener - Callback invoked once for the current game with the reason.
+   *
+   * @example
+   * ```ts
+   * overlay.on('shared-texture-unavailable', async (reason) => {
+   *   if (reason !== 'gpuAdapterMismatch') return;
+   *   if ((await overlay.getGpuPreference()) === 'highPerformance') return;
+   *   await overlay.setGpuPreference('highPerformance');
+   *   promptUserToRestart();
+   * });
+   * ```
+   *
+   * @since 2.1.0
+   */
+  on(
+    eventName: 'shared-texture-unavailable',
+    listener: (reason: SharedTextureUnavailableReason) => void,
   ): this;
 }
