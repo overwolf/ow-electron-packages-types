@@ -377,6 +377,8 @@ interface OverlayWindowOptions
    *
    * @default false
    *
+   * @see {@link https://dev.overwolf.com/ow-electron/reference/examples/overlay | Overlay examples}
+   *
    * @since 2.0.2
    */
   useSharedTexture?: boolean;
@@ -760,6 +762,8 @@ interface GameWindowInfo {
    * repeatedly failed to draw.
    *
    * `undefined` until the game is injected and its graphics API is detected.
+   *
+   * @see {@link https://dev.overwolf.com/ow-electron/reference/examples/overlay | Overlay examples}
    *
    * @since 2.0.5
    */
@@ -1252,6 +1256,7 @@ interface IOverwolfOverlayApi extends EventEmitter {
    * @returns A promise that resolves once the preference has been recorded.
    * @throws If the registry cannot be written, or on a non-Windows platform.
    * @see {@link GpuPreference}.
+   * @see {@link https://dev.overwolf.com/ow-electron/reference/examples/overlay | Overlay examples}
    *
    * @example
    * ```ts
@@ -1428,6 +1433,8 @@ interface IOverwolfOverlayApi extends EventEmitter {
    *
    * @param eventName - `shared-texture-unavailable`
    * @param listener - Callback invoked once for the current game with the reason.
+   *
+   * @see {@link https://dev.overwolf.com/ow-electron/reference/examples/overlay | Overlay examples}
    *
    * @example
    * ```ts
