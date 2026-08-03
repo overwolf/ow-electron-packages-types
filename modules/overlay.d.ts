@@ -349,6 +349,8 @@ interface OverlayWindowOptions
    *
    * @default false
    *
+   * @see {@link https://www.electronjs.org/docs/latest/tutorial/offscreen-rendering#software-output-device | Software output device}
+   *
    * @since 1.13.20
    */
   disableHardwareAcceleration?: boolean;
