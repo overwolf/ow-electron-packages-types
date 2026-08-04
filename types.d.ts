@@ -4042,6 +4042,10 @@ interface ReplayOptions extends RecordingBaseOptions {
    * This determines how much time will be retained in memory
    * before being written to disk on replay save.
    *
+   * Must be at least `1`. A shorter buffer can not hold a playable segment,
+   * and is rejected with a {@link RecorderError} carrying the
+   * `MissingOrInvalidParameters` (-11) code.
+   *
    * Example: `30` will capture the last 30 seconds before the save.
    */
   bufferSecond: number;
