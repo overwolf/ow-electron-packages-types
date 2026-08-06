@@ -3767,6 +3767,7 @@ type ErrorCode =
   | -999  // Missing binaries required for recording. 'MissingBinaries'
   | -998  // Failed to connect to the OBS process. 'ConnectionOBSError'
   | -997  // Operation attempted while recording is already running. 'AlreadyRunning'
+  | -996  // Elevated game capture requested while the High Elevation Helper isn't installed. 'ElevationHelperMissing'
   | -12   // Attempted to split recording when split recording is disabled. 'SplitRecordingDisabled'
   | -11   // One or more required parameters are missing or invalid. 'MissingOrInvalidParameters'
   | -10   // No active recording session found. 'NoActiveRecording'
