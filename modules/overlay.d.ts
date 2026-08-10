@@ -252,6 +252,8 @@ type GpuPreference = "default" | "highPerformance";
  *   received in-game. The overlay retried, then fell back to the CPU copy path.
  *   {@link IOverwolfOverlayApi.setGpuPreference} may help when the root cause is
  *   adapter-related.
+ * - `handleTransportBlocked`&mdash;The GPU textures could not be shared with the game
+ *   process.
  *
  * @see {@link IOverwolfOverlayApi.on} `shared-texture-unavailable`.
  *
@@ -260,7 +262,8 @@ type GpuPreference = "default" | "highPerformance";
 type SharedTextureUnavailableReason =
   | "unsupportedGraphicsApi"
   | "gpuAdapterMismatch"
-  | "copyFailure";
+  | "copyFailure"
+  | "handleTransportBlocked";
 
 
 
@@ -1425,12 +1428,14 @@ interface IOverwolfOverlayApi extends EventEmitter {
    *   received in-game**. The overlay retried, then abandoned the path for this game.
    *   {@link IOverwolfOverlayApi.setGpuPreference} may help when the root cause is
    *   adapter-related; details are in the overlay log.
+   * - `handleTransportBlocked`&mdash;the GPU textures **could not be shared with the game
+   *   process**.
    *
    * Fires at most **once per injected game**. The first two reasons are detected when the
-   * game's graphics are detected, before any frame is sent; `copyFailure` is reached only
-   * after frames were sent and repeatedly failed to draw. Either way, the affected overlay
-   * windows have already been switched to the CPU copy path by the time the event fires, so
-   * they stay visible and interactive, and
+   * game's graphics are detected, before any frame is sent; `copyFailure` and
+   * `handleTransportBlocked` are reached only after frames were sent and repeatedly failed to
+   * arrive or draw. Either way, the affected overlay windows have already been switched to the
+   * CPU copy path by the time the event fires, so they stay visible and interactive, and
    * {@link GameWindowInfo.isSharedTextureAvailable} reports `false` for the game.
    *
    * @param eventName - `shared-texture-unavailable`
