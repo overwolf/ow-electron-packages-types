@@ -37,6 +37,18 @@ export interface ICRNEvent {
  * handling UI state changes, or triggering specific behavior based on
  * user intent or automated conditions.
  *
+ * | Value                                       | Description                                                                                      |
+ * | ------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+ * | `'Dismissed'`                               | User clicked on the `X` button to dismiss the notification.                                      |
+ * | `'IgnoredByLaunchingGame'`                  | Notification closed due to launching another game while the notification is displayed.           |
+ * | `'Timeout'`                                 | Notification automatically closed after no user action was registered.                           |
+ * | `'TurnOffNotificationsRequested'`           | User clicked on `Turn off notifications` from the cogwheel icon.                                 |
+ * | `'OpenExternalUrl'`                         | User clicked on a notification that opens an external URL (e.g., newsletter site).               |
+ * | `'DownloadExternalApp'`                     | User clicked on a notification that downloads an external app.                                   |
+ * | `'CancelDownloadExternalApp'`               | User clicked on the `Cancel` button while the external app was downloading.                      |
+ * | `'CloseClickedWhileDownloadingExternalApp'` | User clicked on the `X` button while the external app was downloading.                           |
+ * | `'ForceClosed'`                             | Developer programmatically closed the notification using the `closeNotificationWindow()` method. |
+ *
  * @example
  * crnApi.on('notification-action', (action: CRNActionType) => {
  *   if (action === 'Dismissed') {

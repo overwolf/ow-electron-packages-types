@@ -242,6 +242,21 @@ type AudioDeviceType = 'input' | 'output';
  * Note that older `jim_*` encoder types were deprecated as of OBS version 0.31.0
  * and have been replaced by the `obs_nvenc_*` family of encoders.
  *
+ * | Value                  | Description                                                                        |
+ * | ---------------------- | ---------------------------------------------------------------------------------- |
+ * | `'ffmpeg_svt_av1'`     | Software AV1 encoder using Intel's SVT-AV1 via FFmpeg.                             |
+ * | `'ffmpeg_aom_av1'`     | Software AV1 encoder using AOMedia's libaom via FFmpeg.                            |
+ * | `'obs_x264'`           | Software H.264 encoder using the x264 library (CPU-based).                         |
+ * | `'h264_texture_amf'`   | Hardware-accelerated H.264 encoder using AMD's AMF with texture input.             |
+ * | `'h265_texture_amf'`   | Hardware-accelerated H.265 (HEVC) encoder using AMD's AMF with texture input.      |
+ * | `'av1_texture_amf'`    | Hardware-accelerated AV1 encoder using AMD's AMF with texture input.               |
+ * | `'obs_qsv11_v2'`       | Hardware-accelerated H.264 encoder using Intel's QSV 1.1 API.                      |
+ * | `'obs_qsv11_hevc'`     | Hardware-accelerated H.265 (HEVC) encoder using Intel's QSV 1.1 API.               |
+ * | `'obs_qsv11_av1'`      | Hardware-accelerated AV1 encoder using Intel's QSV 1.1 API.                        |
+ * | `'obs_nvenc_h264_tex'` | Hardware-accelerated H.264 encoder using NVIDIA's NVENC with texture input.        |
+ * | `'obs_nvenc_hevc_tex'` | Hardware-accelerated H.265 (HEVC) encoder using NVIDIA's NVENC with texture input. |
+ * | `'obs_nvenc_av1_tex'`  | Hardware-accelerated AV1 encoder using NVIDIA's NVENC with texture input.          |
+ *
  * @remarks
  * This type includes software-based encoders (like `obs_x264`) and
  * hardware-accelerated encoders for various platforms (e.g., NVENC, QSV, AMF).
@@ -305,6 +320,17 @@ type kSupportedEncodersTypes =
  *
  * Typically used for exporting or streaming audio content in different formats.
  * Each variant maps to a specific FFmpeg audio codec.
+ *
+ * | Value                | Description                                                                                                                            |
+ * | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+ * | `'ffmpeg_aac'`       | AAC (Advanced Audio Coding) encoder using FFmpeg. Widely supported across platforms; good balance of quality and compression.          |
+ * | `'ffmpeg_opus'`      | Opus encoder using FFmpeg. High-efficiency codec commonly used for voice and streaming (e.g., Discord, WebRTC).                        |
+ * | `'ffmpeg_pcm_s16le'` | PCM (Pulse-code Modulation) 16-bit signed little-endian. Uncompressed audio with moderate file size; excellent compatibility.          |
+ * | `'ffmpeg_pcm_s24le'` | PCM 24-bit signed little-endian. Higher-resolution uncompressed audio format, often used in professional audio applications.           |
+ * | `'ffmpeg_pcm_f32le'` | PCM 32-bit floating-point little-endian. Offers high dynamic range; used for precision in audio processing workflows.                  |
+ * | `'ffmpeg_alac'`      | Apple Lossless Audio Codec (ALAC) encoder via FFmpeg. Provides lossless compression; typically used in the Apple ecosystem.            |
+ * | `'ffmpeg_flac'`      | FLAC (Free Lossless Audio Codec) encoder via FFmpeg. Popular open-source lossless format with good compression and widespread support. |
+ * | `string`             | Custom or unknown encoder type represented as a string.                                                                                |
  *
  * @remarks
  * If a custom encoder is used that is not in this predefined list, it can be specified as a `string`.
@@ -391,6 +417,16 @@ type kSampleRate441kHz = 44100;
  * These layout identifiers correspond to common channel arrangements used in audio output systems.
  * They are typically used to configure spatial audio or multichannel playback environments.
  *
+ * | Value                | Description                                                                                     |
+ * | -------------------- | ----------------------------------------------------------------------------------------------- |
+ * | `'SPEAKERS_MONO'`    | Mono output — single audio channel.                                                             |
+ * | `'SPEAKERS_STEREO'`  | Stereo output — standard left and right channels.                                               |
+ * | `'SPEAKERS_2POINT1'` | 2.1 output — stereo plus one subwoofer (LFE) channel.                                           |
+ * | `'SPEAKERS_4POINT0'` | 4.0 output — quadraphonic layout with front and rear left/right channels.                       |
+ * | `'SPEAKERS_4POINT1'` | 4.1 output — quadraphonic layout plus one subwoofer channel.                                    |
+ * | `'SPEAKERS_5POINT1'` | 5.1 surround — front left/right, center, rear left/right, and subwoofer (LFE).                  |
+ * | `'SPEAKERS_7POINT1'` | 7.1 surround — front left/right, center, rear left/right, side left/right, and subwoofer (LFE). |
+ *
  * @example
  * const layout: kSpeakerLayout = 'SPEAKERS_5POINT1';
  */
@@ -422,6 +458,7 @@ type kSpeakerLayout =
   /**
    * 7.1 surround — front left/right, center, rear left/right, side left/right, and subwoofer (LFE).
    */
+  | 'SPEAKERS_7POINT1';
 
 
 /**
@@ -445,6 +482,18 @@ type kSpeakerLayout =
  *
  * Each value corresponds to a specific audio track using a bitmask format.
  * You can combine tracks using bitwise OR operations. For example, `Track1 | Track2` is `3`.
+ *
+ * | Value    | Description                                 |
+ * | -------- | ------------------------------------------- |
+ * | `0`      | No audio track selected.                    |
+ * | `1`      | Select audio Track 1.                       |
+ * | `2`      | Select audio Track 2.                       |
+ * | `4`      | Select audio Track 3.                       |
+ * | `8`      | Select audio Track 4.                       |
+ * | `16`     | Select audio Track 5.                       |
+ * | `32`     | Select audio Track 6.                       |
+ * | `0xff`   | Select all available tracks (bitmask 0xff). |
+ * | `number` | Any custom or combined track.               |
  *
  * @remarks
  * - This format is useful when routing or encoding specific audio channels.
@@ -499,6 +548,13 @@ type AudioTracks =
  * These values determine the underlying capture technology used for grabbing screen content.
  * Selection may depend on hardware support, performance, or compatibility.
  *
+ * | Value      | Description                                                                                             |
+ * | ---------- | ------------------------------------------------------------------------------------------------------- |
+ * | `'Auto'`   | Automatically select the best capture method based on the system's capabilities.                        |
+ * | `'DXGI'`   | Use DXGI (DirectX Graphics Infrastructure) for capturing. Offers high performance on supported systems. |
+ * | `'BitBlt'` | Use BitBlt (Bit Block Transfer), a legacy GDI-based capture method. May be less performant.             |
+ * | `'WGC'`    | Use Windows Graphics Capture (WGC), available on Windows 10+ with improved performance and stability.   |
+ *
  * @example
  * const captureType: DisplayCaptureType = "DXGI";
  */
@@ -522,6 +578,12 @@ type DisplayCaptureType =
 
 /**
  * Type of window capture method.
+ *
+ * | Value      | Description                                                                                           |
+ * | ---------- | ----------------------------------------------------------------------------------------------------- |
+ * | `'Auto'`   | Automatically select the best window capture method.                                                  |
+ * | `'BitBlt'` | Use BitBlt (Bit Block Transfer), a legacy GDI-based capture method. May be less performant.           |
+ * | `'WGC'`    | Use Windows Graphics Capture (WGC), available on Windows 10+ with improved performance and stability. |
  */
 type WindowCaptureType =
   /**
@@ -541,6 +603,14 @@ type WindowCaptureType =
  * Type of source to capture during screen recording or streaming.
  *
  * These source types determine what part of the system the capture engine will target.
+ *
+ * | Value       | Description                                                                   |
+ * | ----------- | ----------------------------------------------------------------------------- |
+ * | `'Display'` | Capture the entire display (monitor/screen).                                  |
+ * | `'Game'`    | Capture a game process or window, often using optimized game capture methods. |
+ * | `'Window'`  | Capture a specific application window.                                        |
+ * | `'Image'`   | Capture a specific image.                                                     |
+ * | `'Color'`   | Capture a solid color screen.                                                 |
  *
  * @example
  * const source: CaptureSourceType = 'Game';
@@ -1025,6 +1095,18 @@ interface RecordingInformation {
  * Each format may offer different tradeoffs in terms of compatibility, streaming support,
  * compression, or support for advanced features like fragmentation or hybrid modes.
  *
+ * | Value              | Description                                                                            |
+ * | ------------------ | -------------------------------------------------------------------------------------- |
+ * | `'fragmented_mp4'` | Fragmented MP4 — Ideal for adaptive streaming and progressive download scenarios.      |
+ * | `'fragmented_mov'` | Fragmented MOV — Similar to fragmented MP4 but uses the .mov container format.         |
+ * | `'mp4'`            | Standard MP4 — Widely supported container for high-quality compressed video and audio. |
+ * | `'flv'`            | FLV — Flash Video format, legacy support for some live streaming services.             |
+ * | `'mkv'`            | MKV — Matroska container supporting multiple audio, video, and subtitle tracks.        |
+ * | `'mov'`            | MOV — Apple's QuickTime format, often used in macOS video workflows.                   |
+ * | `'mpegts'`         | MPEG-TS — Transport stream format suitable for broadcasting or continuous streaming.   |
+ * | `'hls'`            | HLS — HTTP Live Streaming; produces a playlist with segmented video chunks.            |
+ * | `'hybrid_mp4'`     | Hybrid MP4 — A format combining fragmented and standard MP4 traits for compatibility.  |
+ *
  * @example
  * const format: kFileFormat = 'mp4';
  */
@@ -1079,6 +1161,17 @@ type kFileFormat =
  *
  * Each format defines how color and luminance information is represented in memory.
  * Choice of format can affect performance, quality, and hardware compatibility.
+ *
+ * | Value    | Description                                                                                                                 |
+ * | -------- | --------------------------------------------------------------------------------------------------------------------------- |
+ * | `'NV12'` | 8-bit YUV format with planar Y and interleaved UV planes. Commonly used in hardware-accelerated video processing.           |
+ * | `'I420'` | 8-bit planar YUV format with 4:2:0 chroma subsampling. Widely supported and efficient for compression.                      |
+ * | `'I444'` | 8-bit planar YUV format with full 4:4:4 chroma (no subsampling). Offers highest color fidelity, useful for post-production. |
+ * | `'P010'` | 10-bit packed YUV 4:2:0 format. Suitable for high dynamic range (HDR) workflows.                                            |
+ * | `'I010'` | 10-bit planar YUV 4:2:0 format. Provides better color depth while retaining planar layout.                                  |
+ * | `'P216'` | 16-bit packed YUV 4:2:2 format. Offers higher color resolution, used in professional capture scenarios.                     |
+ * | `'P416'` | 16-bit packed YUV 4:4:4 format. Ideal for precise color reproduction and advanced editing.                                  |
+ * | `'BGRA'` | 8-bit packed RGB format with alpha channel. Used in real-time rendering and desktop capture.                                |
  *
  * @example
  * const colorFormat: kVideoColorFormat = 'NV12';
@@ -1140,6 +1233,14 @@ type kVideoColorFormat =
  * used in video encoding pipelines. Choosing the appropriate spec impacts color
  * accuracy and display compatibility, especially for HDR or broadcast workflows.
  *
+ * | Value       | Description                                                                                                                    |
+ * | ----------- | ------------------------------------------------------------------------------------------------------------------------------ |
+ * | `'sRGB'`    | Standard RGB color space used for web content and computer monitors. Matches the typical display profile of non-HDR screens.   |
+ * | `'709'`     | Rec. 709 color space used for HDTV and most modern video production. Offers better color range and gamma than older standards. |
+ * | `'601'`     | Rec. 601 color space used in standard-definition television (SDTV). Suitable for legacy content or older broadcast systems.    |
+ * | `'2100PQ'`  | Rec. 2100 color spec using PQ (Perceptual Quantizer) transfer function. Used for HDR10 and other HDR video delivery standards. |
+ * | `'2100HLG'` | Rec. 2100 color spec using HLG (Hybrid Log-Gamma) transfer function. HDR-compatible and backward-compatible with SDR displays. |
+ *
  * @example
  * const colorSpec: kVideoColorSpec = '709';
  */
@@ -1181,6 +1282,11 @@ type kVideoColorSpec =
  * and contrast. It is important to match the color range to the target display
  * or encoder to avoid washed-out or crushed colors.
  *
+ * | Value       | Description                                                                                              |
+ * | ----------- | -------------------------------------------------------------------------------------------------------- |
+ * | `'Partial'` | Uses limited color range (typically 16–235 for luma), common in broadcast and traditional video content. |
+ * | `'Full'`    | Uses the full color range (0–255), typical for computer monitors and PC gaming content.                  |
+ *
  * @example
  * const range: kVideoColorRange = 'Full';
  */
@@ -1203,6 +1309,16 @@ type kVideoColorRange =
  * Rate control modes determine how bitrate is managed during video encoding,
  * affecting quality, file size, and encoding performance.
  * These values are specific to AMD's video encoding capabilities.
+ *
+ * | Value       | Description                                                                                                             |
+ * | ----------- | ----------------------------------------------------------------------------------------------------------------------- |
+ * | `'CBR'`     | Constant Bitrate. Maintains a fixed bitrate for consistent file size and streaming bandwidth.                           |
+ * | `'CQP'`     | Constant Quantization Parameter. Uses a fixed quantizer value, offering consistent visual quality but variable bitrate. |
+ * | `'VBR'`     | Variable Bitrate. Bitrate adjusts based on complexity of the content, balancing quality and size.                       |
+ * | `'VBR_LAT'` | Variable Bitrate with low-latency tuning. Optimized for low-latency scenarios like real-time streaming.                 |
+ * | `'QVBR'`    | Quality-defined Variable Bitrate. Maintains a target visual quality level rather than a specific bitrate.               |
+ * | `'HQVBR'`   | High-Quality Variable Bitrate. Prioritizes visual fidelity while allowing variable bitrate.                             |
+ * | `'HQCBR'`   | High-Quality Constant Bitrate. Delivers consistent bitrate while maximizing encoding quality.                           |
  *
  * @example
  * const rateControl: kAMDEncoderRateControl = 'CBR';
@@ -1255,6 +1371,12 @@ type kAMDEncoderRateControl =
  *
  * These presets control the balance between encoding speed and visual quality.
  * Useful when tuning encoder behavior for different use cases such as streaming or local recording.
+ *
+ * | Value        | Description                                                                                                       |
+ * | ------------ | ----------------------------------------------------------------------------------------------------------------- |
+ * | `'quality'`  | Prioritizes the best possible image quality. May result in slower encoding speeds.                                |
+ * | `'balanced'` | Offers a tradeoff between quality and speed. Suitable for most general-purpose use cases.                         |
+ * | `'speed'`    | Optimized for fastest encoding performance. May reduce image quality in favor of lower latency and CPU/GPU usage. |
  *
  * @example
  * const preset: kAMDEncoderPreset = 'balanced';
@@ -1314,6 +1436,12 @@ type kAMDEncoderProfileAV1 = 'main';
  * impacting compatibility, quality, and efficiency. This type includes standard H.264 profiles,
  * as well as the AV1 `main` profile reused for structural consistency.
  *
+ * | Value                              | Description                                                                                                                              |
+ * | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+ * | `kAMDEncoderProfileAV1` (`'main'`) | The AV1 main profile reused here for structural consistency. Typically not used with H.264 but may appear in shared configuration types. |
+ * | `'high'`                           | Offers the best visual quality and compression efficiency. Commonly used for high-definition video applications.                         |
+ * | `'baseline'`                       | Provides the most basic H.264 features. Suitable for low-complexity or real-time encoding scenarios.                                     |
+ *
  * @example
  * const profile: kAMDEncoderProfile264 = 'high';
  *
@@ -1343,6 +1471,13 @@ type kAMDEncoderProfile264 =
  *
  * Rate control modes define how the encoder manages bitrate and quality.
  * Choosing the appropriate mode depends on the desired balance between quality, file size, and real-time performance.
+ *
+ * | Value        | Description                                                                                                                                |
+ * | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+ * | `'CBR'`      | Constant Bitrate. Maintains a consistent bitrate throughout the recording. Useful for streaming and bandwidth-limited scenarios.           |
+ * | `'CQP'`      | Constant Quantization Parameter. Prioritizes visual quality by keeping a consistent quantization level. File sizes may vary significantly. |
+ * | `'VBR'`      | Variable Bitrate. Adjusts bitrate dynamically based on scene complexity. Provides better compression but less predictability in file size. |
+ * | `'Lossless'` | Encodes without compression loss. Produces very high-quality output at the cost of large file sizes.                                       |
  *
  * @example
  * const rateControl: kNVENCEncoderRateControl = 'CQP';
@@ -1378,6 +1513,12 @@ type kNVENCEncoderRateControl =
  * Multipass encoding improves visual quality by analyzing the video in multiple passes
  * to better allocate bitrate and compression decisions.
  *
+ * | Value        | Description                                                                                                                   |
+ * | ------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+ * | `'qres'`     | Quarter-resolution first pass followed by full-resolution encoding. Offers a good balance between speed and improved quality. |
+ * | `'fullres'`  | Full-resolution multipass encoding. Produces the highest quality results but increases encoding time.                         |
+ * | `'disabled'` | Multipass is turned off. Results in faster encoding at the potential cost of lower quality.                                   |
+ *
  * @example
  * const multipass: kNVENCEncoderMultipass = 'qres';
  */
@@ -1405,6 +1546,12 @@ type kNVENCEncoderMultipass =
  *
  * Tuning presets allow the encoder to optimize for specific use cases like high quality or low latency,
  * adjusting internal settings accordingly.
+ *
+ * | Value   | Description                                                                                                                    |
+ * | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
+ * | `'hq'`  | High Quality. Prioritizes visual quality over latency. Ideal for recording or broadcasting when minimal delay is not critical. |
+ * | `'ll'`  | Low Latency. Balances quality and latency. Suitable for interactive streaming and real-time applications.                      |
+ * | `'ull'` | Ultra Low Latency. Minimizes delay as much as possible. Best used in competitive gaming or remote control scenarios.           |
  *
  * @example
  * const tuning: kNVENCEncoderTuning = 'll';
@@ -1441,6 +1588,12 @@ type kNVENCEncoderProfile = 'main';
  * These profiles determine the features used in encoding and the compatibility of the resulting stream or file.
  * This type extends the base `kNVENCEncoderProfile` and includes commonly used H.264 profiles.
  *
+ * | Value                             | Description                                                                                                          |
+ * | --------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+ * | `kNVENCEncoderProfile` (`'main'`) | Base set of encoder profiles (e.g., `main`). May include additional shared or AV1-specific variants.                 |
+ * | `'high'`                          | Supports the most advanced H.264 features. Recommended for high-definition video with better compression efficiency. |
+ * | `'baseline'`                      | Basic H.264 profile with minimal compression features. Best for low-latency and real-time video applications.        |
+ *
  * @example
  * const profile: kNVENCEncoderProfile264 = 'high';
  *
@@ -1471,6 +1624,11 @@ type kNVENCEncoderProfile264 =
  * These profiles determine the compression capabilities, color depth, and compatibility of the HEVC stream.
  * This type extends `kNVENCEncoderProfile` and includes 10-bit support via `main10`.
  *
+ * | Value                             | Description                                                                              |
+ * | --------------------------------- | ---------------------------------------------------------------------------------------- |
+ * | `kNVENCEncoderProfile` (`'main'`) | Base HEVC profile, typically includes `main`. Suitable for standard 8-bit HEVC encoding. |
+ * | `'main10'`                        | Enables 10-bit color depth for enhanced video quality and HDR compatibility.             |
+ *
  * @example
  * const profile: kNVENCEncoderProfileHEVC = 'main10';
  *
@@ -1493,6 +1651,13 @@ type kNVENCEncoderProfileHEVC =
  *
  * Rate control modes determine how the encoder manages bitrate and quality over time.
  * Each mode offers a different balance between output file size, quality, and encoding speed.
+ *
+ * | Value   | Description                                                                                                                                                  |
+ * | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+ * | `'CBR'` | Constant Bitrate. Maintains a fixed bitrate throughout encoding. Useful for streaming where bandwidth predictability is important.                           |
+ * | `'ABR'` | Average Bitrate. Tries to maintain a target average bitrate across the whole stream. Balances quality and file size over long durations.                     |
+ * | `'VBR'` | Variable Bitrate. Allows the bitrate to vary depending on frame complexity. Offers better quality at lower file sizes, but less predictable bandwidth usage. |
+ * | `'CRF'` | Constant Rate Factor. Targets a consistent visual quality instead of bitrate. Ideal for scenarios where quality is more important than file size.            |
  *
  * @example
  * const rateControl: kX264EncoderRateControl = 'CRF';
@@ -1528,6 +1693,13 @@ type kX264EncoderRateControl =
  * Encoding profiles define the set of features used for compression and compatibility
  * with various playback devices and streaming platforms.
  *
+ * | Value        | Description                                                                                                                         |
+ * | ------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+ * | `''`         | Default profile. Lets the encoder decide which profile to use automatically.                                                        |
+ * | `'baseline'` | Provides basic H.264 features. Suitable for low-complexity, real-time, or legacy device compatibility scenarios.                    |
+ * | `'main'`     | Supports interlaced video and enhanced compression. Recommended for general-purpose encoding with balanced quality and performance. |
+ * | `'high'`     | Enables advanced compression features for better video quality. Ideal for HD content, streaming, or high-quality recording.         |
+ *
  * @example
  * const profile: kX264EncoderProfile = 'high';
  */
@@ -1562,6 +1734,18 @@ type kX264EncoderProfile =
  *
  * Tuning options help optimize the encoder's performance for specific types of content or use cases.
  * These settings adjust internal compression behavior and rate-distortion tradeoffs.
+ *
+ * | Value           | Description                                                                                                  |
+ * | --------------- | ------------------------------------------------------------------------------------------------------------ |
+ * | `''`            | Default. No tuning applied; encoder uses standard compression behavior.                                      |
+ * | `'film'`        | Optimizes for live-action, natural footage. Preserves fine grain and cinematic detail.                       |
+ * | `'animation'`   | Optimizes for animated content. Enhances compression of solid colors and repetitive patterns.                |
+ * | `'grain'`       | Preserves film grain. Reduces temporal blurring at the cost of larger file sizes.                            |
+ * | `'stillimage'`  | Optimizes for individual image compression. Suitable for slideshow or low-motion content.                    |
+ * | `'psnr'`        | Optimizes for peak signal-to-noise ratio (PSNR). Prioritizes objective video quality metrics.                |
+ * | `'ssim'`        | Optimizes for structural similarity index (SSIM). Targets better perceptual quality over raw pixel accuracy. |
+ * | `'fastdecode'`  | Reduces computational load on decoders. Disables features that are hard to decode quickly.                   |
+ * | `'zerolatency'` | Minimizes latency for real-time streaming. Reduces buffering and introduces faster frame delivery.           |
  *
  * @example
  * const tune: kX264EncoderTune = 'animation';
@@ -1625,6 +1809,19 @@ type kX264EncoderTune =
  *
  * Faster presets use less CPU but result in lower compression efficiency (larger files),
  * while slower presets use more CPU to produce better compression and quality.
+ *
+ * | Value         | Description                                                                                                   |
+ * | ------------- | ------------------------------------------------------------------------------------------------------------- |
+ * | `'ultrafast'` | Lowest CPU usage and fastest encoding speed. Produces larger file sizes and lower compression quality.        |
+ * | `'superfast'` | Very fast encoding with slightly better compression than `ultrafast`.                                         |
+ * | `'veryfast'`  | A good balance between speed and quality. Commonly used default setting.                                      |
+ * | `'faster'`    | Slightly slower than `veryfast` with improved compression.                                                    |
+ * | `'fast'`      | Offers better compression efficiency than `faster` at the cost of more CPU.                                   |
+ * | `'medium'`    | Default preset for x264. Balances speed and quality effectively.                                              |
+ * | `'slow'`      | Slower encoding for better compression and video quality.                                                     |
+ * | `'slower'`    | Even better compression at the cost of more processing time.                                                  |
+ * | `'veryslow'`  | Maximizes compression efficiency and visual quality. Suitable for archival or final delivery.                 |
+ * | `'placebo'`   | Insanely slow with minimal improvement over `veryslow`. Generally not recommended due to diminishing returns. |
  *
  * @example
  * const preset: kX264EncoderPreset = 'veryfast';
@@ -1721,6 +1918,16 @@ type kQuickSyncEncoderProfile264 = kNVENCEncoderProfile264;
  * Target usage defines a trade-off between encoding speed and output quality.
  * Lower TU values result in better quality but slower performance, while higher values favor speed.
  *
+ * | Value   | Description                                         |
+ * | ------- | --------------------------------------------------- |
+ * | `'TU1'` | Slowest encoding, best possible quality.            |
+ * | `'TU2'` | Slower encoding with slightly reduced quality.      |
+ * | `'TU3'` | Slow encoding with good quality.                    |
+ * | `'TU4'` | Balanced setting offering medium quality and speed. |
+ * | `'TU5'` | Fast encoding with reduced quality.                 |
+ * | `'TU6'` | Faster encoding with further quality tradeoffs.     |
+ * | `'TU7'` | Fastest encoding, lowest quality.                   |
+ *
  * @example
  * const usage: kQuickSyncTargetUsage = 'TU4'; // Balanced
  */
@@ -1748,6 +1955,13 @@ type kQuickSyncTargetUsage =
  * 
  * Rate control determines how the bitrate is managed during encoding, impacting quality, file size, and performance.
  *
+ * | Value   | Description                                                                                           |
+ * | ------- | ----------------------------------------------------------------------------------------------------- |
+ * | `'CBR'` | Constant Bitrate. Maintains a fixed bitrate for predictable file sizes.                               |
+ * | `'CQP'` | Constant Quantization Parameter. Prioritizes consistent quality over bitrate.                         |
+ * | `'VBR'` | Variable Bitrate. Adjusts bitrate dynamically for efficient encoding with acceptable quality.         |
+ * | `'ICQ'` | Intelligent Constant Quality. Balances quality and bitrate automatically using an internal algorithm. |
+ *
  * @example
  * const rateControl: kQuickSyncEncoderRateControl = 'CBR';
  */
@@ -1765,6 +1979,12 @@ type kQuickSyncEncoderRateControl =
  * Defines the methods available for splitting video recordings.
  * 
  * Splitting can be useful for managing file sizes, organizing segments, or controlling recording behavior dynamically.
+ *
+ * | Value      | Description                                                                    |
+ * | ---------- | ------------------------------------------------------------------------------ |
+ * | `'byTime'` | Automatically splits the recording into segments based on elapsed time.        |
+ * | `'bySize'` | Automatically splits the recording once a specific file size limit is reached. |
+ * | `'manual'` | Splitting is controlled programmatically or by user input.                     |
  *
  * @example
  * const splitType: VideoRecordingSplitType = 'bySize';
@@ -3903,6 +4123,25 @@ interface RecordingAppOptions {
  *
  * These codes help in identifying and handling recording-related issues.
  *
+ * | Code    | Name                         | Description                                                                      |
+ * | ------- | ---------------------------- | -------------------------------------------------------------------------------- |
+ * | `-1001` | `Unknown`                    | Generic unknown error.                                                           |
+ * | `-1000` | `ProcessTerminated`          | OBS process crashed.                                                             |
+ * | `-999`  | `MissingBinaries`            | Missing binaries required for recording.                                         |
+ * | `-998`  | `ConnectionOBSError`         | Failed to connect to the OBS process.                                            |
+ * | `-997`  | `AlreadyRunning`             | Operation attempted while recording is already running.                          |
+ * | `-996`  | `ElevationHelperMissing`     | Elevated game capture requested while the High Elevation Helper isn't installed. |
+ * | `-12`   | `SplitRecordingDisabled`     | Attempted to split recording when split recording is disabled.                   |
+ * | `-11`   | `MissingOrInvalidParameters` | One or more required parameters are missing or invalid.                          |
+ * | `-10`   | `NoActiveRecording`          | No active recording session found.                                               |
+ * | `-8`    | `EncoderError`               | Encoder encountered an error.                                                    |
+ * | `-7`    | `NoDiskSpaceError`           | Not enough disk space to complete the recording.                                 |
+ * | `-4`    | `ProcessOutputError`         | Failed to process or finalize the output video file.                             |
+ * | `-1`    | `BadPathError`               | Invalid or inaccessible output file path.                                        |
+ * | `0`     | `Success`                    | Operation succeeded.                                                             |
+ * | `1`     | `SuccessLowDiskSpace`        | Operation succeeded but stopped early due to low disk space.                     |
+ * | `2`     | `SuccessWithError`           | Replay stopped while creating replay.                                            |
+ *
  * @example
  * ```ts
  * function handleError(code: ErrorCode) {
@@ -3928,9 +4167,7 @@ type ErrorCode =
   | -1    // Invalid or inaccessible output file path. 'BadPathError'
   | 0     // Operation succeeded. 'Success'
   | 1     // Operation succeeded but stopped early due to low disk space. 'SuccessLowDiskSpace'
-  | 2;    // Reserved or undefined success code.
-
- // Replay stopped while creating replay 'SuccessWithError'
+  | 2;    // Replay stopped while creating replay. 'SuccessWithError'
 
 /**
  * Base configuration options for video recording.
@@ -5036,8 +5273,8 @@ type GpuPreference = "default" | "highPerformance";
  *   received in-game. The overlay retried, then fell back to the CPU copy path.
  *   {@link IOverwolfOverlayApi.setGpuPreference} may help when the root cause is
  *   adapter-related.
- * - `handleTransportBlocked`&mdash;The GPU textures could not be shared with the game
- *   process.
+ * - `handleTransportBlocked`&mdash;The GPU textures could not be handed to the game process
+ *   at all. Nothing the application can do; the overlay uses the CPU copy path for this game.
  *
  * @see {@link IOverwolfOverlayApi.on} `shared-texture-unavailable`.
  *
@@ -6212,8 +6449,8 @@ interface IOverwolfOverlayApi extends EventEmitter {
    *   received in-game**. The overlay retried, then abandoned the path for this game.
    *   {@link IOverwolfOverlayApi.setGpuPreference} may help when the root cause is
    *   adapter-related; details are in the overlay log.
-   * - `handleTransportBlocked`&mdash;the GPU textures **could not be shared with the game
-   *   process**.
+   * - `handleTransportBlocked`&mdash;the GPU textures **could not be handed to the game
+   *   process at all**. Nothing the application can do.
    *
    * Fires at most **once per injected game**. The first two reasons are detected when the
    * game's graphics are detected, before any frame is sent; `copyFailure` and
@@ -6486,6 +6723,18 @@ export interface ICRNEvent {
  * interact with or dismiss a notification. It is useful for analytics,
  * handling UI state changes, or triggering specific behavior based on
  * user intent or automated conditions.
+ *
+ * | Value                                       | Description                                                                                      |
+ * | ------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+ * | `'Dismissed'`                               | User clicked on the `X` button to dismiss the notification.                                      |
+ * | `'IgnoredByLaunchingGame'`                  | Notification closed due to launching another game while the notification is displayed.           |
+ * | `'Timeout'`                                 | Notification automatically closed after no user action was registered.                           |
+ * | `'TurnOffNotificationsRequested'`           | User clicked on `Turn off notifications` from the cogwheel icon.                                 |
+ * | `'OpenExternalUrl'`                         | User clicked on a notification that opens an external URL (e.g., newsletter site).               |
+ * | `'DownloadExternalApp'`                     | User clicked on a notification that downloads an external app.                                   |
+ * | `'CancelDownloadExternalApp'`               | User clicked on the `Cancel` button while the external app was downloading.                      |
+ * | `'CloseClickedWhileDownloadingExternalApp'` | User clicked on the `X` button while the external app was downloading.                           |
+ * | `'ForceClosed'`                             | Developer programmatically closed the notification using the `closeNotificationWindow()` method. |
  *
  * @example
  * crnApi.on('notification-action', (action: CRNActionType) => {

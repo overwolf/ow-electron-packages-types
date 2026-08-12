@@ -252,8 +252,8 @@ type GpuPreference = "default" | "highPerformance";
  *   received in-game. The overlay retried, then fell back to the CPU copy path.
  *   {@link IOverwolfOverlayApi.setGpuPreference} may help when the root cause is
  *   adapter-related.
- * - `handleTransportBlocked`&mdash;The GPU textures could not be shared with the game
- *   process.
+ * - `handleTransportBlocked`&mdash;The GPU textures could not be handed to the game process
+ *   at all. Nothing the application can do; the overlay uses the CPU copy path for this game.
  *
  * @see {@link IOverwolfOverlayApi.on} `shared-texture-unavailable`.
  *
@@ -1428,8 +1428,8 @@ interface IOverwolfOverlayApi extends EventEmitter {
    *   received in-game**. The overlay retried, then abandoned the path for this game.
    *   {@link IOverwolfOverlayApi.setGpuPreference} may help when the root cause is
    *   adapter-related; details are in the overlay log.
-   * - `handleTransportBlocked`&mdash;the GPU textures **could not be shared with the game
-   *   process**.
+   * - `handleTransportBlocked`&mdash;the GPU textures **could not be handed to the game
+   *   process at all**. Nothing the application can do.
    *
    * Fires at most **once per injected game**. The first two reasons are detected when the
    * game's graphics are detected, before any frame is sent; `copyFailure` and
