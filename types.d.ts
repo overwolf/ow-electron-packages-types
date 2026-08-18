@@ -4053,6 +4053,13 @@ interface EncoderInformation {
 type CrashDumpType = 'off' | 'mini' | 'full';
 
 /**
+ * How OBS is hosted.
+ * - `process`: OBS runs as its own standalone process; the default.
+ * - `dll`: OBS runs inside a helper process launched by the app.
+ */
+type ObsHostMode = 'process' | 'dll';
+
+/**
  * Crash dump configuration for the OBS host process.
  */
 interface CrashDumpOptions {
@@ -4113,6 +4120,16 @@ interface RecordingAppOptions {
    * @see {@link CrashDumpOptions}
    */
   crashDumps?: CrashDumpOptions;
+
+  /**
+   * How to host OBS. Defaults to `process`.
+   *
+   * Applied the next time OBS starts, so changing it while a recording is
+   * running does not affect that recording.
+   *
+   * @see {@link ObsHostMode}
+   */
+  hostMode?: ObsHostMode;
 }
 
 
