@@ -697,6 +697,17 @@ interface EncoderInfoBase {
    * A human-readable name for the encoder (e.g., shown in UI).
    */
   readonly name: string;
+
+  /**
+   * Optional map of encoder-specific configuration properties, keyed by
+   * setting name (e.g. `bitrate`, `rate_control`). Each property describes a
+   * setting that can be adjusted for this encoder.
+   *
+   * Reported for both video and audio encoders.
+   *
+   * @see {@link EncoderProperty}
+   */
+  readonly properties?: Record<string, EncoderProperty>;
 }
 
 /**
@@ -706,14 +717,22 @@ interface EncoderInfoBase {
  * Provides metadata to help display options in a UI or validate configuration.
  *
  * @example
- * const bitrateProperty: EncoderProperty = {
- *   default: 4500,
- *   description: 'Target video bitrate in kbps.',
- *   values: {
- *     3000: 'Low quality',
- *     4500: 'Medium quality (default)',
- *     6000: 'High quality'
- *   }
+ * // An enum-like setting - `values` lists every accepted value.
+ * const rateControl: EncoderProperty = {
+ *   default: 'CBR',
+ *   description: 'Rate Control',
+ *   values: ['CBR', 'CQP', 'VBR', 'CQVBR'],
+ *   valuesDesc: ['CBR', 'CQP', 'VBR', 'CQVBR']
+ * };
+ *
+ * @example
+ * // A numeric range setting - no `values`; the range is min/max/step.
+ * const bitrate: EncoderProperty = {
+ *   default: 10000,
+ *   description: 'Bitrate',
+ *   min: 50,
+ *   max: 4294967,
+ *   step: 50
  * };
  */
 interface EncoderProperty {
@@ -728,8 +747,14 @@ interface EncoderProperty {
   readonly description: string;
 
   /**
-   * Optional array of possible values for this property.
+   * The complete set of accepted values for this property, present only for
+   * enum-like settings (e.g. `rate_control`, `preset`, `profile`, `tune`).
    * Useful for dropdowns or presets.
+   *
+   * Numeric range settings such as `bitrate`, `max_bitrate` or `keyint_sec`
+   * do **not** report `values` - they describe their range through `min`,
+   * `max` and `step` instead. An absent or single-entry `values` array
+   * therefore does not mean the setting is restricted to one option.
    */
   readonly values?: (string | number)[];
 
@@ -738,6 +763,29 @@ interface EncoderProperty {
    * Helps provide additional context for each option.
    */
   readonly valuesDesc?: string[];
+
+  /**
+   * The smallest value this setting accepts.
+   *
+   * Reported for numeric settings only (`bitrate`, `keyint_sec`, `cqp`, ...);
+   * enum-like settings use `values` instead.
+   */
+  readonly min?: number;
+
+  /**
+   * The largest value this setting accepts.
+   *
+   * Reported for numeric settings only.
+   */
+  readonly max?: number;
+
+  /**
+   * The granularity between accepted values.
+   *
+   * Reported for numeric settings only. A `bitrate` with a `step` of 50
+   * accepts 50, 100, 150 and so on.
+   */
+  readonly step?: number;
 }
 
 /**
@@ -752,7 +800,10 @@ interface EncoderProperty {
  * const audioEncoder: AudioEncoderInfo = {
  *   codec: 'aac',
  *   name: 'FFmpeg AAC Encoder',
- *   type: 'ffmpeg_aac'
+ *   type: 'ffmpeg_aac',
+ *   properties: {
+ *     bitrate: { default: 128, description: 'Bitrate' }
+ *   }
  * };
  */
 interface AudioEncoderInfo extends EncoderInfoBase {
@@ -769,8 +820,9 @@ interface AudioEncoderInfo extends EncoderInfoBase {
 /**
  * Information for a supported video encoder.
  *
- * This interface extends `EncoderInfoBase` and adds specific information
- * about the video encoder type and any configurable encoder properties.
+ * This interface extends `EncoderInfoBase` and adds the specific video encoder
+ * type identifier. Configurable encoder settings are reported through the
+ * inherited `properties` map.
  *
  * @extends EncoderInfoBase
  *
@@ -780,14 +832,11 @@ interface AudioEncoderInfo extends EncoderInfoBase {
  *   name: 'NVIDIA NVENC H.264',
  *   type: 'obs_nvenc_h264_tex',
  *   properties: {
- *     bitrate: {
- *       default: 6000,
- *       description: 'Target video bitrate in kbps.',
- *       values: {
- *         4000: 'Low quality',
- *         6000: 'Medium quality',
- *         8000: 'High quality'
- *       }
+ *     bitrate: { default: 10000, description: 'Bitrate' },
+ *     rate_control: {
+ *       default: 'CBR',
+ *       description: 'Rate Control',
+ *       values: ['CBR', 'CQP', 'VBR', 'CQVBR']
  *     }
  *   }
  * };
@@ -795,19 +844,10 @@ interface AudioEncoderInfo extends EncoderInfoBase {
 interface VideoEncoderInfo extends EncoderInfoBase {
   /**
    * The identifier for the specific video encoder type.
-   * 
+   *
    * @see {@link kSupportedEncodersTypes}
    */
   readonly type: kSupportedEncodersTypes;
-
-  /**
-   * Optional map of encoder-specific configuration properties.
-   * Each property defines a setting that can be adjusted,
-   * such as bitrate, profile, or keyframe interval.
-   * 
-   * @see {@link EncoderProperty}
-   */
-  readonly properties?: Record<string, EncoderProperty>;
 }
 
 
@@ -911,7 +951,7 @@ interface AudioInformation {
  *   adapterIndex: 0,
  *   id: 'MONITOR\\GSM5B10\\{4d36e96e-e325-11ce-bfc1-08002be10318}_0',
  *   altId: 'DISPLAY1',
- *   dpi: 96,
+ *   dpi: 1.25,
  *   attachedToDesktop: true,
  *   friendlyName: 'LG UltraFine 4K',
  *   refreshRate: 60,
@@ -937,7 +977,8 @@ interface MonitorInfo {
   readonly altId: string;
 
   /**
-   * The DPI (dots per inch) value of the monitor.
+   * Display scale factor (system DPI / 96), not a DPI value.
+   * `1` = 100%, `1.25` = 125%, `2` = 200%.
    */
   readonly dpi: number;
 
@@ -1477,7 +1518,13 @@ type kAMDEncoderProfile264 =
  * | `'CBR'`      | Constant Bitrate. Maintains a consistent bitrate throughout the recording. Useful for streaming and bandwidth-limited scenarios.           |
  * | `'CQP'`      | Constant Quantization Parameter. Prioritizes visual quality by keeping a consistent quantization level. File sizes may vary significantly. |
  * | `'VBR'`      | Variable Bitrate. Adjusts bitrate dynamically based on scene complexity. Provides better compression but less predictability in file size. |
- * | `'Lossless'` | Encodes without compression loss. Produces very high-quality output at the cost of large file sizes.                                       |
+ * | `'CQVBR'`    | Constrained Quality VBR. Targets a quality level (`target_quality`) while respecting `max_bitrate`.                                        |
+ * | `'lossless'` | Encodes without compression loss. Produces very high-quality output at the cost of large file sizes.                                       |
+ *
+ * These values are **case-sensitive**: NVENC compares `CQP` and `lossless`
+ * exactly as spelled here. Any value it does not recognize falls back to `CBR`
+ * silently, with no error - so pass these strings verbatim and do not
+ * upper- or lower-case them.
  *
  * @example
  * const rateControl: kNVENCEncoderRateControl = 'CQP';
@@ -1502,10 +1549,18 @@ type kNVENCEncoderRateControl =
   | 'VBR'
 
   /**
-   * `Lossless` — Encodes without compression loss.
-   * Produces very high-quality output at the cost of large file sizes.
+   * `CQVBR` — Constrained Quality VBR. Targets the quality level given by
+   * `target_quality` while keeping within `max_bitrate`.
    */
-  | 'Lossless';
+  | 'CQVBR'
+
+  /**
+   * `lossless` — Encodes without compression loss.
+   * Produces very high-quality output at the cost of large file sizes.
+   *
+   * Lower-case by design: NVENC matches this value case-sensitively.
+   */
+  | 'lossless';
 
 /**
  * Specifies the multipass encoding mode for NVIDIA's NVENC encoder.
