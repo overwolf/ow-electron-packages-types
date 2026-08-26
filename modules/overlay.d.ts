@@ -1390,6 +1390,22 @@ interface IOverwolfOverlayApi extends EventEmitter {
   ): this;
 
   /**
+   * Fires when the injected game's window is destroyed, which on many games
+   * happens seconds before the process exits. `game-exit` still follows and
+   * remains the authoritative end-of-session event.
+   *
+   * Not emitted for OOPO games.
+   *
+   * @param eventName - `game-window-destroyed`
+   * @param listener - Callback with the game info of the destroyed window.
+   * @see {@link GameInfo}.
+   */
+  on(
+    eventName: 'game-window-destroyed',
+    listener: (gameInfo: GameInfo) => void,
+  ): this;
+
+  /**
    * Fires when the game input interception capability changes.
    *
    * @param eventName - `game-input-interception-changed`
