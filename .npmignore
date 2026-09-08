@@ -6,5 +6,9 @@ utility.d.ts
 crn.d.ts
 packages.d.ts
 combine-dts.js
+beta.js
+release.js
+release-util.js
 modules/
+.github/
 npm-publish.yml

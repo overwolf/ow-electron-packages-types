@@ -9,9 +9,17 @@ on:
       - "package.json"
 
 jobs:
+  # Gate: regenerates types.d.ts from modules/*.d.ts and fails if the
+  # committed file differs. Both publish jobs depend on it, so a stale type
+  # surface can never reach npm.
+  verify:
+    name: Verify Types Are In Sync
+    uses: ./.github/workflows/verify-types.yml
+
   publish-beta:
     name: Publish Beta Package
     runs-on: ubuntu-latest
+    needs: verify
 
     if: github.ref == 'refs/heads/beta'
 
@@ -62,6 +70,7 @@ jobs:
   publish-main:
     name: Publish Main Package
     runs-on: ubuntu-latest
+    needs: verify
 
     if: github.ref == 'refs/heads/main'
 

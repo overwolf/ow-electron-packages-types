@@ -1,0 +1,61 @@
+name: Verify Types Are In Sync
+
+# types.d.ts is the only file the published package ships (.npmignore excludes
+# modules/), and the docs pipeline generates its ow-electron API reference from
+# it. If it is committed stale, a publish ships a type surface that does not
+# match modules/*.d.ts and the reference pages are generated from the stale
+# copy - silently, because the split back into modules still succeeds.
+
+on:
+  # Lets npm-publish.yml depend on this check, so a stale types.d.ts is
+  # unpublishable rather than merely flagged. The two workflows trigger on
+  # different paths, so without this a release commit (package.json only)
+  # would never run the check at all.
+  workflow_call:
+  pull_request:
+    paths:
+      - "modules/**"
+      - "types.d.ts"
+      - "combine-dts.js"
+  push:
+    branches:
+      - beta
+      - main
+    paths:
+      - "modules/**"
+      - "types.d.ts"
+      - "combine-dts.js"
+
+jobs:
+  verify-combine:
+    name: types.d.ts matches modules
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # No package-lock.json is committed (.gitignore excludes it), so npm ci
+      # is not an option here.
+      - name: Install Dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Regenerate types.d.ts
+        run: npm run combine
+
+      - name: Fail if the committed file is stale
+        run: |
+          if ! git diff --quiet -- types.d.ts; then
+            echo "::error::types.d.ts does not match modules/*.d.ts. Run 'npm run combine' and commit the result."
+            git diff --stat -- types.d.ts
+            exit 1
+          fi
+          echo "types.d.ts is in sync with modules/*.d.ts."

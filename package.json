@@ -1,6 +1,6 @@
 {
     "name": "@overwolf/ow-electron-packages-types",
-    "version": "1.1.11",
+    "version": "1.1.12-beta.0",
     "description": "Type definition file for autocompletion and documentation purposes for ow-electron packages",
     "license": "MIT",
     "types": "types.d.ts",
@@ -32,7 +32,9 @@
         }
     },
     "scripts": {
-        "combine": "node combine-dts.js ./modules"
+        "combine": "node combine-dts.js ./modules",
+        "beta": "node beta.js",
+        "release": "node release.js"
     },
     "dependencies": {
         "glob": "^13.0.0"
