@@ -374,6 +374,11 @@ interface OverlayWindowOptions
    * ignored when either condition is not met, falling back to the
    * shared-memory (CPU copy) path.
    *
+   * There is no need to wait for {@link GameWindowInfo.isSharedTextureAvailable} before
+   * creating the window. While the game's support is still unknown the window starts on the
+   * shared-texture path, and switches to the CPU copy path if the game turns out not to
+   * support it.
+   *
    * The rendering path follows the active game: when the overlay moves to a
    * different game, a shared-texture window automatically falls back to the
    * shared-memory (CPU copy) path on a game that does not support shared
@@ -681,6 +686,11 @@ interface InjectionError {
  * - Screen display information.
  * - Bounding rectangle of the game window.
  *
+ * Not available at injection time: the injected client reports the window only once the
+ * game's graphics device initializes, a few seconds after `game-injected`. Until then
+ * {@link ActiveGameInfo.gameWindowInfo} is `undefined`. The first `game-window-changed`
+ * event delivers it and is the earliest point where every field below holds a real value.
+ *
  * @example
  * ```ts
  * overlay.on('game-window-changed', (windowInfo, gameInfo, reason) => {
@@ -749,7 +759,8 @@ interface GameWindowInfo {
    * This is a capability probe only &mdash; to decide whether the path can actually be used
    * on this machine, gate on {@link GameWindowInfo.isSharedTextureAvailable} instead.
    *
-   * `undefined` until the game is injected and its graphics API is detected.
+   * `undefined` until the game's graphics device initializes, a few seconds after
+   * `game-injected`; the first `game-window-changed` event carries the resolved value.
    *
    * @since 2.0.0
    */
@@ -757,7 +768,11 @@ interface GameWindowInfo {
 
   /**
    * Indicates whether shared-texture (GPU) overlay rendering can actually be used with this
-   * game &mdash; gate `useSharedTexture` window creation on it.
+   * game.
+   *
+   * Not a precondition for creating a window: a `useSharedTexture` window may be created
+   * before this value resolves, and the overlay corrects the rendering path on its own. Read
+   * it to observe the outcome, or to branch when the window behaves differently on each path.
    *
    * `true` when the game's graphics API supports it
    * ({@link GameWindowInfo.isSharedTextureSupported}), no GPU adapter mismatch was detected,
@@ -766,7 +781,8 @@ interface GameWindowInfo {
    * `false` mid-game: the copy-failure verdict is reached only after frames were sent and
    * repeatedly failed to draw.
    *
-   * `undefined` until the game is injected and its graphics API is detected.
+   * `undefined` until the game's graphics device initializes, a few seconds after
+   * `game-injected`; the first `game-window-changed` event carries the resolved value.
    *
    * @see {@link https://dev.overwolf.com/ow-electron/reference/examples/overlay | Overlay examples}
    *
@@ -824,6 +840,10 @@ interface ActiveGameInfo {
   readonly gameInfo: GameInfo;
   /**
    * Window-specific details for the running game.
+   *
+   * `undefined` between injection and the first `game-window-changed` event: the injected
+   * client reports the window only once the game's graphics device initializes.
+   *
    * @see {@link GameWindowInfo}.
    */
   readonly gameWindowInfo: GameWindowInfo;
@@ -1357,6 +1377,11 @@ interface IOverwolfOverlayApi extends EventEmitter {
   /**
    * Fires when the game window focus state changes.
    *
+   * Also fires for a game whose injection was dismissed
+   * ({@link GameLaunchEvent.dismiss}). That window info carries position, size and focus
+   * only, with no graphics or shared-texture fields, so it is not a substitute for the first
+   * `game-window-changed`.
+   *
    * @param eventName - `game-focus-changed`
    * @param listener - Callback with window info, game info, and focus state.
    * @see {@link GameWindowInfo}.
@@ -1372,7 +1397,9 @@ interface IOverwolfOverlayApi extends EventEmitter {
   ): this;
 
   /**
-   * Fires when the game window is resized or changes position.
+   * Fires when the game window is resized or changes position, and once when the injected
+   * client first reports the window. That first event is the earliest point where
+   * {@link GameWindowInfo} is available.
    *
    * @param eventName - `game-window-changed`
    * @param listener - Callback with window info, game info, and optional reason.
