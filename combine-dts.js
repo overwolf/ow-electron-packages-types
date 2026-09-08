@@ -56,7 +56,14 @@ function combineDTSFiles() {
 
   for (const file of files) {
     const content = fs.readFileSync(file, "utf-8");
-    const relativePath = path.relative(process.cwd(), file);
+    // Separators are forced to backslash so the output is byte-identical on
+    // every platform. path.relative() would emit "modules/overlay.d.ts" on
+    // Linux and macOS, which changes the published file for no reason and
+    // breaks the docs pipeline: its splitter recovers each module by matching
+    // these markers with a backslash.
+    const relativePath = path
+      .relative(process.cwd(), file)
+      .replace(/\//g, "\\");
     combined += `\n// --- ${relativePath} ---\n` + content + "\n";
   }
 
