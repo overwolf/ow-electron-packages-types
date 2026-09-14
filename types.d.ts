@@ -40,6 +40,68 @@ import { EventEmitter } from 'events';
  */
 
 /**
+ * Reason `canInjectElevated()` reports {@link ElevatedInjectionCapability.supported} as `false`.
+ */
+type ElevatedInjectionUnsupportedReason =
+  /**
+   * `owe-helper-ui.exe` / `owe-helper-ui-x86.exe` are not installed yet in
+   * `%CommonProgramFiles%\<app-name>\`. Call `installHighElevationHelper()` to fix this.
+   */
+  | 'helper-not-installed'
+  /**
+   * The account running the app is a standard (non-administrator) user. A
+   * uiAccess helper launched from such an account only gets a MEDIUM+16
+   * integrity token, and Windows will not map a hook dll into a HIGH
+   * integrity (elevated) game.
+   *
+   * Call `installElevationBroker()` to inject anyway; without it the game has
+   * to run un-elevated, or the account needs administrator rights.
+   */
+  | 'account-cannot-elevate';
+
+/**
+ * Reports whether an elevated (HIGH integrity) game can actually be injected
+ * under the account the app is running as.
+ *
+ * @example
+ * ```ts
+ * const capability = await api.canInjectElevated();
+ * if (!capability.supported) {
+ *   console.warn('Cannot inject elevated games:', capability.reason);
+ * }
+ * ```
+ */
+interface ElevatedInjectionCapability {
+  /**
+   * `true` only when an elevated game can actually be injected right now.
+   */
+  readonly supported: boolean;
+
+  /**
+   * Set when {@link supported} is `false`.
+   */
+  readonly reason?: ElevatedInjectionUnsupportedReason;
+
+  /**
+   * `true` when the account can obtain a HIGH integrity token
+   * (administrator). When the check itself cannot run this is reported as
+   * `true`, so an undetermined account is attempted rather than blocked.
+   */
+  readonly accountCanElevate: boolean;
+
+  /**
+   * `true` when the uiAccess helper binaries are installed.
+   */
+  readonly helperInstalled: boolean;
+
+  /**
+   * `true` when the LocalSystem broker service is registered. It makes
+   * elevated injection possible regardless of {@link accountCanElevate}.
+   */
+  readonly brokerInstalled: boolean;
+}
+
+/**
  * Defines the API for managing game launch and utility operations.
  */
 interface IOverwolfUtilityApi {
@@ -115,11 +177,17 @@ interface IOverwolfUtilityApi {
    /**
    * Returns true if ow-electron helpers is already installed in
    * `%CommonProgramFiles%\<app-name>\`.
-   * 
+   *
    * @returns `true` if the helper is installed and ready.
-   * 
+   *
+   * @remarks
+   * This only reports whether the binaries are present. On a standard
+   * (non-administrator) account they can be present and elevated injection
+   * still won't work — use `canInjectElevated()` to decide what to tell the
+   * user.
+   *
    * @example
-   * ```ts 
+   * ```ts
    * const installed: boolean = await api.isHighElevationHelperInstalled();
    * if (!installed) {
    *   // Prompt the user to run the one-time setup before injecting into elevated games
@@ -127,6 +195,56 @@ interface IOverwolfUtilityApi {
    * ```
    */
   isHighElevationHelperInstalled?(): Promise<boolean>;
+
+  /**
+   * Whether an elevated (HIGH integrity) game can actually be injected under
+   * the account this app is running as.
+   *
+   * @returns An {@link ElevatedInjectionCapability} describing what's
+   * missing when elevated injection isn't currently possible.
+   *
+   * @remarks
+   * `supported` is `false` with reason `'account-cannot-elevate'` on a
+   * standard user account: Windows gives a uiAccess helper launched from such
+   * an account a MEDIUM+16 integrity token, which cannot get a dll mapped
+   * into an elevated game. The only workarounds are running the game
+   * un-elevated, granting the account administrator rights, or installing the
+   * elevation broker via `installElevationBroker()`.
+   *
+   * @example
+   * ```ts
+   * const capability = await api.canInjectElevated();
+   * if (!capability.supported) {
+   *   console.warn('Cannot inject elevated games:', capability.reason);
+   * }
+   * ```
+   */
+  canInjectElevated?(): Promise<ElevatedInjectionCapability>;
+
+  /**
+   * Installs the elevated injection broker: a LocalSystem service that
+   * injects into elevated games for accounts that cannot reach HIGH
+   * integrity, which is the only way an app running under a standard user
+   * account can overlay an elevated game. Prompts for UAC once.
+   *
+   * @throws `HelperInstallError` `exitCode 1223` — user cancelled the UAC prompt (ERROR_CANCELLED)
+   * @throws `HelperInstallError` any other non-zero exitCode — installation failed
+   *
+   * @remarks
+   * The service stays registered until `uninstallElevationBroker()` removes
+   * it, so the app's uninstaller must call that.
+   *
+   * @returns Resolves when installation completes.
+   */
+  installElevationBroker?(): Promise<void>;
+
+  /**
+   * Stops and removes the elevation broker service. Prompts for UAC once.
+   * Succeeds when the service is already absent.
+   *
+   * @returns Resolves when removal completes.
+   */
+  uninstallElevationBroker?(): Promise<void>;
 
   /**
    * Fires when a tracked game is launched.
