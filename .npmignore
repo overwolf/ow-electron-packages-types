@@ -12,3 +12,4 @@ release-util.js
 modules/
 .github/
 npm-publish.yml
+.githooks/

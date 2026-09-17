@@ -1,0 +1,20 @@
+#!/bin/sh
+# types.d.ts is generated from modules/*.d.ts by combine-dts.js. It is the only
+# file the published package ships, and the docs pipeline reads it, so it must
+# never be committed stale. Keep it in the same commit as its source.
+#
+# Installed by the "prepare" script in package.json (git config core.hooksPath).
+
+git diff --cached --name-only | grep -qE '^(modules/|combine-dts\.js$)' || exit 0
+
+# Quiet on success, loud on failure - combine-dts.js logs every file it reads.
+if ! out=$(npm run --silent combine 2>&1); then
+  echo "$out" >&2
+  echo "pre-commit: 'npm run combine' failed, commit aborted." >&2
+  exit 1
+fi
+
+if ! git diff --quiet -- types.d.ts; then
+  git add types.d.ts
+  echo "pre-commit: regenerated types.d.ts into this commit."
+fi

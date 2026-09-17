@@ -34,7 +34,8 @@
     "scripts": {
         "combine": "node combine-dts.js ./modules",
         "beta": "node beta.js",
-        "release": "node release.js"
+        "release": "node release.js",
+        "prepare": "git config core.hooksPath .githooks || true"
     },
     "dependencies": {
         "glob": "^13.0.0"
