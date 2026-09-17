@@ -4233,6 +4233,24 @@ type CrashDumpType = 'off' | 'mini' | 'full';
 type ObsHostMode = 'process' | 'dll';
 
 /**
+ * Lifecycle of the recording or replays output.
+ *
+ * | Value        | Meaning                                                              |
+ * | ------------ | -------------------------------------------------------------------- |
+ * | `idle`       | Not started.                                                         |
+ * | `starting`   | Start accepted, output not running yet - OBS waits for a capture source to hook. |
+ * | `active`     | Running and producing frames.                                        |
+ *
+ * An output stays `starting` for as long as its capture source fails to hook,
+ * with no timeout. Operations that need a running output - `captureReplay`,
+ * `splitRecording` - fail with `CaptureSourceNotHooked` while it does.
+ *
+ * @see {@link IOverwolfRecordingApi.getRecordingState}
+ * @see {@link IOverwolfRecordingApi.getReplayState}
+ */
+type OutputState = 'idle' | 'starting' | 'active';
+
+/**
  * Crash dump configuration for the OBS host process.
  */
 interface CrashDumpOptions {
@@ -4321,6 +4339,10 @@ interface RecordingAppOptions {
  * | `-998`  | `ConnectionOBSError`         | Failed to connect to the OBS process.                                            |
  * | `-997`  | `AlreadyRunning`             | Operation attempted while recording is already running.                          |
  * | `-996`  | `ElevationHelperMissing`     | Elevated game capture requested while the High Elevation Helper isn't installed. |
+ * | `-995`  | `CaptureSourceNotHooked`     | Output accepted by OBS but not running yet - waiting for a capture source.       |
+ * | `-994`  | `CaptureSourceNotFound`      | A game or window capture source's target process wasn't found. Retryable.        |
+ * | `-993`  | `CaptureSourceCreationFailed`| OBS refused to create the capture source. Not retryable.                         |
+ * | `-992`  | `OBSNotReady`                | OBS accepted the connection but its core isn't initialized yet. Retryable.       |
  * | `-12`   | `SplitRecordingDisabled`     | Attempted to split recording when split recording is disabled.                   |
  * | `-11`   | `MissingOrInvalidParameters` | One or more required parameters are missing or invalid.                          |
  * | `-10`   | `NoActiveRecording`          | No active recording session found.                                               |
@@ -4348,6 +4370,10 @@ type ErrorCode =
   | -998  // Failed to connect to the OBS process. 'ConnectionOBSError'
   | -997  // Operation attempted while recording is already running. 'AlreadyRunning'
   | -996  // Elevated game capture requested while the High Elevation Helper isn't installed. 'ElevationHelperMissing'
+  | -995  // Output accepted by OBS but not running yet - waiting for a capture source. 'CaptureSourceNotHooked'
+  | -994  // A game or window capture source's target process wasn't found. Retryable. 'CaptureSourceNotFound'
+  | -993  // OBS refused to create the capture source. 'CaptureSourceCreationFailed'
+  | -992  // OBS accepted the connection but its core isn't initialized yet. Retryable. 'OBSNotReady'
   | -12   // Attempted to split recording when split recording is disabled. 'SplitRecordingDisabled'
   | -11   // One or more required parameters are missing or invalid. 'MissingOrInvalidParameters'
   | -10   // No active recording session found. 'NoActiveRecording'
@@ -4936,19 +4962,59 @@ interface IOverwolfRecordingApi {
   readonly binFolderPath: string;
 
   /**
-   * Checks if either recording or replays are currently active.
+   * Whether a recording or a replays service has been started and not yet
+   * stopped - `true` for both the `starting` and `active` states.
+   *
+   * @see {@link getRecordingState}
+   * @see {@link getReplayState}
    */
   isActive(): Promise<boolean>;
 
   /**
-   * Checks if a recording is currently active.
+   * Whether a recording has been started and not yet stopped.
+   *
+   * `true` from the moment {@link startRecording} resolves, including while the
+   * output is still `starting` - waiting for a capture source to hook - so it
+   * does not mean frames are being written.
+   *
+   * @see {@link getRecordingState} to tell those apart.
    */
   isRecordingActive(): Promise<boolean>;
 
   /**
-   * Checks if a replay session is currently active.
+   * Whether a replays service has been started and not yet stopped.
+   *
+   * `true` from the moment {@link startReplays} resolves, including while the
+   * buffer is still `starting` - waiting for a capture source to hook - so it
+   * does not mean the buffer holds any footage.
+   *
+   * @see {@link getReplayState} to tell those apart.
    */
   isReplayActive(): Promise<boolean>;
+
+  /**
+   * The recording output's current state.
+   *
+   * @example
+   * ```ts
+   * if (await recorder.getRecordingState() === 'starting') {
+   *   // started, but no capture source has hooked yet - nothing is written
+   * }
+   * ```
+   *
+   * @see {@link OutputState}
+   */
+  getRecordingState(): Promise<OutputState>;
+
+  /**
+   * The replays buffer's current state.
+   *
+   * {@link captureReplay} fails with `CaptureSourceNotHooked` while this is
+   * `starting`, since the buffer holds no footage yet.
+   *
+   * @see {@link OutputState}
+   */
+  getReplayState(): Promise<OutputState>;
 
   /**
    * Queries supported encoders, audio/video devices, and configuration options.
