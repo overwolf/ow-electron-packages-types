@@ -4071,6 +4071,9 @@ interface RecordingAppOptions {
  * | `-997`  | `AlreadyRunning`             | Operation attempted while recording is already running.                          |
  * | `-996`  | `ElevationHelperMissing`     | Elevated game capture requested while the High Elevation Helper isn't installed. |
  * | `-995`  | `CaptureSourceNotHooked`     | Output accepted by OBS but not running yet - waiting for a capture source.       |
+ * | `-994`  | `CaptureSourceNotFound`      | A game or window capture source's target process wasn't found. Retryable.        |
+ * | `-993`  | `CaptureSourceCreationFailed`| OBS refused to create the capture source. Not retryable.                         |
+ * | `-992`  | `OBSNotReady`                | OBS accepted the connection but its core isn't initialized yet. Retryable.       |
  * | `-12`   | `SplitRecordingDisabled`     | Attempted to split recording when split recording is disabled.                   |
  * | `-11`   | `MissingOrInvalidParameters` | One or more required parameters are missing or invalid.                          |
  * | `-10`   | `NoActiveRecording`          | No active recording session found.                                               |
@@ -4099,6 +4102,9 @@ type ErrorCode =
   | -997  // Operation attempted while recording is already running. 'AlreadyRunning'
   | -996  // Elevated game capture requested while the High Elevation Helper isn't installed. 'ElevationHelperMissing'
   | -995  // Output accepted by OBS but not running yet - waiting for a capture source. 'CaptureSourceNotHooked'
+  | -994  // A game or window capture source's target process wasn't found. Retryable. 'CaptureSourceNotFound'
+  | -993  // OBS refused to create the capture source. 'CaptureSourceCreationFailed'
+  | -992  // OBS accepted the connection but its core isn't initialized yet. Retryable. 'OBSNotReady'
   | -12   // Attempted to split recording when split recording is disabled. 'SplitRecordingDisabled'
   | -11   // One or more required parameters are missing or invalid. 'MissingOrInvalidParameters'
   | -10   // No active recording session found. 'NoActiveRecording'
