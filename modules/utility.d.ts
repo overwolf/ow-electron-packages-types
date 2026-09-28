@@ -87,6 +87,46 @@ interface ElevatedInjectionCapability {
 }
 
 /**
+ * The value a failed elevation call rejects with: `installHighElevationHelper()`,
+ * `isHighElevationHelperInstalled()`, `canInjectElevated()`,
+ * `installElevationBroker()` and `uninstallElevationBroker()`.
+ *
+ * It is a plain object, not an `Error` instance: `err instanceof Error` is
+ * `false`, and there is no stack trace.
+ *
+ * @example
+ * ```ts
+ * try {
+ *   await api.installElevationBroker();
+ * } catch (err) {
+ *   const { message, exitCode } = err as UtilityApiError;
+ *   if (exitCode === 1223) {
+ *     console.warn('User cancelled UAC prompt');
+ *   } else {
+ *     console.error('Broker install failed:', message, exitCode);
+ *   }
+ * }
+ * ```
+ */
+interface UtilityApiError {
+  /**
+   * Describes the failure.
+   */
+  readonly message: string;
+
+  /**
+   * Exit code of the elevated installer process. Only set by the calls that
+   * prompt for UAC (`installHighElevationHelper()`,
+   * `installElevationBroker()` and `uninstallElevationBroker()`), and only
+   * when the installer actually ran - it is absent when the call failed
+   * before that, e.g. a missing helper binary.
+   *
+   * `1223` (ERROR_CANCELLED) means the user cancelled the UAC prompt.
+   */
+  readonly exitCode?: number;
+}
+
+/**
  * Defines the API for managing game launch and utility operations.
  */
 interface IOverwolfUtilityApi {
@@ -117,9 +157,9 @@ interface IOverwolfUtilityApi {
    * Allows injection into high elevation games.
    * No-ops if files are already present.
    *
-   * @throws `HelperInstallError` `exitCode 1223` — user cancelled the UAC prompt (ERROR_CANCELLED)
-   * @throws `HelperInstallError` `err.exitCode !== 1223` — the installer process failed. Log `err.exitCode` and investigate.
-   * @throws `HelperInstallError` any other non-zero exitCode — installation failed.
+   * @throws {@link UtilityApiError} `exitCode 1223` — user cancelled the UAC prompt (ERROR_CANCELLED)
+   * @throws {@link UtilityApiError} any other `exitCode` — the installer process failed. Log `err.exitCode` and investigate.
+   * @throws {@link UtilityApiError} no `exitCode` — the call failed before the installer ran. Log `err.message`.
    *
    * @remarks
    * The helper binaries are installed to:
@@ -135,12 +175,13 @@ interface IOverwolfUtilityApi {
    * try {
    *   await api.installHighElevationHelper();
    *   console.log('Helper installed successfully');
-   * } catch (err: any) {
-   *   if (err.exitCode === 1223) {
+   * } catch (err) {
+   *   const { message, exitCode } = err as UtilityApiError;
+   *   if (exitCode === 1223) {
    *     // User cancelled the UAC prompt — not an error, just inform the user
    *     console.warn('User cancelled UAC prompt');
    *   } else {
-   *     console.error('Installation failed, exitCode:', err.exitCode);
+   *     console.error('Installation failed:', message, exitCode);
    *   }
    * }
    * ```
@@ -164,6 +205,7 @@ interface IOverwolfUtilityApi {
    * `%CommonProgramFiles%\<app-name>\`.
    *
    * @returns `true` if the helper is installed and ready.
+   * @throws {@link UtilityApiError}
    *
    * @remarks
    * This only reports whether the binaries are present. On a standard
@@ -187,6 +229,7 @@ interface IOverwolfUtilityApi {
    *
    * @returns An {@link ElevatedInjectionCapability} describing what's
    * missing when elevated injection isn't currently possible.
+   * @throws {@link UtilityApiError}
    *
    * @remarks
    * `supported` is `false` with reason `'account-cannot-elevate'` on a
@@ -212,8 +255,9 @@ interface IOverwolfUtilityApi {
    * integrity, which is the only way an app running under a standard user
    * account can overlay an elevated game. Prompts for UAC once.
    *
-   * @throws `HelperInstallError` `exitCode 1223` — user cancelled the UAC prompt (ERROR_CANCELLED)
-   * @throws `HelperInstallError` any other non-zero exitCode — installation failed
+   * @throws {@link UtilityApiError} `exitCode 1223` — user cancelled the UAC prompt (ERROR_CANCELLED)
+   * @throws {@link UtilityApiError} any other `exitCode` — installation failed
+   * @throws {@link UtilityApiError} no `exitCode` — the call failed before the installer ran
    *
    * @remarks
    * The service stays registered until `uninstallElevationBroker()` removes
@@ -226,6 +270,10 @@ interface IOverwolfUtilityApi {
   /**
    * Stops and removes the elevation broker service. Prompts for UAC once.
    * Succeeds when the service is already absent.
+   *
+   * @throws {@link UtilityApiError} `exitCode 1223` — user cancelled the UAC prompt (ERROR_CANCELLED)
+   * @throws {@link UtilityApiError} any other `exitCode` — removal failed
+   * @throws {@link UtilityApiError} no `exitCode` — the call failed before the uninstaller ran
    *
    * @returns Resolves when removal completes.
    */
