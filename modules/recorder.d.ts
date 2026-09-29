@@ -3420,7 +3420,11 @@ interface EncoderSettingsAMF extends VideoEncoderSettingsBase {
    *
    * B-frames improve compression efficiency but may add encoding latency.
    *
-   * @default 3
+   * Applies to H.264 and AV1; ignored for HEVC. AV1 B-frames need a GPU that
+   * supports them, such as the Radeon RX 9000 series; on other GPUs the
+   * encoder logs a warning and encodes without B-frames.
+   *
+   * @default 3 (`2` for AV1)
    */
   bf?: number;
 }
