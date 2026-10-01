@@ -936,6 +936,18 @@ interface ExclusiveInputOptions {
    * @default 'rgba(12, 12, 12, , 0.5)'
    */
   backgroundColor?: string;
+
+  /**
+   * Move the mouse cursor to the center of the game window when entering
+   * exclusive mode.
+   *
+   * Useful when the game has no visible cursor (e.g. during gameplay), where
+   * the cursor would otherwise appear wherever the game last left it.
+   *
+   * @default false
+   * @since 2.0.17
+   */
+  centerCursor?: boolean;
 }
 
 
