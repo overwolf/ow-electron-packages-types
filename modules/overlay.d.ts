@@ -247,7 +247,9 @@ type GpuPreference = "default" | "highPerformance";
  *   game.
  * - `gpuAdapterMismatch`&mdash;The game renders on a different GPU adapter than Chromium,
  *   and a shared texture handle can only be opened on the adapter that created it. Fixable
- *   with {@link IOverwolfOverlayApi.setGpuPreference} and an application restart.
+ *   with {@link IOverwolfOverlayApi.setGpuPreference} and an application restart, or from
+ *   the first launch with Chromium's `force_high_performance_gpu` switch (see
+ *   {@link IOverwolfOverlayApi.setGpuPreference}).
  * - `copyFailure`&mdash;The game repeatedly failed to open the shared texture handles it
  *   received in-game. The overlay retried, then fell back to the CPU copy path.
  *   {@link IOverwolfOverlayApi.setGpuPreference} may help when the root cause is
@@ -1280,6 +1282,13 @@ interface IOverwolfOverlayApi extends EventEmitter {
    * the application is *already* aligned and therefore needs no restart; this method is
    * idempotent, so calling it unconditionally is safe.
    *
+   * **Alternative with no restart.** Appending Chromium's `force_high_performance_gpu` switch
+   * from the application's main script, **before** the `ready` event, starts the GPU process
+   * on the high-performance adapter from the first launch. It affects only Chromium's GPU
+   * process and writes no Windows setting, though it still keeps the discrete GPU awake while
+   * the application runs. The overlay package loads after `ready`, so it cannot apply the
+   * switch itself.
+   *
    * **Side effects &mdash; read before calling.** It moves the **entire application's**
    * rendering to that GPU, draining laptop battery and keeping the discrete GPU awake; it is
    * persistent, user-visible Windows state under
@@ -1294,6 +1303,7 @@ interface IOverwolfOverlayApi extends EventEmitter {
    * @throws If the registry cannot be written, or on a non-Windows platform.
    * @see {@link GpuPreference}.
    * @see {@link https://dev.overwolf.com/ow-electron/reference/examples/overlay | Overlay examples}
+   * @see {@link https://www.electronjs.org/docs/latest/api/command-line-switches#--force_high_performance_gpu | --force_high_performance_gpu}
    *
    * @example
    * ```ts
@@ -1303,6 +1313,12 @@ interface IOverwolfOverlayApi extends EventEmitter {
    *   await overlay.setGpuPreference('highPerformance');
    *   promptUserToRestart(); // takes effect on the next launch
    * });
+   * ```
+   *
+   * @example
+   * ```ts
+   * // Main script, before `app` is ready - no restart needed.
+   * app.commandLine.appendSwitch('force_high_performance_gpu');
    * ```
    *
    * @since 2.0.5
@@ -1477,8 +1493,9 @@ interface IOverwolfOverlayApi extends EventEmitter {
    *   (D3D9 / OpenGL / Vulkan). Nothing to fix.
    * - `gpuAdapterMismatch`&mdash;the game renders on a **different GPU adapter than
    *   Chromium**; a shared texture handle can only be opened on the adapter that created it.
-   *   Fixable with {@link IOverwolfOverlayApi.setGpuPreference} and a restart; both adapters
-   *   are named in the overlay log.
+   *   Fixable with {@link IOverwolfOverlayApi.setGpuPreference} and a restart, or from the
+   *   first launch with Chromium's `force_high_performance_gpu` switch; both adapters are
+   *   named in the overlay log.
    * - `copyFailure`&mdash;the game **repeatedly failed to open the shared texture handles it
    *   received in-game**. The overlay retried, then abandoned the path for this game.
    *   {@link IOverwolfOverlayApi.setGpuPreference} may help when the root cause is
