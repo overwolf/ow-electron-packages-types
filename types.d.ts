@@ -5572,8 +5572,8 @@ type GpuPreference = "default" | "highPerformance";
  * Why the shared-texture rendering path cannot be used with the current game.
  *
  * - `unsupportedGraphicsApi`&mdash;The game's graphics API cannot composite GPU textures
- *   (D3D9 / OpenGL / Vulkan). Nothing to fix; the overlay uses the CPU copy path for this
- *   game.
+ *   (D3D9 / Vulkan, or OpenGL on a GPU driver without `WGL_NV_DX_interop2`). Nothing to
+ *   fix; the overlay uses the CPU copy path for this game.
  * - `gpuAdapterMismatch`&mdash;The game renders on a different GPU adapter than Chromium,
  *   and a shared texture handle can only be opened on the adapter that created it. Fixable
  *   with {@link IOverwolfOverlayApi.setGpuPreference} and an application restart, or from
@@ -6085,7 +6085,8 @@ interface GameWindowInfo {
 
   /**
    * Indicates whether the game's **graphics API** supports shared-texture (GPU) overlay
-   * rendering: `true` for D3D11 / D3D12, `false` for D3D9 / OpenGL / Vulkan.
+   * rendering: `true` for D3D11 / D3D12, and for OpenGL when the GPU driver supports
+   * `WGL_NV_DX_interop2`; `false` for D3D9 / Vulkan and for OpenGL without it.
    *
    * This is a capability probe only &mdash; to decide whether the path can actually be used
    * on this machine, gate on {@link GameWindowInfo.isSharedTextureAvailable} instead.
@@ -6819,7 +6820,8 @@ interface IOverwolfOverlayApi extends EventEmitter {
    * the reason:
    *
    * - `unsupportedGraphicsApi`&mdash;the game's graphics API cannot composite GPU textures
-   *   (D3D9 / OpenGL / Vulkan). Nothing to fix.
+   *   (D3D9 / Vulkan, or OpenGL on a GPU driver without `WGL_NV_DX_interop2`). Nothing to
+   *   fix.
    * - `gpuAdapterMismatch`&mdash;the game renders on a **different GPU adapter than
    *   Chromium**; a shared texture handle can only be opened on the adapter that created it.
    *   Fixable with {@link IOverwolfOverlayApi.setGpuPreference} and a restart, or from the
