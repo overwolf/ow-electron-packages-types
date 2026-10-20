@@ -4248,16 +4248,17 @@ interface ReplayOptions extends RecordingBaseOptions {
   rootFolder: string;
 
   /**
-   * How long (ms) to wait for OBS to acknowledge a stop before force-killing
-   * the process. Defaults to `30000` ms.
+   * How long (ms) a replays stop may take before it is forced. A forced stop
+   * ends on the next frame and drops whatever the encoder had not caught up
+   * on yet. If it still has not stopped 30 s later, OBS is restarted and
+   * every running output is reported stopped with `ProcessTerminated`.
+   * Defaults to `60000` ms.
    */
   stopReplaysKillTimeoutMs?: number;
 
   /**
-   * Output frame-skip rate (0–1) at which OBS is considered critically
-   * overloaded during an active recording. If this threshold is reached when
-   * the stop-replays timeout fires, OBS is force-killed even while a recording
-   * is active. Defaults to `0.5`.
+   * @deprecated No effect. Stops are now forced and, if needed, OBS restarted
+   * on a fixed schedule; see `stopReplaysKillTimeoutMs`.
    */
   criticalEncodeSkipRate?: number;
 }
@@ -4365,6 +4366,10 @@ interface CaptureReplayOptions {
   /**
    * The video length, in milliseconds, to include prior to the time this method is called.
    * This allows capturing moments that happened just before the replay trigger.
+   *
+   * A clip must start on a keyframe, so it starts on the last keyframe before
+   * that point and can be up to one keyframe interval longer than asked. Set
+   * `keyint_sec` (e.g. `1`) in the video encoder settings for tighter clips.
    */
   pastDuration: number;
 
