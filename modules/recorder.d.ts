@@ -4631,6 +4631,45 @@ interface RecorderStats {
 }
 
 /**
+ * What a 'performance-warning' measured. Both show as a choppy or frozen
+ * video, but different settings fix them.
+ * - `encoding-lag`: the encoder could not keep up, so frames were skipped and
+ *   the previous one repeated. The video also falls behind real time, so clips
+ *   and recordings can hold older footage than requested. Use a faster encoder
+ *   preset, a lower resolution or frame rate, or another encoder. Bitrate has
+ *   little effect.
+ * - `rendering-lag`: the recorder could not compose frames in time, usually
+ *   because the game takes the whole GPU. Lower the frame rate (most effective)
+ *   or the resolution; an encoder change does not help.
+ */
+type PerformanceWarningType = 'encoding-lag' | 'rendering-lag';
+
+/**
+ * Reported with the 'performance-warning' event.
+ *
+ * Measured since the recording or replays started, after a warm-up of 1000
+ * rendered frames, and over at least 1000 more.
+ */
+interface PerformanceWarningArgs {
+  type: PerformanceWarningType;
+
+  /**
+   * Percentage of frames skipped, 0 to 100.
+   */
+  percentage: number;
+
+  /**
+   * Number of frames skipped.
+   */
+  skippedFrames: number;
+
+  /**
+   * Number of frames measured.
+   */
+  totalFrames: number;
+}
+
+/**
  * Recording error information including a specific error code and description.
  * Useful for detailed debugging and error handling during recording operations.
  *
@@ -4923,4 +4962,16 @@ interface IOverwolfRecordingApi {
    *
    */
   on(eventName: 'stats', listener: (args: RecorderStats) => void): this;
+
+  /**
+   * @event Fired on every 5% rise of skipped frames while recording or replays
+   * run (5%, 10%, ...).
+   *
+   * The recorder only reports; lowering the capture settings is the caller's
+   * decision. See {@link PerformanceWarningType} for what helps.
+   */
+  on(
+    eventName: 'performance-warning',
+    listener: (args: PerformanceWarningArgs) => void,
+  ): this;
 }
