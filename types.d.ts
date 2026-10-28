@@ -1020,8 +1020,8 @@ interface VideoEncoderInfo extends EncoderInfoBase {
 /**
  * Information about a GPU adapter (graphics device).
  *
- * This structure provides metadata such as adapter name, driver, and
- * hardware-accelerated GPU scheduling (HAGS) support.
+ * This structure provides metadata such as adapter name, driver,
+ * hardware-accelerated GPU scheduling (HAGS) support, and PCI vendor/device IDs.
  *
  * @example
  * const adapter: AdapterInfo = {
@@ -1029,7 +1029,9 @@ interface VideoEncoderInfo extends EncoderInfoBase {
  *   name: 'NVIDIA GeForce RTX 3080',
  *   driver: '546.33',
  *   hagsEnabled: true,
- *   hagsEnabledByDefault: false
+ *   hagsEnabledByDefault: false,
+ *   vendorId: 0x10DE,
+ *   deviceId: 0x2206
  * };
  */
 interface AdapterInfo {
@@ -1057,6 +1059,17 @@ interface AdapterInfo {
    * Indicates whether HAGS is enabled by default on this adapter.
    */
   readonly hagsEnabledByDefault: boolean;
+
+  /**
+   * The PCI vendor ID of the adapter.
+   * Common values: 0x10DE (NVIDIA), 0x1002 (AMD), 0x8086 (Intel).
+   */
+  readonly vendorId: number;
+
+  /**
+   * The PCI device ID of the adapter, identifying the GPU model within its vendor.
+   */
+  readonly deviceId: number;
 }
 
 
