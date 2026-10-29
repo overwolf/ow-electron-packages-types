@@ -4677,7 +4677,8 @@ interface PerformanceWarningArgs {
   skippedFrames: number;
 
   /**
-   * Number of frames measured.
+   * Number of frames measured: frames sent to the encoder for `encoding-lag`,
+   * rendered frames for `rendering-lag`.
    */
   totalFrames: number;
 }
