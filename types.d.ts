@@ -553,6 +553,37 @@ type kKnownAudioEncodersTypes =
   | string;
 
 /**
+ * PCI vendor IDs of the GPU vendors that provide a hardware video encoder.
+ *
+ * Values arrive as plain numbers, not hex strings - `0x10DE` is reported (and
+ * logged) as `4318`. Comparing against either form works.
+ *
+ * | Value    | Decimal | Vendor | Encoders        |
+ * | -------- | ------- | ------ | --------------- |
+ * | `0x10DE` | `4318`  | NVIDIA | `obs_nvenc_*`   |
+ * | `0x1002` | `4098`  | AMD    | `*_texture_amf` |
+ * | `0x8086` | `32902` | Intel  | `obs_qsv11_*`   |
+ *
+ * @see {@link VideoEncoderInfo.vendorId}
+ *
+ * @example
+ * const isNvidia = encoder.vendorId === 0x10DE;
+ */
+type kGpuVendorId =
+  /**
+   * NVIDIA (4318).
+   */
+  | 0x10DE
+  /**
+   * AMD (4098).
+   */
+  | 0x1002
+  /**
+   * Intel (32902).
+   */
+  | 0x8086;
+
+/**
  * Fixed audio sample rate of 48kHz.
  *
  * Commonly used in professional audio and video recording, broadcasting,
@@ -987,8 +1018,8 @@ interface AudioEncoderInfo extends EncoderInfoBase {
  * Information for a supported video encoder.
  *
  * This interface extends `EncoderInfoBase` and adds the specific video encoder
- * type identifier. Configurable encoder settings are reported through the
- * inherited `properties` map.
+ * type identifier and, for hardware encoders, the GPU vendor. Configurable
+ * encoder settings are reported through the inherited `properties` map.
  *
  * @extends EncoderInfoBase
  *
@@ -997,6 +1028,7 @@ interface AudioEncoderInfo extends EncoderInfoBase {
  *   codec: 'h264',
  *   name: 'NVIDIA NVENC H.264',
  *   type: 'obs_nvenc_h264_tex',
+ *   vendorId: 0x10DE,
  *   properties: {
  *     bitrate: { default: 10000, description: 'Bitrate' },
  *     rate_control: {
@@ -1014,6 +1046,15 @@ interface VideoEncoderInfo extends EncoderInfoBase {
    * @see {@link kSupportedEncodersTypes}
    */
   readonly type: kSupportedEncodersTypes;
+
+  /**
+   * The PCI vendor ID of the GPU this hardware encoder runs on, matching
+   * {@link AdapterInfo.vendorId}. Absent for software (CPU) encoders such as
+   * `obs_x264`.
+   *
+   * @see {@link kGpuVendorId}
+   */
+  readonly vendorId?: kGpuVendorId;
 }
 
 
@@ -1061,8 +1102,10 @@ interface AdapterInfo {
   readonly hagsEnabledByDefault: boolean;
 
   /**
-   * The PCI vendor ID of the adapter.
-   * Common values: 0x10DE (NVIDIA), 0x1002 (AMD), 0x8086 (Intel).
+   * The PCI vendor ID of the adapter, reported as a plain number.
+   * Common values: 0x10DE (4318) NVIDIA, 0x1002 (4098) AMD, 0x8086 (32902) Intel.
+   * Other vendors are possible (e.g. virtual display adapters), so this is a
+   * `number` rather than {@link kGpuVendorId}.
    */
   readonly vendorId: number;
 
