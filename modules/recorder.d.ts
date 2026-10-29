@@ -4082,7 +4082,7 @@ interface RecordingAppOptions {
  * | Code    | Name                         | Description                                                                      |
  * | ------- | ---------------------------- | -------------------------------------------------------------------------------- |
  * | `-1001` | `Unknown`                    | Generic unknown error.                                                           |
- * | `-1000` | `ProcessTerminated`          | OBS process crashed.                                                             |
+ * | `-1000` | `ProcessTerminated`          | OBS process ended: a crash, or a restart after a hung stop.                      |
  * | `-999`  | `MissingBinaries`            | Missing binaries required for recording.                                         |
  * | `-998`  | `ConnectionOBSError`         | Failed to connect to the OBS process.                                            |
  * | `-997`  | `AlreadyRunning`             | Operation attempted while recording is already running.                          |
@@ -4113,7 +4113,7 @@ interface RecordingAppOptions {
  */
 type ErrorCode =
   | -1001 // Generic unknown error. 'Unknown'
-  | -1000 // OBS process crashed. 'ProcessTerminated'
+  | -1000 // OBS process ended: a crash, or a restart after a hung stop. 'ProcessTerminated'
   | -999  // Missing binaries required for recording. 'MissingBinaries'
   | -998  // Failed to connect to the OBS process. 'ConnectionOBSError'
   | -997  // Operation attempted while recording is already running. 'AlreadyRunning'
@@ -4460,6 +4460,7 @@ interface RecordStopEventArgs extends RecordEventArgs {
   /**
    * The total duration of the video in milliseconds,
    * available when the recording ends successfully.
+   * `0` when OBS ended before the recording stopped (`ProcessTerminated`).
    */
   duration?: number;
 
@@ -4477,6 +4478,7 @@ interface RecordStopEventArgs extends RecordEventArgs {
   /**
    * The epoch timestamp (in milliseconds) representing
    * when the recording started.
+   * `0` when OBS ended before the recording stopped (`ProcessTerminated`).
    */
   startTimeEpoch?: number;
 }
@@ -4535,11 +4537,13 @@ interface SplitRecordArgs extends RecordEventArgs {
 interface ReplayVideo extends RecordEventArgs {
   /**
    * Duration of the replay video in milliseconds.
+   * `0` when OBS ended before the replay was saved (`ProcessTerminated`).
    */
   duration: number;
 
   /**
    * Epoch UTC timestamp (in milliseconds) of when the replay started (first frame).
+   * `0` when OBS ended before the replay was saved (`ProcessTerminated`).
    */
   startTimeEpoch: number;
 }
