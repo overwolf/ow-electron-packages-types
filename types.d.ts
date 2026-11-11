@@ -142,6 +142,22 @@ interface UtilityApiError {
 }
 
 /**
+ * Result of `registerVulkanLayer()` and `getVulkanLayerStatus()`.
+ */
+interface VulkanLayerStatus {
+  /**
+   * `true` when `registerVulkanLayer()` is in effect for your app.
+   */
+  readonly registered: boolean;
+
+  /**
+   * `true` when games that run as administrator are covered too. `false`
+   * means only games that run normally are covered.
+   */
+  readonly coversElevatedGames: boolean;
+}
+
+/**
  * Defines the API for managing game launch and utility operations.
  */
 interface IOverwolfUtilityApi {
@@ -293,6 +309,46 @@ interface IOverwolfUtilityApi {
    * @returns Resolves when removal completes.
    */
   uninstallElevationBroker?(): Promise<void>;
+
+  /**
+   * Enables recording of Vulkan games. Without it a Vulkan game can record a
+   * black video.
+   *
+   * Call it once when your app starts, if your app records games. It shows no
+   * prompt and is safe to call every time; ow-electron apps share it, and the
+   * utility keeps it up to date.
+   *
+   * @throws {@link UtilityApiError} setup failed - log `err.message`
+   *
+   * @remarks
+   * Games that run as administrator are covered only when the call is made
+   * while your app runs as administrator, so call it then when you can - see
+   * {@link VulkanLayerStatus.coversElevatedGames}.
+   *
+   * @example
+   * ```ts
+   * try {
+   *   const status = await api.registerVulkanLayer();
+   *   console.log('Vulkan recording support:', status);
+   * } catch (err) {
+   *   console.error('Vulkan recording support failed:', (err as UtilityApiError).message);
+   * }
+   * ```
+   */
+  registerVulkanLayer?(): Promise<VulkanLayerStatus>;
+
+  /**
+   * Undoes `registerVulkanLayer()` for your app. Other ow-electron apps that
+   * still use it are not affected.
+   *
+   * @returns Resolves when done.
+   */
+  unregisterVulkanLayer?(): Promise<void>;
+
+  /**
+   * Whether `registerVulkanLayer()` is in effect for your app.
+   */
+  getVulkanLayerStatus?(): Promise<VulkanLayerStatus>;
 
   /**
    * Fires when a tracked game is launched.
