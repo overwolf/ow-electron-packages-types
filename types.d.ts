@@ -2770,8 +2770,8 @@ interface VideoSettings {
    * Defines the color range for video encoding.
    * 
    * Affects the range of brightness and color values.
-   * 
-   * @default '709'
+   *
+   * @default 'Partial'
    */
   colorRange?: kVideoColorRange;
 
@@ -2779,8 +2779,8 @@ interface VideoSettings {
    * Defines the color specification standard for the video.
    * 
    * Affects tone mapping and interpretation of colors.
-   * 
-   * @default 'Partial'
+   *
+   * @default '709'
    */
   colorSpec?: kVideoColorSpec;
 
