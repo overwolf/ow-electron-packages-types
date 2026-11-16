@@ -50,7 +50,7 @@ interface OWPackages extends overwolf.packages.OverwolfPackageManager {
   utility: IOverwolfUtilityApi;
 
   /**
-   * Access to crash reporting and notification APIs.
+   * Access to Content Recommendation Notification (CRN) APIs.
    */
   crn: IOverwolfCRNApi;
 
@@ -75,7 +75,7 @@ declare global {
         overlay: IOverwolfOverlayApi;
         /** Access to utility APIs for game launch tracking and game scanning. */
         utility: IOverwolfUtilityApi;
-        /** Access to crash reporting and notification APIs. */
+        /** Access to Content Recommendation Notification (CRN) APIs. */
         crn: IOverwolfCRNApi;
         /** Subscribe to real-time in-game events and info updates from supported games. */
         gep: OverwolfGameEventPackage;
