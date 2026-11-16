@@ -1052,6 +1052,7 @@ interface RecordingInformation {
  * | `'mpegts'`         | MPEG-TS — Transport stream format suitable for broadcasting or continuous streaming.   |
  * | `'hls'`            | HLS — HTTP Live Streaming; produces a playlist with segmented video chunks.            |
  * | `'hybrid_mp4'`     | Hybrid MP4 — A format combining fragmented and standard MP4 traits for compatibility.  |
+ * | `'hybrid_mov'`     | Hybrid MOV — The same crash-safe writer as Hybrid MP4, in a .mov file (H.264/HEVC only). |
  *
  * @example
  * const format: kFileFormat = 'mp4';
@@ -1100,7 +1101,15 @@ type kFileFormat =
   /**
    * Hybrid MP4 — A format combining fragmented and standard MP4 traits for compatibility.
    */
-  | 'hybrid_mp4';
+  | 'hybrid_mp4'
+
+  /**
+   * Hybrid MOV — The same crash-safe writer as Hybrid MP4, writing a `.mov`
+   * file (for editing tools that prefer QuickTime files). H.264 and HEVC
+   * only: AV1 is refused at start. Recorder 0.34+ / OBS 33; older recorders
+   * do not support it.
+   */
+  | 'hybrid_mov';
 
 /**
  * Supported video color formats used during video encoding or capture.
@@ -1512,11 +1521,18 @@ type kNVENCEncoderMultipass =
  * | `'hq'`  | High Quality. Prioritizes visual quality over latency. Ideal for recording or broadcasting when minimal delay is not critical. |
  * | `'ll'`  | Low Latency. Balances quality and latency. Suitable for interactive streaming and real-time applications.                      |
  * | `'ull'` | Ultra Low Latency. Minimizes delay as much as possible. Best used in competitive gaming or remote control scenarios.           |
+ * | `'uhq'` | Ultra High Quality. Best quality, highest GPU cost. Turing or later GPUs; H.264, HEVC and AV1 since recorder 0.34 (OBS 33).    |
  *
  * @example
  * const tuning: kNVENCEncoderTuning = 'll';
  */
 type kNVENCEncoderTuning =
+  /**
+   * `uhq` — Ultra High Quality. Best quality at the highest GPU cost.
+   * Turing or later GPUs (recorder 0.34+ / OBS 33 for H.264 and AV1).
+   */
+  | 'uhq'
+
   /**
    * `hq` — High Quality. Prioritizes visual quality over latency.
    * Ideal for recording or broadcasting when minimal delay is not critical.
@@ -1553,6 +1569,7 @@ type kNVENCEncoderProfile = 'main';
  * | `kNVENCEncoderProfile` (`'main'`) | Base set of encoder profiles (e.g., `main`). May include additional shared or AV1-specific variants.                 |
  * | `'high'`                          | Supports the most advanced H.264 features. Recommended for high-definition video with better compression efficiency. |
  * | `'baseline'`                      | Basic H.264 profile with minimal compression features. Best for low-latency and real-time video applications.        |
+ * | `'high10'`                        | 10-bit H.264 (needs a 10-bit capable GPU and a 10-bit color format; recorder 0.34+ / OBS 33). Limited player support. |
  *
  * @example
  * const profile: kNVENCEncoderProfile264 = 'high';
@@ -1576,7 +1593,13 @@ type kNVENCEncoderProfile264 =
    * `baseline` — Basic H.264 profile with minimal compression features.
    * Best for low-latency and real-time video applications.
    */
-  | 'baseline';
+  | 'baseline'
+
+  /**
+   * `high10` — 10-bit H.264. Needs a 10-bit capable GPU and a 10-bit color
+   * format (recorder 0.34+ / OBS 33). Many players cannot decode it.
+   */
+  | 'high10';
 
 /**
  * Specifies the supported HEVC (H.265) encoding profiles for NVIDIA's NVENC encoder.
@@ -3305,15 +3328,32 @@ interface EncoderSettingsNVENC extends VideoEncoderSettingsBase {
    * Tuning mode for encoding optimization.
    *
    * Common values:
+   * - `'uhq'` — Ultra High Quality (Turing or later GPUs; recorder 0.34+ / OBS 33)
    * - `'hq'` — High Quality _(Default)_
    * - `'ll'` — Low Latency
    * - `'ull'` — Ultra Low Latency
    *
    * @default 'hq'
-   * 
+   *
    * @see {@link kNVENCEncoderTuning}
    */
   tune?: kNVENCEncoderTuning;
+
+  /**
+   * Split-frame encoding across the GPU's NVENC engines (HEVC and AV1 only,
+   * GPUs with more than one engine). Raw NVENC modes:
+   * - `0` — Auto _(Default)_
+   * - `1` — Auto, forced
+   * - `2` — Two-way, forced
+   * - `3` — Three-way, forced (GPUs with 3+ engines)
+   * - `4` — Four-way, forced (GPUs with 4+ engines; recorder 0.34+ / OBS 33)
+   * - `15` — Disabled
+   *
+   * Helps 4K / high frame rate encodes on large GPUs; ignored for H.264.
+   *
+   * @default 0
+   */
+  split_encode?: 0 | 1 | 2 | 3 | 4 | 15;
 
   /**
    * Enables psycho-visual tuning.
@@ -3480,9 +3520,21 @@ interface EncoderSettingsAMF extends VideoEncoderSettingsBase {
    * supports them, such as the Radeon RX 9000 series; on other GPUs the
    * encoder logs a warning and encodes without B-frames.
    *
-   * @default 3 (`2` for AV1)
+   * Since recorder 0.34 (OBS 33) the H.264 default is `2`, and `0` above
+   * 1080p or above 60 fps.
+   *
+   * @default 2
    */
   bf?: number;
+
+  /**
+   * Enables AMF Pre-Analysis (content analysis before encoding), which can
+   * improve quality at the cost of some GPU time. With AV1 and B-frames it
+   * also enables adaptive mini-GOP. Recorder 0.34+ (OBS 33).
+   *
+   * @default false
+   */
+  pre_analysis?: boolean;
 }
 
 
