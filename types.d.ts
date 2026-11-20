@@ -5948,6 +5948,15 @@ interface OverlayWindowOptions
    * texture, and restores the shared-texture path on a game that does — so the
    * window stays visible on every game.
    *
+   * Hit testing differs from the CPU copy path, which lets mouse events over
+   * fully transparent pixels through to the game. A shared-texture window is
+   * hit-tested on its whole bounding rectangle: it captures every mouse event
+   * inside its bounds, and a click anywhere in them focuses it in-game. For a
+   * large, mostly transparent window, set `passthrough` to
+   * `'passThroughAndNotify'` (see {@link PassthroughType}) so the game keeps
+   * receiving mouse and keyboard input while the window still gets the
+   * events; add `ignoreKeyboardInput` when the window should not receive keys.
+   *
    * @default false
    *
    * @see {@link https://dev.overwolf.com/ow-electron/reference/examples/overlay | Overlay examples}
