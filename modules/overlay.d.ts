@@ -437,6 +437,13 @@ interface OverlayWindowOptions
  *   modifiers: { ctrl: true, custom: 'Tab' },
  *   passthrough: true
  * };
+ *
+ * // Since 2.6.3: modifier keys alone (no keyCode)
+ * const talkHotkey: IOverlayHotkey = {
+ *   name: 'talk',
+ *   modifiers: { ctrl: true },
+ *   passthrough: true
+ * };
  * ```
  */
 interface IOverlayHotkey {
@@ -470,6 +477,10 @@ interface IOverlayHotkey {
    * thrown at registration time when the string does not map to a known VK code.
    * Validate the string before calling `register` if the value comes from user input.
    *
+   * Since 2.6.3 `keyCode` may be omitted to make a hotkey of the `ctrl`, `alt`
+   * and/or `shift` modifiers alone (either left or right key). Registering a
+   * hotkey with neither a `keyCode` nor one of these modifiers throws.
+   *
    * @example
    * ```ts
    * // Preferred: physical key position, layout-independent
@@ -488,9 +499,12 @@ interface IOverlayHotkey {
    * // Throws at registration — unknown string
    * api.hotkeys.register({ name: 'bad', keyCode: 'Bogus' }, callback);
    * // Error: Unknown hotkey code: "Bogus". Pass a valid KeyboardEvent.code string…
+   *
+   * // Since 2.6.3: Ctrl alone (left or right)
+   * api.hotkeys.register({ name: 'talk', modifiers: { ctrl: true } }, callback);
    * ```
    */
-  keyCode: number | string;
+  keyCode?: number | string;
 
   /**
    * Modifier keys that must be pressed along with the main key.
